@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NWIS Drilling Event Schema v1.0",
+  "description": "Shared event format across NLP extraction (P1), similarity matching (P2), telemetry simulation (P3), and backend API (P4). LOCK THIS ON DAY 1 MORNING.",
+  "version": "1.0.0",
+
+  "_usage_notes": {
+    "P1_NLP_extraction": "Your LLM output must conform to this schema. Use structured output / JSON mode.",
+    "P2_similarity": "You consume events in this format and compute similarity scores across wells.",
+    "P3_simulation": "Your synthetic events and telemetry-derived events must output this format.",
+    "P4_backend": "Your SQLite DB and API endpoints serialize/deserialize this format."
+  },
+
+  "type": "object",
+  "required": ["event_id", "well_id", "event_type", "depth_start_m", "source_type"],
+  "properties": {
+    "event_id":       { "type": "string", "pattern": "^EVT-[0-9]{4,6}$" },
+    "well_id":        { "type": "string", "examples": ["WELL-F9A", "WELL-F11"] },
+    "event_type":     { "type": "string", "enum": ["mud_loss", "stuck_pipe", "kick", "torque_spike", "cementing_issue", "formation_change", "equipment_failure", "npt", "other"] },
+    "depth_start_m":  { "type": "number" },
+    "depth_end_m":    { "type": ["number", "null"] },
+    "formation":      { "type": ["string", "null"], "examples": ["Hugin", "Draupne", "Heather"] },
+    "severity":       { "type": "string", "enum": ["low", "moderate", "high", "critical"] },
+    "description":    { "type": "string" },
+    "mitigation":     { "type": ["string", "null"] },
+    "outcome":        { "type": "string", "enum": ["resolved", "ongoing", "escalated", "unknown"] },
+    "duration_hours": { "type": ["number", "null"] },
+    "parameters": {
+      "type": ["object", "null"],
+      "properties": {
+        "wob_kN":         { "type": ["number", "null"] },
+        "rop_m_per_hr":   { "type": ["number", "null"] },
+        "torque_kNm":     { "type": ["number", "null"] },
+        "spp_bar":        { "type": ["number", "null"] },
+        "flow_rate_lpm":  { "type": ["number", "null"] },
+        "mud_weight_sg":  { "type": ["number", "null"] }
+      }
+    },
+    "source_type":    { "type": "string", "enum": ["ddr_extraction", "wcr_extraction", "manual_entry", "telemetry_detection", "synthetic"] },
+    "source_report":  { "type": ["string", "null"] },
+    "confidence":     { "type": "number", "minimum": 0, "maximum": 1 },
+    "timestamp":      { "type": ["string", "null"], "format": "date-time" }
+  },
+
+  "_example": {
+    "event_id": "EVT-0001",
+    "well_id": "WELL-F9A",
+    "event_type": "mud_loss",
+    "depth_start_m": 2205,
+    "depth_end_m": 2213,
+    "formation": "Hugin",
+    "severity": "moderate",
+    "description": "Pumped 5 m3 hi-vis pill while milling at 2205 m. Partial mud losses observed.",
+    "mitigation": "hi-vis pill",
+    "outcome": "resolved",
+    "duration_hours": 6.0,
+    "parameters": {
+      "wob_kN": null,
+      "rop_m_per_hr": 8.5,
+      "torque_kNm": null,
+      "spp_bar": 185,
+      "flow_rate_lpm": 2400,
+      "mud_weight_sg": 1.35
+    },
+    "source_type": "ddr_extraction",
+    "source_report": "DDR_2012-05-15_F9A",
+    "confidence": 0.85,
+    "timestamp": "2012-05-15T06:00:00Z"
+  }
+}

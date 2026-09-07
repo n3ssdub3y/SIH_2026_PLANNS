@@ -1,0 +1,97 @@
+{
+  "version": "1.0",
+  "created_by": "P1 NLP Pipeline",
+  "timestamp": "2026-09-07T18:17:04.186308",
+  "event_types": {
+    "EVT_MUD_LOSS_PARTIAL": {
+      "hazard": "mud_loss",
+      "severity": "medium",
+      "description": "Partial loss of returns to formation"
+    },
+    "EVT_MUD_LOSS_TOTAL": {
+      "hazard": "mud_loss",
+      "severity": "critical",
+      "description": "Total loss of returns"
+    },
+    "EVT_LCM_APPLIED": {
+      "hazard": "mud_loss",
+      "severity": "low",
+      "description": "LCM pill pumped to cure losses"
+    },
+    "EVT_CIRC_RESTORED": {
+      "hazard": "mud_loss",
+      "severity": "low",
+      "description": "Circulation restored after losses"
+    },
+    "EVT_STUCK_PIPE": {
+      "hazard": "stuck_pipe",
+      "severity": "critical",
+      "description": "String mechanically stuck"
+    },
+    "EVT_DIFF_STICKING": {
+      "hazard": "stuck_pipe",
+      "severity": "high",
+      "description": "Differential pressure sticking"
+    },
+    "EVT_TIGHT_HOLE": {
+      "hazard": "stuck_pipe",
+      "severity": "medium",
+      "description": "Tight hole during trips"
+    },
+    "EVT_JARRING": {
+      "hazard": "stuck_pipe",
+      "severity": "medium",
+      "description": "Jarring operations to free string"
+    },
+    "EVT_FISHING": {
+      "hazard": "stuck_pipe",
+      "severity": "high",
+      "description": "Fishing for lost BHA/tools in hole"
+    },
+    "EVT_KICK": {
+      "hazard": "kick",
+      "severity": "critical",
+      "description": "Formation fluid influx into wellbore"
+    },
+    "EVT_GAS_INFLUX": {
+      "hazard": "kick",
+      "severity": "high",
+      "description": "Gas detected in mud returns"
+    },
+    "EVT_BOP_SHUTIN": {
+      "hazard": "kick",
+      "severity": "critical",
+      "description": "BOP shut in for well control"
+    },
+    "EVT_OVERPRESSURE_DETECTED": {
+      "hazard": "overpressure",
+      "severity": "high",
+      "description": "Abnormal formation pressure encountered"
+    },
+    "EVT_TORQUE_UP": {
+      "hazard": "torque_spike",
+      "severity": "medium",
+      "description": "High or fluctuating torque"
+    },
+    "EVT_TORQUE_SPIKE": {
+      "hazard": "torque_spike",
+      "severity": "high",
+      "description": "Sudden torque spike exceeding limit"
+    },
+    "EVT_CEMENTING_FAILURE": {
+      "hazard": "cementing",
+      "severity": "high",
+      "description": "Cement job anomaly or losses during cement"
+    },
+    "EVT_WOC": {
+      "hazard": "cementing",
+      "severity": "none",
+      "description": "Waiting on cement"
+    },
+    "EVT_ROUTINE_DRILLING": {
+      "hazard": "none",
+      "severity": "none",
+      "description": "Normal drilling \u2014 no hazard"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+System: You are an expert Drilling Data Engineer & NLP Specialist. Extract structured operational parameters and hazards from the Daily Drilling Report (DDR) text.
+
+Input DDR Text:
+---
+{ddr_text}
+---
+
+Return JSON output with the exact schema below:
+{
+  "well_id": "Well identifier e.g., WELL-F11",
+  "report_date": "YYYY-MM-DD",
+  "depth_m": 0.0,
+  "formation": "Formation name or null",
+  "activity_summary": "1-2 sentence summary of primary activity",
+  "hazards": [
+    {
+      "hazard_type": "mud_loss | stuck_pipe | kick | tight_hole | bit_wear | none",
+      "severity": "low | medium | high | critical",
+      "depth_m": 0.0,
+      "volume_lost_bbl": 0.0,
+      "mitigation_action": "Description of action taken to resolve or null"
+    }
+  ],
+  "npt_hours": 0.0,
+  "mud_weight_ppg": 0.0,
+  "confidence_score": 0.95
+}

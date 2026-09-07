@@ -1,0 +1,62 @@
+[
+  {
+    "id": "DDR-001",
+    "well_id": "WELL-15/9-F-11",
+    "date": "2014-04-12",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-11\nDepth: 2,450 m | Formation: Hordaland Group | Mud Weight: 1.45 SG\n00:00 - 06:00: Drilled 12-1/4 inch hole from 2410m to 2450m. WOB: 12-15 tons, RPM: 120, Flow rate: 2800 l/min.\n06:00 - 08:30: Sudden loss of returns observed at 2450m. Mud pit level dropped by 45 bbls within 20 mins. Total mud loss: 120 bbls synthetic mud to formation.\n08:30 - 12:00: Stop drilling, pull back off bottom. Pumped 30 bbl high-viscosity LCM (Loss Circulation Material) pill with coarse calcium carbonate.\n12:00 - 16:00: Waited on LCM pill to set. Flow check clean, losses cured. Pit volume stabilized.\n16:00 - 24:00: Resumed drilling carefully with reduced flow rate (2400 l/min) from 2450m to 2485m. No further losses.\nNPT: 7.5 hours due to mud loss treatment."
+  },
+  {
+    "id": "DDR-002",
+    "well_id": "WELL-15/9-F-12",
+    "date": "2014-05-18",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-12\nDepth: 3,120 m | Formation: Smith Bank Formation | Mud Weight: 1.62 SG\n00:00 - 04:00: Wiper trip prior to casing run. Pulling 8-1/2 inch BHA at 3120m.\n04:00 - 07:15: Severe overpull (60 klbs above string weight) experienced at 3105m while pulling through reactive shale zone. String stuck at 3105m.\n07:15 - 11:30: Unable to rotate or work pipe down. Jarred down with 80 klbs impact. Jarred up 120 klbs.\n11:30 - 15:00: Pumped 40 bbl acid/oil-based organic soak pill around BHA. Allowed soak time 2 hours.\n15:00 - 18:00: Worked pipe with maximum allowable torque (28,000 ft-lbs). Pipe freed at 17:45.\n18:00 - 24:00: Circulated hole clean at 2950m, raised mud weight from 1.60 to 1.64 SG to stabilize shale wall.\nNPT: 13.75 hours stuck pipe incident."
+  },
+  {
+    "id": "DDR-003",
+    "well_id": "WELL-15/9-F-14",
+    "date": "2014-06-02",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-14\nDepth: 1,850 m | Formation: Utsira Formation | Mud Weight: 1.22 SG\n00:00 - 12:00: Drilled 17-1/2 inch surface hole from 1620m to 1850m smoothly. ROP averaged 35 m/hr.\n12:00 - 14:00: Flow check while making connection at 1850m. Pit gain of 12 bbls observed over 15 mins. Active gas influx detected.\n14:00 - 16:30: Shut in well using annular BOP. Recorded SIDPP = 250 psi, SICP = 340 psi.\n16:30 - 21:00: Initiated Driller's Method to circulate out gas kick. Increased mud weight from 1.22 SG to 1.30 SG.\n21:00 - 24:00: Gas kick successfully circulated out. Well static. Opened BOP and resumed monitoring.\nNPT: 9.0 hours well control kick response."
+  },
+  {
+    "id": "DDR-004",
+    "well_id": "WELL-15/9-F-15",
+    "date": "2014-07-10",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-15\nDepth: 2,780 m | Formation: Shetland Group | Mud Weight: 1.50 SG\n00:00 - 08:00: Drilled 12-1/4 inch section from 2710m to 2780m. Constant torque fluctuations observed (18,000 to 26,000 ft-lbs).\n08:00 - 12:00: Severe tight spots encountered during trip out at 2740m and 2715m. Reamed tight sections twice with high flow rate (3000 l/min).\n12:00 - 18:00: Large volume of cavings/cuttings observed on shale shakers (approx 3x theoretical hole volume), indicating hole cleaning issues and micro-fractures.\n18:00 - 24:00: Performed 2 high-density sweep pills (50 bbls each) to clean hole. Cuttings discharge returned to normal level.\nNPT: 4.5 hours reaming tight hole and circulating sweeps."
+  },
+  {
+    "id": "DDR-005",
+    "well_id": "WELL-15/9-F-1",
+    "date": "2014-08-01",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-1\nDepth: 3,450 m | Formation: Statfjord Formation | Mud Weight: 1.68 SG\n00:00 - 14:00: Normal 8-1/2 inch reservoir section drilling from 3400m to 3450m. ROP 12 m/hr. Torque steady at 14,000 ft-lbs.\n14:00 - 18:00: Routine BHA pull to replace worn PDC bit (Bit #4, IADC 437). Bit graded 3-4-WT-A-X-I-NO-TD.\n18:00 - 24:00: Tripped in hole with new Bit #5. Tagged bottom at 3450m. Circulated mud and conditioned hole.\nNPT: 0.0 hours. Planned operational maintenance."
+  },
+  {
+    "id": "DDR-006",
+    "well_id": "WELL-15/9-F-11",
+    "date": "2014-09-05",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-11\nDepth: 2,910 m | Formation: Draupne Formation | Mud Weight: 1.58 SG\n00:00 - 05:00: Drilled 8-1/2 inch section from 2880m to 2910m. High ECD (Equivalent Circulating Density) reached 1.65 SG.\n05:00 - 09:00: Minor mud losses initiated at 2910m (15-20 bbl/hr partial losses). Total 65 bbl lost over 4 hours.\n09:00 - 13:00: Reduced pump SPM to lower ECD from 1.65 to 1.59 SG. Added 15 ppb fine nut plug to mud system.\n13:00 - 24:00: Partial losses reduced to < 2 bbl/hr. Continued drilling smoothly to 2945m.\nNPT: 2.0 hours mud loss monitoring and conditioning."
+  },
+  {
+    "id": "DDR-007",
+    "well_id": "WELL-15/9-F-7",
+    "date": "2014-10-14",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-7\nDepth: 2,150 m | Formation: Hordaland Group | Mud Weight: 1.38 SG\n00:00 - 08:00: Drilling 12-1/4 inch hole at 2150m. High differential pressure observed across permeable sand.\n08:00 - 11:30: Differential sticking occurred at 2150m while pipe was stationary for 10 mins during survey. String stuck with 40 klbs overpull.\n11:30 - 15:00: Spot 35 bbl pipe-freeing lubricant (spotting fluid pill) across BHA zone.\n15:00 - 17:00: Worked string with maximum torque and jarred up. String freed after 1.5 hours soak time.\n17:00 - 24:00: Circulated hole clean, reduced static time during connections to prevent resticking.\nNPT: 7.0 hours differential stuck pipe."
+  },
+  {
+    "id": "DDR-008",
+    "well_id": "WELL-15/9-F-12",
+    "date": "2014-11-20",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-12\nDepth: 3,380 m | Formation: Lyr Formation | Mud Weight: 1.65 SG\n00:00 - 10:00: Drilled 8-1/2 inch hole from 3340m to 3380m. ROP 4 m/hr in hard limestone formation.\n10:00 - 16:00: MWD tool signal lost at 3380m. Tripped out of hole to troubleshoot pulser unit.\n16:00 - 20:00: Replaced MWD pulse module on surface. Tested tools OK.\n20:00 - 24:00: Tripped back in hole to 3380m. Re-established survey transmission.\nNPT: 10.0 hours MWD failure and trip time."
+  },
+  {
+    "id": "DDR-009",
+    "well_id": "WELL-15/9-F-14",
+    "date": "2014-12-04",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-14\nDepth: 2,620 m | Formation: Lista Formation | Mud Weight: 1.48 SG\n00:00 - 07:00: Running 9-5/8 inch casing to 2615m. Casing tight at 2580m.\n07:00 - 11:00: Reciprocated casing and circulated mud at 2580m. Worked casing past tight spot down to setting depth 2618m.\n11:00 - 18:00: Rigged up cement head. Cemented 9-5/8 casing with 450 sacks lead cement and 200 sacks tail cement.\n18:00 - 24:00: Bumped plug with 2500 psi. Pressure held solid. WOC (Waiting on Cement).\nNPT: 1.5 hours working casing past tight spot."
+  },
+  {
+    "id": "DDR-010",
+    "well_id": "WELL-15/9-F-15",
+    "date": "2015-01-15",
+    "text": "DAILY DRILLING REPORT - WELL 15/9-F-15\nDepth: 3,510 m | Formation: Skagerrak Formation | Mud Weight: 1.70 SG\n00:00 - 12:00: Drilled 6 inch production section from 3480m to 3510m TD (Total Depth).\n12:00 - 16:00: Flow check static. Pumped high-vis sweeps, hole clean.\n16:00 - 24:00: Pulled out of hole to run wireline log suite (PEX/HNGS/OBDT). Reached TD smoothly.\nNPT: 0.0 hours. Successfully reached section TD."
+  }
+]

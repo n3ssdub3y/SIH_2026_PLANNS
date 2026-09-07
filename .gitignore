@@ -1,0 +1,26 @@
+# Large dataset files that exceed GitHub's 100MB limit
+Petrobras 3W Dataset.zip
+Volve Real-Time Drilling Data/Norway-NA-15_47_9-F-9 A time.csv
+
+# Python Virtual Environments
+venv/
+.venv/
+env/
+**/venv/
+**/env/
+**/.venv/
+
+# Python Cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Operating System Files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/

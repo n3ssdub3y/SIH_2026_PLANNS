@@ -1,0 +1,233 @@
+[
+  {
+    "report_id": "DDR-001",
+    "well_id": "WELL-15/9-F-11",
+    "report_date": "2014-04-12",
+    "depth_m": 2450.0,
+    "formation": "Hordaland Group",
+    "mud_weight_ppg": 12.08,
+    "mud_weight_sg": 1.45,
+    "npt_hours": 7.5,
+    "activity_summary": "00:00 - 06:00: Drilled 12-1/4 inch hole from 2410m to 2450m. WOB: 12-15 tons, RPM: 120, Flow rate: 2800 l/min.",
+    "hazards": [
+      {
+        "hazard_type": "mud_loss",
+        "severity": "medium",
+        "depth_m": 2450.0,
+        "volume_lost_bbl": 45.0,
+        "mitigation_action": "Pumped high-viscosity LCM pill and waited on setting"
+      }
+    ],
+    "primary_hazard": "mud_loss",
+    "max_severity": "medium",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-002",
+    "well_id": "WELL-15/9-F-12",
+    "report_date": "2014-05-18",
+    "depth_m": 3120.0,
+    "formation": "Smith Bank Formation",
+    "mud_weight_ppg": 13.49,
+    "mud_weight_sg": 1.62,
+    "npt_hours": 13.75,
+    "activity_summary": "00:00 - 04:00: Wiper trip prior to casing run. Pulling 8-1/2 inch BHA at 3120m.",
+    "hazards": [
+      {
+        "hazard_type": "stuck_pipe",
+        "severity": "critical",
+        "depth_m": 3120.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Jarred string and pumped acid/lubricant soak pill to free pipe"
+      }
+    ],
+    "primary_hazard": "stuck_pipe",
+    "max_severity": "critical",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-003",
+    "well_id": "WELL-15/9-F-14",
+    "report_date": "2014-06-02",
+    "depth_m": 1850.0,
+    "formation": "Utsira Formation",
+    "mud_weight_ppg": 10.16,
+    "mud_weight_sg": 1.22,
+    "npt_hours": 9.0,
+    "activity_summary": "00:00 - 12:00: Drilled 17-1/2 inch surface hole from 1620m to 1850m smoothly. ROP averaged 35 m/hr.",
+    "hazards": [
+      {
+        "hazard_type": "kick",
+        "severity": "critical",
+        "depth_m": 1850.0,
+        "volume_lost_bbl": 0.0,
+        "gain_bbl": 12.0,
+        "mitigation_action": "Shut in well using BOP and executed Driller's Method to circulate out kick with weighted mud"
+      }
+    ],
+    "primary_hazard": "kick",
+    "max_severity": "critical",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-004",
+    "well_id": "WELL-15/9-F-15",
+    "report_date": "2014-07-10",
+    "depth_m": 2780.0,
+    "formation": "Shetland Group",
+    "mud_weight_ppg": 12.5,
+    "mud_weight_sg": 1.5,
+    "npt_hours": 4.5,
+    "activity_summary": "00:00 - 08:00: Drilled 12-1/4 inch section from 2710m to 2780m. Constant torque fluctuations observed (18,000 to 26,000 ft-lbs).",
+    "hazards": [
+      {
+        "hazard_type": "tight_hole",
+        "severity": "medium",
+        "depth_m": 2780.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Reamed tight section and pumped high-density sweep pills"
+      }
+    ],
+    "primary_hazard": "tight_hole",
+    "max_severity": "medium",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-005",
+    "well_id": "WELL-15/9-F-1",
+    "report_date": "2014-08-01",
+    "depth_m": 3450.0,
+    "formation": "Statfjord Formation",
+    "mud_weight_ppg": 13.99,
+    "mud_weight_sg": 1.68,
+    "npt_hours": 0.0,
+    "activity_summary": "00:00 - 14:00: Normal 8-1/2 inch reservoir section drilling from 3400m to 3450m. ROP 12 m/hr. Torque steady at 14,000 ft-lbs.",
+    "hazards": [
+      {
+        "hazard_type": "none",
+        "severity": "none",
+        "depth_m": 3450.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Routine drilling operation"
+      }
+    ],
+    "primary_hazard": "none",
+    "max_severity": "none",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-006",
+    "well_id": "WELL-15/9-F-11",
+    "report_date": "2014-09-05",
+    "depth_m": 2910.0,
+    "formation": "Draupne Formation",
+    "mud_weight_ppg": 13.16,
+    "mud_weight_sg": 1.58,
+    "npt_hours": 2.0,
+    "activity_summary": "00:00 - 05:00: Drilled 8-1/2 inch section from 2880m to 2910m. High ECD (Equivalent Circulating Density) reached 1.65 SG.",
+    "hazards": [
+      {
+        "hazard_type": "mud_loss",
+        "severity": "low",
+        "depth_m": 2910.0,
+        "volume_lost_bbl": 20.0,
+        "mitigation_action": "Reduced pump SPM to lower ECD and added fine nut plug"
+      }
+    ],
+    "primary_hazard": "mud_loss",
+    "max_severity": "low",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-007",
+    "well_id": "WELL-15/9-F-7",
+    "report_date": "2014-10-14",
+    "depth_m": 2150.0,
+    "formation": "Hordaland Group",
+    "mud_weight_ppg": 11.5,
+    "mud_weight_sg": 1.38,
+    "npt_hours": 7.0,
+    "activity_summary": "00:00 - 08:00: Drilling 12-1/4 inch hole at 2150m. High differential pressure observed across permeable sand.",
+    "hazards": [
+      {
+        "hazard_type": "stuck_pipe",
+        "severity": "critical",
+        "depth_m": 2150.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Spotted pipe-freeing lubricant pill and worked string"
+      }
+    ],
+    "primary_hazard": "stuck_pipe",
+    "max_severity": "critical",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-008",
+    "well_id": "WELL-15/9-F-12",
+    "report_date": "2014-11-20",
+    "depth_m": 3380.0,
+    "formation": "Lyr Formation",
+    "mud_weight_ppg": 13.74,
+    "mud_weight_sg": 1.65,
+    "npt_hours": 10.0,
+    "activity_summary": "00:00 - 10:00: Drilled 8-1/2 inch hole from 3340m to 3380m. ROP 4 m/hr in hard limestone formation.",
+    "hazards": [
+      {
+        "hazard_type": "none",
+        "severity": "none",
+        "depth_m": 3380.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Routine drilling operation"
+      }
+    ],
+    "primary_hazard": "none",
+    "max_severity": "none",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-009",
+    "well_id": "WELL-15/9-F-14",
+    "report_date": "2014-12-04",
+    "depth_m": 2620.0,
+    "formation": "Lista Formation",
+    "mud_weight_ppg": 12.33,
+    "mud_weight_sg": 1.48,
+    "npt_hours": 1.5,
+    "activity_summary": "00:00 - 07:00: Running 9-5/8 inch casing to 2615m. Casing tight at 2580m.",
+    "hazards": [
+      {
+        "hazard_type": "tight_hole",
+        "severity": "medium",
+        "depth_m": 2620.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Reamed tight section and pumped high-density sweep pills"
+      }
+    ],
+    "primary_hazard": "tight_hole",
+    "max_severity": "medium",
+    "confidence_score": 0.96
+  },
+  {
+    "report_id": "DDR-010",
+    "well_id": "WELL-15/9-F-15",
+    "report_date": "2015-01-15",
+    "depth_m": 3510.0,
+    "formation": "Skagerrak Formation",
+    "mud_weight_ppg": 14.16,
+    "mud_weight_sg": 1.7,
+    "npt_hours": 0.0,
+    "activity_summary": "00:00 - 12:00: Drilled 6 inch production section from 3480m to 3510m TD (Total Depth).",
+    "hazards": [
+      {
+        "hazard_type": "none",
+        "severity": "none",
+        "depth_m": 3510.0,
+        "volume_lost_bbl": 0.0,
+        "mitigation_action": "Routine drilling operation"
+      }
+    ],
+    "primary_hazard": "none",
+    "max_severity": "none",
+    "confidence_score": 0.96
+  }
+]

@@ -1,0 +1,17 @@
+﻿# Virtual Environment
+venv/
+env/
+ENV/
+*.venv
+
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+
+# IDE and OS
+.vscode/
+.idea/
+Thumbs.db
