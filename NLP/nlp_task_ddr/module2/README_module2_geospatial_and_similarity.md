@@ -1,4 +1,4 @@
-﻿# README — Module 2: Geospatial Visualization & Offset-Well Similarity Engine
+# README — Module 2: Geospatial Visualization & Offset-Well Similarity Engine
 ## NWIS-Sentinel | SIH 2026 | PS SIH26121
 
 ---
@@ -25,7 +25,7 @@ Module 2 consumes Module 1 output files and builds two things:
 
 | Component | Tool | Why |
 |---|---|---|
-| Map frontend | Leaflet.js 1.9.4 + CARTO dark tiles | Free, no API key, production-quality |
+| Map frontend | Leaflet.js 1.9.4 + OpenStreetMap tiles (CSS dark filter) | Free, no API key ever required |
 | Map backend | Flask 3.x (Python) | Lightweight REST API, easy for P4 to embed |
 | Categorical similarity | Jaccard on token sets | Interpretable, standard set-overlap metric |
 | Continuous similarity | Gaussian kernel | Smooth falloff, single tunable sigma |
@@ -229,4 +229,34 @@ module2/
 
 ---
 
-*Generated: 2026-09-08 | P2 Owner | Module handoff: Ready for P3*
+## Changelog (Post-Initial-Build Fixes)
+
+| Date | Fix | Files Changed |
+|---|---|---|
+| 2026-09-08 | **Volve UTM zone bug** — `15/9-F-9A` longitude was projected using Zone 32N instead of Zone 31N, placing it ~6° too far east (inland Norway instead of North Sea). Corrected lon from `7.93482` → `1.93482`. | `wells_metadata.json`, `analog_wells.json` (790 entries patched) |
+| 2026-09-08 | **Map tile provider** — Switched from CARTO (started requiring API key) to OpenStreetMap + CSS dark filter. No API key needed. | `templates/map.html` |
+| 2026-09-08 | **Dropdown UI** — Replaced native OS `<select>` (white box, unreadable) with fully themed custom dropdown with live search. | `templates/map.html` |
+| 2026-09-08 | **JS crash on well select** — `selectWell()` referenced deleted `<select id="well-select">` element, crashing before similarity panel could load. Fixed to update custom dropdown label instead. | `templates/map.html` |
+
+---
+
+## Impact on P3's Work
+
+> **Short answer: P3's core work is completely safe. No action required from P3.**
+
+| Change | Does P3 use this? | Impact |
+|---|---|---|
+| `map.html` UI fixes (dropdown, tiles, JS crash) | ❌ No — P3 doesn't use the frontend | Zero impact |
+| `app.py` API fixes | ❌ No — P3 reads JSON files directly | Zero impact |
+| `wells_metadata.json` Volve lon fix | ⚠️ Possibly — if P3 reads coords for display | Display-only. P3's similarity lookups use `well_id`, not coordinates |
+| `analog_wells.json` coord patch (790 entries) | ⚠️ Possibly — coords embedded per analog | Display-only. P3's sequence alignment uses `well_id` + `weighted_score`, not lat/lon |
+| Similarity scores in `analog_wells.json` | ✅ Untouched — not recomputed | Zero impact — all 125,610 scores identical |
+| AHP weights in `ahp_weights.json` | ✅ Untouched | Zero impact |
+| `formation_correlation.json` | ✅ Untouched | Zero impact |
+| P1 files (`events.jsonl`, `flagged_real_incidents.json`) | ✅ Untouched | Zero impact |
+
+**P3 can continue using all output files exactly as before.** The only thing that changed is the display coordinate for one well (`15/9-F-9A`), which does not affect sequence alignment, hazard prediction, or the backtest.
+
+---
+
+*Generated: 2026-09-08 | Updated: 2026-09-08 | P2 Owner | Module handoff: Ready for P3*
