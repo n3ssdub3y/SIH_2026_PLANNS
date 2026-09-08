@@ -1,0 +1,553 @@
+{
+  "metadata": {
+    "evaluation_timestamp": "2026-09-08T18:48:14.006169+00:00",
+    "target_well_id": "15/9-F-9A",
+    "target_incident_depth_m": 619.0,
+    "alignment_algorithm": "Smith-Waterman Local Sequence Alignment",
+    "alignment_parameters": {
+      "match_same_token": 4,
+      "match_same_hazard": 2,
+      "mismatch": -1,
+      "gap_penalty": -1,
+      "success_threshold_normalized": 0.2
+    },
+    "statistical_engine": "Wilson Score Proportion Confidence Interval (statsmodels, alpha=0.05)",
+    "causality_verified": true,
+    "target_well_excluded_from_offset_analogs": true
+  },
+  "hazards_evaluated": {
+    "stuck_pipe": {
+      "hazard": "stuck_pipe",
+      "query_sequence": [
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_DIFF_STICKING",
+        "EVT_DIFF_STICKING",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_DIFF_STICKING",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE"
+      ],
+      "n_query_tokens": 92,
+      "risk_level": "CRITICAL",
+      "risk_score": 0.8,
+      "wilson_ci": {
+        "lower": 0.4902,
+        "center": 0.8,
+        "upper": 0.9433,
+        "n_trials": 10,
+        "n_successes": 8,
+        "method": "wilson",
+        "alpha": 0.05
+      },
+      "feature_weights_and_breakdown": {
+        "n_trials": 10,
+        "n_successes": 8,
+        "success_rate": 0.8,
+        "alignment_threshold": 0.2,
+        "wilson_alpha": 0.05,
+        "wilson_ci_formula": "statsmodels.stats.proportion.proportion_confint(method='wilson')",
+        "top_analog_feature_weights": [
+          {
+            "analog_well_id": "SYNTH-W26",
+            "ahp_similarity_weight": 0.941,
+            "smith_waterman_raw": 10.0,
+            "smith_waterman_normalized": 0.8333
+          },
+          {
+            "analog_well_id": "SYNTH-W34",
+            "ahp_similarity_weight": 0.9333,
+            "smith_waterman_raw": 10.0,
+            "smith_waterman_normalized": 0.8333
+          },
+          {
+            "analog_well_id": "SYNTH-W09",
+            "ahp_similarity_weight": 0.9438,
+            "smith_waterman_raw": 12.0,
+            "smith_waterman_normalized": 0.75
+          },
+          {
+            "analog_well_id": "SYNTH-W36",
+            "ahp_similarity_weight": 0.9401,
+            "smith_waterman_raw": 9.0,
+            "smith_waterman_normalized": 0.75
+          },
+          {
+            "analog_well_id": "SYNTH-W22",
+            "ahp_similarity_weight": 0.943,
+            "smith_waterman_raw": 2.0,
+            "smith_waterman_normalized": 0.5
+          }
+        ],
+        "causality_audit": {
+          "zero_future_leakage_enforced": true,
+          "target_well_excluded_from_analogs": true,
+          "max_historical_depth_m": 619.0,
+          "max_historical_timestamp": null
+        }
+      },
+      "matched_analogs": [
+        {
+          "well_id": "SYNTH-W26",
+          "analog_weighted_score": 0.941,
+          "alignment_score": 10.0,
+          "normalized_alignment": 0.8333,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "matched_hist_segment": [
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 3
+        },
+        {
+          "well_id": "SYNTH-W34",
+          "analog_weighted_score": 0.9333,
+          "alignment_score": 10.0,
+          "normalized_alignment": 0.8333,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "matched_hist_segment": [
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 3
+        },
+        {
+          "well_id": "SYNTH-W09",
+          "analog_weighted_score": 0.9438,
+          "alignment_score": 12.0,
+          "normalized_alignment": 0.75,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "matched_hist_segment": [
+            "EVT_DIFF_STICKING",
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 4
+        },
+        {
+          "well_id": "SYNTH-W36",
+          "analog_weighted_score": 0.9401,
+          "alignment_score": 9.0,
+          "normalized_alignment": 0.75,
+          "matched_query_segment": [
+            "EVT_DIFF_STICKING",
+            "EVT_TIGHT_HOLE",
+            "EVT_DIFF_STICKING"
+          ],
+          "matched_hist_segment": [
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING",
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 3
+        },
+        {
+          "well_id": "SYNTH-W22",
+          "analog_weighted_score": 0.943,
+          "alignment_score": 2.0,
+          "normalized_alignment": 0.5,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE"
+          ],
+          "matched_hist_segment": [
+            "EVT_STUCK_PIPE"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 1
+        },
+        {
+          "well_id": "SYNTH-W35",
+          "analog_weighted_score": 0.9419,
+          "alignment_score": 8.0,
+          "normalized_alignment": 0.5,
+          "matched_query_segment": [
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "matched_hist_segment": [
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 4
+        },
+        {
+          "well_id": "SYNTH-W12",
+          "analog_weighted_score": 0.9412,
+          "alignment_score": 8.0,
+          "normalized_alignment": 0.5,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_DIFF_STICKING"
+          ],
+          "matched_hist_segment": [
+            "EVT_STUCK_PIPE",
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 4
+        },
+        {
+          "well_id": "SYNTH-W10",
+          "analog_weighted_score": 0.9438,
+          "alignment_score": 2.0,
+          "normalized_alignment": 0.25,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE"
+          ],
+          "matched_hist_segment": [
+            "EVT_STUCK_PIPE"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 2
+        },
+        {
+          "well_id": "SYNTH-W31",
+          "analog_weighted_score": 0.9366,
+          "alignment_score": 0.0,
+          "normalized_alignment": 0.0,
+          "matched_query_segment": [],
+          "matched_hist_segment": [],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 5
+        },
+        {
+          "well_id": "SYNTH-W28",
+          "analog_weighted_score": 0.9344,
+          "alignment_score": 0.0,
+          "normalized_alignment": 0.0,
+          "matched_query_segment": [],
+          "matched_hist_segment": [],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 5
+        }
+      ]
+    },
+    "torque_spike": {
+      "hazard": "torque_spike",
+      "query_sequence": [
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_SPIKE"
+      ],
+      "n_query_tokens": 8,
+      "risk_level": "CRITICAL",
+      "risk_score": 0.8,
+      "wilson_ci": {
+        "lower": 0.4902,
+        "center": 0.8,
+        "upper": 0.9433,
+        "n_trials": 10,
+        "n_successes": 8,
+        "method": "wilson",
+        "alpha": 0.05
+      },
+      "feature_weights_and_breakdown": {
+        "n_trials": 10,
+        "n_successes": 8,
+        "success_rate": 0.8,
+        "alignment_threshold": 0.2,
+        "wilson_alpha": 0.05,
+        "wilson_ci_formula": "statsmodels.stats.proportion.proportion_confint(method='wilson')",
+        "top_analog_feature_weights": [
+          {
+            "analog_well_id": "SYNTH-W22",
+            "ahp_similarity_weight": 0.9338,
+            "smith_waterman_raw": 4.0,
+            "smith_waterman_normalized": 1.0
+          },
+          {
+            "analog_well_id": "SYNTH-W26",
+            "ahp_similarity_weight": 0.932,
+            "smith_waterman_raw": 4.0,
+            "smith_waterman_normalized": 1.0
+          },
+          {
+            "analog_well_id": "SYNTH-W36",
+            "ahp_similarity_weight": 0.9311,
+            "smith_waterman_raw": 4.0,
+            "smith_waterman_normalized": 1.0
+          },
+          {
+            "analog_well_id": "SYNTH-W31",
+            "ahp_similarity_weight": 0.928,
+            "smith_waterman_raw": 6.0,
+            "smith_waterman_normalized": 0.75
+          },
+          {
+            "analog_well_id": "SYNTH-W10",
+            "ahp_similarity_weight": 0.9345,
+            "smith_waterman_raw": 4.0,
+            "smith_waterman_normalized": 0.5
+          }
+        ],
+        "causality_audit": {
+          "zero_future_leakage_enforced": true,
+          "target_well_excluded_from_analogs": true,
+          "max_historical_depth_m": 619.0,
+          "max_historical_timestamp": null
+        }
+      },
+      "matched_analogs": [
+        {
+          "well_id": "SYNTH-W22",
+          "analog_weighted_score": 0.9338,
+          "alignment_score": 4.0,
+          "normalized_alignment": 1.0,
+          "matched_query_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "matched_hist_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 1
+        },
+        {
+          "well_id": "SYNTH-W26",
+          "analog_weighted_score": 0.932,
+          "alignment_score": 4.0,
+          "normalized_alignment": 1.0,
+          "matched_query_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "matched_hist_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 1
+        },
+        {
+          "well_id": "SYNTH-W36",
+          "analog_weighted_score": 0.9311,
+          "alignment_score": 4.0,
+          "normalized_alignment": 1.0,
+          "matched_query_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "matched_hist_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 1
+        },
+        {
+          "well_id": "SYNTH-W31",
+          "analog_weighted_score": 0.928,
+          "alignment_score": 6.0,
+          "normalized_alignment": 0.75,
+          "matched_query_segment": [
+            "EVT_TORQUE_SPIKE",
+            "EVT_TORQUE_UP"
+          ],
+          "matched_hist_segment": [
+            "EVT_TORQUE_UP",
+            "EVT_TORQUE_UP"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 2
+        },
+        {
+          "well_id": "SYNTH-W10",
+          "analog_weighted_score": 0.9345,
+          "alignment_score": 4.0,
+          "normalized_alignment": 0.5,
+          "matched_query_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "matched_hist_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 2
+        },
+        {
+          "well_id": "SYNTH-W09",
+          "analog_weighted_score": 0.9345,
+          "alignment_score": 7.0,
+          "normalized_alignment": 0.35,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE"
+          ],
+          "matched_hist_segment": [
+            "EVT_DIFF_STICKING",
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 5
+        },
+        {
+          "well_id": "SYNTH-W35",
+          "analog_weighted_score": 0.9328,
+          "alignment_score": 4.0,
+          "normalized_alignment": 0.3333,
+          "matched_query_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "matched_hist_segment": [
+            "EVT_TORQUE_UP"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 3
+        },
+        {
+          "well_id": "SYNTH-W34",
+          "analog_weighted_score": 0.925,
+          "alignment_score": 5.0,
+          "normalized_alignment": 0.25,
+          "matched_query_segment": [
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE",
+            "EVT_TIGHT_HOLE"
+          ],
+          "matched_hist_segment": [
+            "EVT_STUCK_PIPE",
+            "EVT_DIFF_STICKING",
+            "EVT_DIFF_STICKING"
+          ],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 5
+        },
+        {
+          "well_id": "SYNTH-W12",
+          "analog_weighted_score": 0.9322,
+          "alignment_score": 0.0,
+          "normalized_alignment": 0.0,
+          "matched_query_segment": [],
+          "matched_hist_segment": [],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 1
+        },
+        {
+          "well_id": "SYNTH-W28",
+          "analog_weighted_score": 0.926,
+          "alignment_score": 0.0,
+          "normalized_alignment": 0.0,
+          "matched_query_segment": [],
+          "matched_hist_segment": [],
+          "hist_sequence_length": 5,
+          "hazard_hist_length": 5
+        }
+      ]
+    }
+  }
+}
