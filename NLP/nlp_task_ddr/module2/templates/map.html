@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NWIS-Sentinel — Nearby Wells Intelligence System</title>
+<meta name="description" content="Interactive geospatial map and hazard-specific offset-well similarity engine for NWIS-Sentinel drilling intelligence platform."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --bg-primary:    #0a0e1a;
+    --bg-secondary:  #111827;
+    --bg-card:       rgba(17,24,39,0.85);
+    --bg-glass:      rgba(255,255,255,0.04);
+    --border:        rgba(255,255,255,0.08);
+    --border-active: rgba(99,179,237,0.5);
+    --text-primary:  #f0f4ff;
+    --text-secondary:#94a3b8;
+    --text-muted:    #64748b;
+    --accent-blue:   #3b82f6;
+    --accent-cyan:   #06b6d4;
+    --accent-orange: #f97316;
+    --accent-red:    #ef4444;
+    --accent-green:  #22c55e;
+    --accent-purple: #a855f7;
+    --accent-amber:  #f59e0b;
+    --pin-volve:     #f97316;
+    --pin-force:     #3b82f6;
+    --pin-synth:     #ef4444;
+    --pin-selected:  #22c55e;
+    --pin-neighbor:  #facc15;
+    --radius: 8px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+  html, body { width:100%; height:100%; overflow:hidden; background:var(--bg-primary); color:var(--text-primary); font-family:'Inter',system-ui,sans-serif; }
+
+  /* ─── LAYOUT ─── */
+  #app { display:flex; width:100%; height:100vh; }
+  #sidebar { width:380px; min-width:320px; height:100%; display:flex; flex-direction:column; background:var(--bg-secondary); border-right:1px solid var(--border); z-index:1000; overflow:hidden; }
+  #map-container { flex:1; position:relative; }
+  #map { width:100%; height:100%; }
+
+  /* ─── HEADER ─── */
+  #header { padding:18px 20px 14px; border-bottom:1px solid var(--border); background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(6,182,212,0.06)); flex-shrink:0; }
+  #header h1 { font-size:16px; font-weight:700; letter-spacing:0.03em; color:var(--text-primary); }
+  #header h1 span { color:var(--accent-cyan); }
+  #header p { font-size:11px; color:var(--text-muted); margin-top:3px; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:100px; font-size:10px; font-weight:600; letter-spacing:0.04em; }
+  .badge-blue { background:rgba(59,130,246,0.18); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); }
+
+  /* ─── LEGEND ─── */
+  #legend { padding:12px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  #legend h3 { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:8px; }
+  .legend-items { display:flex; flex-wrap:wrap; gap:6px; }
+  .legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-secondary); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .ld-volve  { background:var(--pin-volve); box-shadow:0 0 6px var(--pin-volve); }
+  .ld-force  { background:var(--pin-force); box-shadow:0 0 6px var(--pin-force); }
+  .ld-synth  { background:var(--pin-synth); box-shadow:0 0 6px var(--pin-synth); }
+  .ld-sel    { background:var(--pin-selected); box-shadow:0 0 6px var(--pin-selected); }
+  .ld-nbr    { background:var(--pin-neighbor); box-shadow:0 0 6px var(--pin-neighbor); }
+
+  /* ─── CONTROLS ─── */
+  #controls { padding:14px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  label { display:block; font-size:11px; color:var(--text-muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.07em; }
+  select, input[type=range] { width:100%; border-radius:var(--radius); border:1px solid var(--border); background:var(--bg-glass); color:var(--text-primary); font-family:inherit; font-size:13px; outline:none; }
+  select { padding:8px 10px; cursor:pointer; transition:border-color 0.2s; }
+  select:hover, select:focus { border-color:var(--border-active); }
+  .ctrl-row { margin-bottom:12px; }
+  .ctrl-row:last-child { margin-bottom:0; }
+  .radius-row { display:flex; align-items:center; gap:10px; }
+  .radius-row input[type=range] { flex:1; accent-color:var(--accent-cyan); }
+  #radius-val { font-size:13px; font-weight:600; color:var(--accent-cyan); width:52px; text-align:right; white-space:nowrap; font-family:'JetBrains Mono',monospace; }
+  .stat-row { display:flex; gap:8px; margin-top:8px; }
+  .stat-chip { flex:1; background:var(--bg-glass); border:1px solid var(--border); border-radius:6px; padding:6px 10px; text-align:center; }
+  .stat-chip .val { font-size:18px; font-weight:700; color:var(--accent-cyan); font-family:'JetBrains Mono',monospace; }
+  .stat-chip .lbl { font-size:9px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-top:2px; }
+
+  /* ─── HAZARD SELECTOR ─── */
+  #hazard-section { padding:12px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  #hazard-section h3 { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:8px; }
+  .hazard-pills { display:flex; flex-wrap:wrap; gap:6px; }
+  .hpill { padding:4px 10px; border-radius:100px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-secondary); transition:all 0.2s; }
+  .hpill:hover  { border-color:var(--border-active); color:var(--text-primary); }
+  .hpill.active { background:rgba(59,130,246,0.2); border-color:var(--accent-blue); color:#93c5fd; }
+
+  /* ─── PANEL ─── */
+  #panel { flex:1; overflow-y:auto; padding:14px 20px 20px; }
+  #panel::-webkit-scrollbar { width:4px; }
+  #panel::-webkit-scrollbar-track { background:transparent; }
+  #panel::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  .panel-title { font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:10px; }
+  .empty-state { text-align:center; padding:32px 0; color:var(--text-muted); font-size:13px; }
+  .empty-state .icon { font-size:32px; margin-bottom:8px; }
+
+  /* Well info card */
+  .well-card { background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:12px; }
+  .well-card h4 { font-size:14px; font-weight:600; color:var(--text-primary); font-family:'JetBrains Mono',monospace; }
+  .well-card .src { font-size:11px; margin-top:3px; }
+  .tag { display:inline-block; padding:1px 7px; border-radius:100px; font-size:10px; font-weight:600; }
+  .tag-volve { background:rgba(249,115,22,0.18); color:#fdba74; border:1px solid rgba(249,115,22,0.3); }
+  .tag-force { background:rgba(59,130,246,0.18); color:#93c5fd; border:1px solid rgba(59,130,246,0.3); }
+  .tag-synth { background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+  .kv-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin-top:10px; }
+  .kv-item .k { font-size:10px; color:var(--text-muted); }
+  .kv-item .v { font-size:12px; font-weight:500; color:var(--text-primary); font-family:'JetBrains Mono',monospace; }
+
+  /* Hazard bar */
+  .hazard-bars { margin-top:10px; }
+  .hbar-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+  .hbar-label { font-size:10px; color:var(--text-muted); width:90px; flex-shrink:0; }
+  .hbar-track { flex:1; height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+  .hbar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
+  .hbar-count { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); width:18px; text-align:right; }
+
+  /* Analog list */
+  .analog-item { background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--radius); padding:12px; margin-bottom:8px; transition:border-color 0.2s; }
+  .analog-item:hover { border-color:var(--border-active); }
+  .analog-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .analog-rank { font-size:10px; color:var(--text-muted); }
+  .analog-id   { font-size:12px; font-weight:600; font-family:'JetBrains Mono',monospace; color:var(--text-primary); }
+  .score-badge { font-size:13px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .score-high   { color:var(--accent-green); }
+  .score-med    { color:var(--accent-amber); }
+  .score-low    { color:var(--text-muted); }
+
+  /* Feature bars */
+  .feat-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+  .feat-row  { display:flex; align-items:center; gap:5px; }
+  .feat-lbl  { font-size:9px; color:var(--text-muted); width:60px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .feat-bar  { flex:1; height:4px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+  .feat-fill { height:100%; border-radius:2px; }
+  .feat-val  { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); width:28px; text-align:right; }
+
+  /* Weights card */
+  .weights-card { background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.2); border-radius:var(--radius); padding:10px 12px; margin-bottom:12px; }
+  .weights-card h4 { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-blue); margin-bottom:8px; }
+  .wt-row { display:flex; justify-content:space-between; align-items:center; padding:2px 0; }
+  .wt-feat { font-size:11px; color:var(--text-secondary); }
+  .wt-val  { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--accent-cyan); font-weight:600; }
+
+  /* Map overlay top-right */
+  #map-stats { position:absolute; top:12px; right:12px; z-index:500; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; backdrop-filter:blur(12px); min-width:160px; }
+  #map-stats h4 { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:6px; }
+  #stats-body .sb { display:flex; justify-content:space-between; font-size:11px; margin-bottom:3px; }
+  #stats-body .sb .label { color:var(--text-muted); }
+  #stats-body .sb .num   { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text-primary); }
+
+  /* Spinner */
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent-cyan); border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Smooth transitions */
+  .fade-in { animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+  /* Leaflet custom */
+  .leaflet-container { background:#0d1220; }
+  .leaflet-popup-content-wrapper { background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); box-shadow:var(--shadow); }
+  .leaflet-popup-tip { background:var(--bg-secondary); }
+  .leaflet-popup-content { font-family:'Inter',sans-serif; font-size:12px; line-height:1.6; margin:10px 14px; }
+  .leaflet-popup-content b { color:var(--accent-cyan); font-family:'JetBrains Mono',monospace; }
+  .leaflet-bar a { background:var(--bg-secondary); color:var(--text-primary); border-color:var(--border); }
+  .leaflet-bar a:hover { background:var(--bg-glass); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── SIDEBAR ── -->
+  <div id="sidebar">
+
+    <div id="header">
+      <h1>NWIS-<span>Sentinel</span> &nbsp;<span class="badge badge-blue">Module 2</span></h1>
+      <p>Geospatial Map &amp; Offset-Well Similarity Engine &nbsp;|&nbsp; SIH 2026</p>
+    </div>
+
+    <div id="legend">
+      <h3>Well Sources</h3>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-dot ld-volve"></div>Volve (real)</div>
+        <div class="legend-item"><div class="legend-dot ld-force"></div>FORCE 2020 (real)</div>
+        <div class="legend-item"><div class="legend-dot ld-synth"></div>Synthetic</div>
+        <div class="legend-item"><div class="legend-dot ld-sel"></div>Selected</div>
+        <div class="legend-item"><div class="legend-dot ld-nbr"></div>In Radius</div>
+      </div>
+    </div>
+
+    <div id="controls">
+      <div class="ctrl-row">
+        <label for="well-select">Select Well</label>
+        <select id="well-select"><option value="">— Choose a well —</option></select>
+      </div>
+      <div class="ctrl-row">
+        <label>Search Radius</label>
+        <div class="radius-row">
+          <input type="range" id="radius-slider" min="5" max="300" value="50" step="5"/>
+          <span id="radius-val">50 km</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-chip"><div class="val" id="stat-total">—</div><div class="lbl">Total Wells</div></div>
+        <div class="stat-chip"><div class="val" id="stat-neighbors">—</div><div class="lbl">In Radius</div></div>
+        <div class="stat-chip"><div class="val" id="stat-real">—</div><div class="lbl">Real Wells</div></div>
+      </div>
+    </div>
+
+    <div id="hazard-section">
+      <h3>Hazard Similarity View</h3>
+      <div class="hazard-pills">
+        <button class="hpill active" data-h="mud_loss">Mud Loss</button>
+        <button class="hpill" data-h="stuck_pipe">Stuck Pipe</button>
+        <button class="hpill" data-h="overpressure">Overpressure</button>
+        <button class="hpill" data-h="torque_spike">Torque Spike</button>
+        <button class="hpill" data-h="cementing">Cementing</button>
+      </div>
+    </div>
+
+    <div id="panel">
+      <div class="empty-state">
+        <div class="icon">🗺️</div>
+        <div>Select a well on the map or from the dropdown<br/>to see offset-well similarity analysis</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAP ── -->
+  <div id="map-container">
+    <div id="map"></div>
+    <div id="map-stats">
+      <h4>Dataset Overview</h4>
+      <div id="stats-body">
+        <div class="sb"><span class="label">Loading...</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// MAP INIT
+// ─────────────────────────────────────────────────────────────────────────────
+const map = L.map('map', { zoomControl:true }).setView([58.5, 2.5], 6);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution:'&copy; <a href="https://carto.com/">CARTO</a> | OpenStreetMap contributors',
+  subdomains: 'abcd',
+  maxZoom: 18,
+}).addTo(map);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let allWells     = [];
+let markerMap    = {};        // well_id -> L.circleMarker
+let radiusCircle = null;
+let selectedId   = null;
+let currentHazard = 'mud_loss';
+let radiusKm     = 50;
+
+const COLORS = {
+  real_volve:    '#f97316',
+  real_force2020:'#3b82f6',
+  synthetic:     '#ef4444',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOAD WELLS
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadWells() {
+  const res  = await fetch('/api/wells');
+  const data = await res.json();
+  allWells   = data.wells;
+
+  // Populate select
+  const sel = document.getElementById('well-select');
+  allWells
+    .slice()
+    .sort((a,b) => a.well_id.localeCompare(b.well_id))
+    .forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.well_id;
+      opt.textContent = `${w.well_id}  [${w.source}]`;
+      sel.appendChild(opt);
+    });
+
+  // Stats
+  const real  = allWells.filter(w => !w.is_synthetic).length;
+  const synth = allWells.filter(w => w.is_synthetic).length;
+  document.getElementById('stat-total').textContent     = allWells.length;
+  document.getElementById('stat-real').textContent      = real;
+
+  document.getElementById('stats-body').innerHTML = `
+    <div class="sb"><span class="label">Total wells</span><span class="num">${allWells.length}</span></div>
+    <div class="sb"><span class="label">Real wells</span><span class="num">${real}</span></div>
+    <div class="sb"><span class="label">Synthetic</span><span class="num">${synth}</span></div>
+    <div class="sb"><span class="label">Module</span><span class="num">P2</span></div>
+  `;
+
+  // Plot markers
+  allWells.forEach(w => {
+    const color = COLORS[w.source] || '#888';
+    const marker = L.circleMarker([w.latitude, w.longitude], {
+      radius:      5,
+      fillColor:   color,
+      color:       color,
+      weight:      1,
+      opacity:     0.9,
+      fillOpacity: 0.8,
+    });
+
+    marker.bindPopup(`
+      <b>${w.well_id}</b><br/>
+      Source: ${w.source.replace('_',' ')}<br/>
+      Synthetic: ${w.is_synthetic}<br/>
+      Formations: ${w.formation_count}<br/>
+      Total depth: ${w.total_depth_m ? w.total_depth_m.toFixed(0)+' m' : 'N/A'}<br/>
+      BHA: ${w.bha_type || 'N/A'}
+    `);
+
+    marker.on('click', () => selectWell(w.well_id));
+    marker.addTo(map);
+    markerMap[w.well_id] = marker;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WELL SELECTION
+// ─────────────────────────────────────────────────────────────────────────────
+function selectWell(wellId) {
+  selectedId = wellId;
+  document.getElementById('well-select').value = wellId;
+  updateRadius();
+  loadAnalogs(wellId, currentHazard);
+}
+
+function resetAllMarkers() {
+  allWells.forEach(w => {
+    const m = markerMap[w.well_id];
+    if (!m) return;
+    const color = COLORS[w.source] || '#888';
+    m.setStyle({ fillColor:color, color:color, radius:5, fillOpacity:0.8, opacity:0.9 });
+  });
+}
+
+function updateRadius() {
+  if (!selectedId) return;
+  resetAllMarkers();
+
+  const target = allWells.find(w => w.well_id === selectedId);
+  if (!target) return;
+
+  // Selected marker
+  const sm = markerMap[selectedId];
+  if (sm) sm.setStyle({ fillColor:'#22c55e', color:'#22c55e', radius:9, fillOpacity:1, opacity:1 });
+
+  // Draw radius circle
+  if (radiusCircle) map.removeLayer(radiusCircle);
+  radiusCircle = L.circle([target.latitude, target.longitude], {
+    radius: radiusKm * 1000,
+    color: '#06b6d4', weight:1.5, fillColor:'#06b6d4', fillOpacity:0.05, dashArray:'6 4',
+  }).addTo(map);
+
+  // Highlight neighbors within radius
+  const R = 6371; // Earth radius km
+  let count = 0;
+  allWells.forEach(w => {
+    if (w.well_id === selectedId) return;
+    const dlat = (w.latitude  - target.latitude)  * Math.PI / 180;
+    const dlon = (w.longitude - target.longitude) * Math.PI / 180;
+    const a    = Math.sin(dlat/2)**2 + Math.cos(target.latitude*Math.PI/180) * Math.cos(w.latitude*Math.PI/180) * Math.sin(dlon/2)**2;
+    const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    if (dist <= radiusKm) {
+      const m = markerMap[w.well_id];
+      if (m) m.setStyle({ fillColor:'#facc15', color:'#facc15', radius:6, fillOpacity:0.9 });
+      count++;
+    }
+  });
+
+  document.getElementById('stat-neighbors').textContent = count;
+
+  // Pan to selected well
+  map.setView([target.latitude, target.longitude], map.getZoom() < 6 ? 7 : map.getZoom());
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ANALOG LOADING & PANEL RENDER
+// ─────────────────────────────────────────────────────────────────────────────
+function scoreClass(s) {
+  if (s >= 0.65) return 'score-high';
+  if (s >= 0.40) return 'score-med';
+  return 'score-low';
+}
+
+function hazardColor(h) {
+  const c = { mud_loss:'#3b82f6', stuck_pipe:'#f97316', overpressure:'#ef4444', torque_spike:'#a855f7', cementing:'#22c55e' };
+  return c[h] || '#64748b';
+}
+
+function hazardBarColor(h) {
+  return hazardColor(h) + 'cc';
+}
+
+function featColor(val) {
+  if (val >= 0.6) return '#22c55e';
+  if (val >= 0.3) return '#f59e0b';
+  return '#64748b';
+}
+
+async function loadAnalogs(wellId, hazard) {
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `<div class="panel-title">Loading <span class="spinner"></span></div>`;
+
+  try {
+    const [aRes, wRes] = await Promise.all([
+      fetch(`/api/analogs?well_id=${encodeURIComponent(wellId)}&hazard=${hazard}&top=8`),
+      fetch(`/api/well?well_id=${encodeURIComponent(wellId)}`),
+    ]);
+    const aData = await aRes.json();
+    const wData = await wRes.json();
+
+    if (aData.error) { panel.innerHTML = `<div class="empty-state"><div>${aData.error}</div></div>`; return; }
+
+    const hc = wData.hazard_counts || {};
+    const maxHC = Math.max(...Object.values(hc), 1);
+    const hazards = ['mud_loss','stuck_pipe','overpressure','torque_spike','cementing'];
+    const hazardLabels = { mud_loss:'Mud Loss', stuck_pipe:'Stuck Pipe', overpressure:'Overpressure', torque_spike:'Torque Spike', cementing:'Cementing' };
+
+    const hbarsHtml = hazards.map(h => {
+      const count = hc[h] || 0;
+      const pct = Math.round(count/maxHC*100);
+      return `<div class="hbar-row">
+        <div class="hbar-label">${hazardLabels[h]}</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${hazardColor(h)}"></div></div>
+        <div class="hbar-count">${count}</div>
+      </div>`;
+    }).join('');
+
+    const srcTag = s => {
+      if (s==='real_volve')     return '<span class="tag tag-volve">Volve</span>';
+      if (s==='real_force2020') return '<span class="tag tag-force">FORCE 2020</span>';
+      return '<span class="tag tag-synth">Synthetic</span>';
+    };
+
+    const wellCardHtml = `
+      <div class="well-card fade-in">
+        <h4>${wellId}</h4>
+        <div class="src">${srcTag(wData.source)} ${wData.is_synthetic ? '<span class="tag tag-synth">Synthetic</span>' : ''}</div>
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Total Depth</div><div class="v">${wData.total_depth_m ? wData.total_depth_m.toFixed(0)+' m' : '—'}</div></div>
+          <div class="kv-item"><div class="k">BHA Type</div><div class="v" style="font-size:10px">${(wData.bha_type||'—').slice(0,24)}</div></div>
+          <div class="kv-item"><div class="k">Formations</div><div class="v">${wData.formation_count || 0}</div></div>
+          <div class="kv-item"><div class="k">Lat / Lon</div><div class="v" style="font-size:10px">${wData.latitude?.toFixed(2) || '—'}, ${wData.longitude?.toFixed(2) || '—'}</div></div>
+        </div>
+        <div class="hazard-bars" style="margin-top:12px">
+          <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em">Documented Hazard Events</div>
+          ${hbarsHtml}
+        </div>
+      </div>`;
+
+    const weightsHtml = `
+      <div class="weights-card fade-in">
+        <h4>AHP Weights for ${hazardLabels[hazard] || hazard}</h4>
+        ${Object.entries(aData.ahp_weights || {}).map(([f,v]) =>
+          `<div class="wt-row"><span class="wt-feat">${f.replace('_',' ')}</span><span class="wt-val">${(v*100).toFixed(1)}%</span></div>`
+        ).join('')}
+        <div style="font-size:9px;color:var(--text-muted);margin-top:6px">Weights derived via AHP principal eigenvector method (Saaty 1980). CR = consistency ratio.</div>
+      </div>`;
+
+    const analogsHtml = aData.analogs.map((a, idx) => {
+      const fb    = a.feature_breakdown;
+      const feats = Object.entries(fb);
+      const featBarsHtml = feats.map(([k,v]) => `
+        <div class="feat-row">
+          <div class="feat-lbl">${k.replace('_sim','').replace('_',' ')}</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:${Math.round(v*100)}%;background:${featColor(v)}"></div></div>
+          <div class="feat-val">${(v*100).toFixed(0)}%</div>
+        </div>`).join('');
+
+      return `
+        <div class="analog-item fade-in">
+          <div class="analog-header">
+            <div>
+              <div class="analog-rank">#${idx+1} &nbsp; ${srcTag(a.source)}</div>
+              <div class="analog-id">${a.well_id}</div>
+            </div>
+            <div class="score-badge ${scoreClass(a.weighted_score)}">${(a.weighted_score*100).toFixed(1)}%</div>
+          </div>
+          <div class="feat-grid">${featBarsHtml}</div>
+        </div>`;
+    }).join('');
+
+    panel.innerHTML = `
+      <div class="panel-title">Selected Well</div>
+      ${wellCardHtml}
+      <div class="panel-title" style="margin-top:4px">AHP Weights — ${hazardLabels[hazard] || hazard}</div>
+      ${weightsHtml}
+      <div class="panel-title">Top Analog Wells (${hazard.replace('_',' ')})</div>
+      ${analogsHtml || '<div class="empty-state">No analogs found</div>'}
+    `;
+  } catch(err) {
+    panel.innerHTML = `<div class="empty-state">Error: ${err.message}</div>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVENT LISTENERS
+// ─────────────────────────────────────────────────────────────────────────────
+document.getElementById('well-select').addEventListener('change', e => {
+  if (e.target.value) selectWell(e.target.value);
+});
+
+document.getElementById('radius-slider').addEventListener('input', e => {
+  radiusKm = parseInt(e.target.value);
+  document.getElementById('radius-val').textContent = radiusKm + ' km';
+  if (selectedId) updateRadius();
+});
+
+document.querySelectorAll('.hpill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.hpill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentHazard = btn.dataset.h;
+    if (selectedId) loadAnalogs(selectedId, currentHazard);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+loadWells();
+</script>
+</body>
+</html>

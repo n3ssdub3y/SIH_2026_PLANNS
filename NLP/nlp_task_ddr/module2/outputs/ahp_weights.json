@@ -1,0 +1,327 @@
+{
+  "mud_loss": {
+    "engineering_rationale": "Formation fracture gradient + porosity dominate loss magnitude; mud weight is secondary control. Ref: Bourgoyne et al.; SPE-171915.",
+    "features": [
+      "formation",
+      "mud_weight",
+      "bha_type",
+      "mud_type",
+      "trajectory"
+    ],
+    "matrix_note": "Row i / Col j = how much more important feature_i is vs feature_j (Saaty 1980)",
+    "pairwise_matrix": [
+      [
+        1.0,
+        3.0,
+        5.0,
+        5.0,
+        7.0
+      ],
+      [
+        0.3333333333333333,
+        1.0,
+        3.0,
+        3.0,
+        5.0
+      ],
+      [
+        0.2,
+        0.3333333333333333,
+        1.0,
+        1.0,
+        3.0
+      ],
+      [
+        0.2,
+        0.3333333333333333,
+        1.0,
+        1.0,
+        3.0
+      ],
+      [
+        0.14285714285714285,
+        0.2,
+        0.3333333333333333,
+        0.3333333333333333,
+        1.0
+      ]
+    ],
+    "weights": {
+      "formation": 0.4971,
+      "mud_weight": 0.2454,
+      "bha_type": 0.1053,
+      "mud_type": 0.1053,
+      "trajectory": 0.0469
+    },
+    "weights_vector": [
+      0.4971,
+      0.2454,
+      0.1053,
+      0.1053,
+      0.0469
+    ],
+    "consistency_ratio": 0.0284,
+    "consistency_acceptable": true,
+    "consistency_threshold": 0.1
+  },
+  "stuck_pipe": {
+    "engineering_rationale": "Wellbore trajectory (inclination, dogleg severity) governs differential pressure sticking; BHA determines contact area. Ref: Maidla & Wojtanowicz 1990; SPE-179005.",
+    "features": [
+      "formation",
+      "mud_weight",
+      "bha_type",
+      "mud_type",
+      "trajectory"
+    ],
+    "matrix_note": "Row i / Col j = how much more important feature_i is vs feature_j (Saaty 1980)",
+    "pairwise_matrix": [
+      [
+        1.0,
+        0.3333333333333333,
+        0.2,
+        0.3333333333333333,
+        0.14285714285714285
+      ],
+      [
+        3.0,
+        1.0,
+        0.3333333333333333,
+        1.0,
+        0.2
+      ],
+      [
+        5.0,
+        3.0,
+        1.0,
+        3.0,
+        0.3333333333333333
+      ],
+      [
+        3.0,
+        1.0,
+        0.3333333333333333,
+        1.0,
+        0.2
+      ],
+      [
+        7.0,
+        5.0,
+        3.0,
+        5.0,
+        1.0
+      ]
+    ],
+    "weights": {
+      "formation": 0.0469,
+      "mud_weight": 0.1053,
+      "bha_type": 0.2454,
+      "mud_type": 0.1053,
+      "trajectory": 0.4971
+    },
+    "weights_vector": [
+      0.0469,
+      0.1053,
+      0.2454,
+      0.1053,
+      0.4971
+    ],
+    "consistency_ratio": 0.0284,
+    "consistency_acceptable": true,
+    "consistency_threshold": 0.1
+  },
+  "overpressure": {
+    "engineering_rationale": "Mud weight vs pore pressure gradient is primary kick indicator; formation lithology sets pore pressure regime. Ref: Fertl 1976; Zhang 2011.",
+    "features": [
+      "formation",
+      "mud_weight",
+      "bha_type",
+      "mud_type",
+      "trajectory"
+    ],
+    "matrix_note": "Row i / Col j = how much more important feature_i is vs feature_j (Saaty 1980)",
+    "pairwise_matrix": [
+      [
+        1.0,
+        0.3333333333333333,
+        5.0,
+        5.0,
+        7.0
+      ],
+      [
+        3.0,
+        1.0,
+        7.0,
+        7.0,
+        9.0
+      ],
+      [
+        0.2,
+        0.14285714285714285,
+        1.0,
+        1.0,
+        3.0
+      ],
+      [
+        0.2,
+        0.14285714285714285,
+        1.0,
+        1.0,
+        3.0
+      ],
+      [
+        0.14285714285714285,
+        0.1111111111111111,
+        0.3333333333333333,
+        0.3333333333333333,
+        1.0
+      ]
+    ],
+    "weights": {
+      "formation": 0.283,
+      "mud_weight": 0.5213,
+      "bha_type": 0.0793,
+      "mud_type": 0.0793,
+      "trajectory": 0.0371
+    },
+    "weights_vector": [
+      0.283,
+      0.5213,
+      0.0793,
+      0.0793,
+      0.0371
+    ],
+    "consistency_ratio": 0.0411,
+    "consistency_acceptable": true,
+    "consistency_threshold": 0.1
+  },
+  "torque_spike": {
+    "engineering_rationale": "Trajectory shape (dogleg, build rate) and BHA drive friction torque and drag; mud type affects lubricity. Ref: Johancsik et al. 1984; SPE-163420.",
+    "features": [
+      "formation",
+      "mud_weight",
+      "bha_type",
+      "mud_type",
+      "trajectory"
+    ],
+    "matrix_note": "Row i / Col j = how much more important feature_i is vs feature_j (Saaty 1980)",
+    "pairwise_matrix": [
+      [
+        1.0,
+        0.3333333333333333,
+        0.2,
+        0.3333333333333333,
+        0.2
+      ],
+      [
+        3.0,
+        1.0,
+        0.3333333333333333,
+        1.0,
+        0.3333333333333333
+      ],
+      [
+        5.0,
+        3.0,
+        1.0,
+        3.0,
+        0.3333333333333333
+      ],
+      [
+        3.0,
+        1.0,
+        0.3333333333333333,
+        1.0,
+        0.2
+      ],
+      [
+        5.0,
+        3.0,
+        3.0,
+        5.0,
+        1.0
+      ]
+    ],
+    "weights": {
+      "formation": 0.0538,
+      "mud_weight": 0.1246,
+      "bha_type": 0.2622,
+      "mud_type": 0.1117,
+      "trajectory": 0.4477
+    },
+    "weights_vector": [
+      0.0538,
+      0.1246,
+      0.2622,
+      0.1117,
+      0.4477
+    ],
+    "consistency_ratio": 0.0481,
+    "consistency_acceptable": true,
+    "consistency_threshold": 0.1
+  },
+  "cementing": {
+    "engineering_rationale": "Mud type is dominant - OBM contamination severely degrades cement bond. Formation type determines bond strength. Ref: Nelson & Guillot; SPE-77771.",
+    "features": [
+      "formation",
+      "mud_weight",
+      "bha_type",
+      "mud_type",
+      "trajectory"
+    ],
+    "matrix_note": "Row i / Col j = how much more important feature_i is vs feature_j (Saaty 1980)",
+    "pairwise_matrix": [
+      [
+        1.0,
+        3.0,
+        3.0,
+        0.3333333333333333,
+        5.0
+      ],
+      [
+        0.3333333333333333,
+        1.0,
+        1.0,
+        0.2,
+        3.0
+      ],
+      [
+        0.3333333333333333,
+        1.0,
+        1.0,
+        0.2,
+        3.0
+      ],
+      [
+        3.0,
+        5.0,
+        5.0,
+        1.0,
+        7.0
+      ],
+      [
+        0.2,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.14285714285714285,
+        1.0
+      ]
+    ],
+    "weights": {
+      "formation": 0.2454,
+      "mud_weight": 0.1053,
+      "bha_type": 0.1053,
+      "mud_type": 0.4971,
+      "trajectory": 0.0469
+    },
+    "weights_vector": [
+      0.2454,
+      0.1053,
+      0.1053,
+      0.4971,
+      0.0469
+    ],
+    "consistency_ratio": 0.0284,
+    "consistency_acceptable": true,
+    "consistency_threshold": 0.1
+  }
+}
