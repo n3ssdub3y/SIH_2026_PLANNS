@@ -67,14 +67,54 @@
   /* ─── CONTROLS ─── */
   #controls { padding:14px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
   label { display:block; font-size:11px; color:var(--text-muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.07em; }
-  select, input[type=range] { width:100%; border-radius:var(--radius); border:1px solid var(--border); background:var(--bg-glass); color:var(--text-primary); font-family:inherit; font-size:13px; outline:none; }
-  select { padding:8px 10px; cursor:pointer; transition:border-color 0.2s; }
-  select:hover, select:focus { border-color:var(--border-active); }
+  input[type=range] { width:100%; border-radius:var(--radius); border:1px solid var(--border); background:var(--bg-glass); color:var(--text-primary); font-family:inherit; font-size:13px; outline:none; }
   .ctrl-row { margin-bottom:12px; }
   .ctrl-row:last-child { margin-bottom:0; }
   .radius-row { display:flex; align-items:center; gap:10px; }
   .radius-row input[type=range] { flex:1; accent-color:var(--accent-cyan); }
   #radius-val { font-size:13px; font-weight:600; color:var(--accent-cyan); width:52px; text-align:right; white-space:nowrap; font-family:'JetBrains Mono',monospace; }
+
+  /* ─── CUSTOM DROPDOWN ─── */
+  .custom-select-wrap { position:relative; width:100%; }
+  .custom-select-btn {
+    width:100%; padding:9px 36px 9px 12px; border-radius:var(--radius);
+    border:1px solid var(--border); background:rgba(255,255,255,0.05);
+    color:var(--text-primary); font-family:'Inter',sans-serif; font-size:13px;
+    cursor:pointer; text-align:left; display:flex; align-items:center;
+    justify-content:space-between; transition:border-color 0.2s, background 0.2s;
+    user-select:none;
+  }
+  .custom-select-btn:hover { border-color:var(--border-active); background:rgba(255,255,255,0.08); }
+  .custom-select-btn.open { border-color:var(--accent-cyan); background:rgba(6,182,212,0.07); }
+  .custom-select-btn .csb-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .custom-select-btn .csb-arrow { flex-shrink:0; margin-left:8px; transition:transform 0.2s; color:var(--text-muted); font-size:10px; }
+  .custom-select-btn.open .csb-arrow { transform:rotate(180deg); color:var(--accent-cyan); }
+  .custom-select-dropdown {
+    position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:9999;
+    background:#1a2235; border:1px solid rgba(99,179,237,0.3);
+    border-radius:var(--radius); max-height:260px; overflow-y:auto;
+    box-shadow:0 16px 40px rgba(0,0,0,0.6); display:none;
+  }
+  .custom-select-dropdown::-webkit-scrollbar { width:4px; }
+  .custom-select-dropdown::-webkit-scrollbar-track { background:transparent; }
+  .custom-select-dropdown::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+  .custom-select-dropdown.open { display:block; animation:fadeIn 0.15s ease; }
+  .csd-search {
+    width:100%; padding:8px 12px; background:transparent;
+    border:none; border-bottom:1px solid var(--border);
+    color:var(--text-primary); font-family:'Inter',sans-serif; font-size:12px;
+    outline:none;
+  }
+  .csd-search::placeholder { color:var(--text-muted); }
+  .csd-option {
+    padding:8px 12px; font-size:12px; color:var(--text-secondary);
+    cursor:pointer; transition:background 0.1s; display:flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .csd-option:hover  { background:rgba(255,255,255,0.06); color:var(--text-primary); }
+  .csd-option.selected { background:rgba(6,182,212,0.1); color:var(--accent-cyan); }
+  .csd-option .csd-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .csd-empty { padding:12px; text-align:center; color:var(--text-muted); font-size:12px; }
   .stat-row { display:flex; gap:8px; margin-top:8px; }
   .stat-chip { flex:1; background:var(--bg-glass); border:1px solid var(--border); border-radius:6px; padding:6px 10px; text-align:center; }
   .stat-chip .val { font-size:18px; font-weight:700; color:var(--accent-cyan); font-family:'JetBrains Mono',monospace; }
@@ -161,6 +201,8 @@
 
   /* Leaflet custom */
   .leaflet-container { background:#0d1220; }
+  /* Dark map effect on OSM tiles — no API key needed */
+  .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.85) saturate(0.6); }
   .leaflet-popup-content-wrapper { background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); box-shadow:var(--shadow); }
   .leaflet-popup-tip { background:var(--bg-secondary); }
   .leaflet-popup-content { font-family:'Inter',sans-serif; font-size:12px; line-height:1.6; margin:10px 14px; }
@@ -193,8 +235,17 @@
 
     <div id="controls">
       <div class="ctrl-row">
-        <label for="well-select">Select Well</label>
-        <select id="well-select"><option value="">— Choose a well —</option></select>
+        <label>Select Well</label>
+        <div class="custom-select-wrap" id="well-select-wrap">
+          <button class="custom-select-btn" id="well-select-btn" type="button">
+            <span class="csb-text" id="well-select-label">— Choose a well —</span>
+            <span class="csb-arrow">▼</span>
+          </button>
+          <div class="custom-select-dropdown" id="well-select-dropdown">
+            <input class="csd-search" id="well-search-input" type="text" placeholder="Search well name..."/>
+            <div id="well-options-list"></div>
+          </div>
+        </div>
       </div>
       <div class="ctrl-row">
         <label>Search Radius</label>
@@ -247,10 +298,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const map = L.map('map', { zoomControl:true }).setView([58.5, 2.5], 6);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution:'&copy; <a href="https://carto.com/">CARTO</a> | OpenStreetMap contributors',
-  subdomains: 'abcd',
-  maxZoom: 18,
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19,
 }).addTo(map);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -277,17 +327,7 @@ async function loadWells() {
   const data = await res.json();
   allWells   = data.wells;
 
-  // Populate select
-  const sel = document.getElementById('well-select');
-  allWells
-    .slice()
-    .sort((a,b) => a.well_id.localeCompare(b.well_id))
-    .forEach(w => {
-      const opt = document.createElement('option');
-      opt.value = w.well_id;
-      opt.textContent = `${w.well_id}  [${w.source}]`;
-      sel.appendChild(opt);
-    });
+  // Stats (dropdown is built separately in buildDropdown() after wells load)
 
   // Stats
   const real  = allWells.filter(w => !w.is_synthetic).length;
@@ -334,10 +374,13 @@ async function loadWells() {
 // ─────────────────────────────────────────────────────────────────────────────
 function selectWell(wellId) {
   selectedId = wellId;
-  document.getElementById('well-select').value = wellId;
+  // Update custom dropdown label to reflect the selected well
+  const lbl = document.getElementById('well-select-label');
+  if (lbl) lbl.textContent = wellId;
   updateRadius();
   loadAnalogs(wellId, currentHazard);
 }
+
 
 function resetAllMarkers() {
   allWells.forEach(w => {
@@ -508,13 +551,73 @@ async function loadAnalogs(wellId, hazard) {
   }
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM DROPDOWN
+// ─────────────────────────────────────────────────────────────────────────────
+const WELL_DOT_COLORS = { real_volve:'#f97316', real_force2020:'#3b82f6', synthetic:'#ef4444' };
+
+function buildDropdown(wells) {
+  const list = document.getElementById('well-options-list');
+  const btn  = document.getElementById('well-select-btn');
+  const dd   = document.getElementById('well-select-dropdown');
+  const lbl  = document.getElementById('well-select-label');
+  const inp  = document.getElementById('well-search-input');
+
+  function renderOptions(filter) {
+    const filtered = filter
+      ? wells.filter(w => w.well_id.toLowerCase().includes(filter.toLowerCase()))
+      : wells;
+    if (!filtered.length) {
+      list.innerHTML = '<div class="csd-empty">No wells match</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(w => {
+      const dotColor = WELL_DOT_COLORS[w.source] || '#888';
+      return `<div class="csd-option" data-id="${w.well_id}">
+        <div class="csd-dot" style="background:${dotColor};box-shadow:0 0 5px ${dotColor}"></div>
+        ${w.well_id}
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.csd-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const id = opt.dataset.id;
+        lbl.textContent = id;
+        list.querySelectorAll('.csd-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        closeDropdown();
+        selectWell(id);
+      });
+    });
+  }
+
+  function openDropdown() {
+    btn.classList.add('open');
+    dd.classList.add('open');
+    inp.value = '';
+    renderOptions('');
+    inp.focus();
+  }
+
+  function closeDropdown() {
+    btn.classList.remove('open');
+    dd.classList.remove('open');
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    dd.classList.contains('open') ? closeDropdown() : openDropdown();
+  });
+
+  inp.addEventListener('input', () => renderOptions(inp.value));
+  inp.addEventListener('click', e => e.stopPropagation());
+  document.addEventListener('click', () => closeDropdown());
+  dd.addEventListener('click', e => e.stopPropagation());
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // EVENT LISTENERS
 // ─────────────────────────────────────────────────────────────────────────────
-document.getElementById('well-select').addEventListener('change', e => {
-  if (e.target.value) selectWell(e.target.value);
-});
-
 document.getElementById('radius-slider').addEventListener('input', e => {
   radiusKm = parseInt(e.target.value);
   document.getElementById('radius-val').textContent = radiusKm + ' km';
@@ -533,7 +636,11 @@ document.querySelectorAll('.hpill').forEach(btn => {
 // ─────────────────────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────────────────────
-loadWells();
+async function init() {
+  await loadWells();
+  buildDropdown(allWells.slice().sort((a,b) => a.well_id.localeCompare(b.well_id)));
+}
+init();
 </script>
 </body>
 </html>
