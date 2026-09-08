@@ -173,7 +173,7 @@ Build a service that replays a REAL Volve well's telemetry.csv row-by-row (or a 
 STEP 2 — PRECURSOR/ANOMALY DETECTION (feeds the predictive models):
 For each of the 5 hazards, implement precursor detection on the live-replayed telemetry: start with transparent statistical methods (rolling z-score, CUSUM change-point detection) as the primary, fully-explainable baseline. If time allows, add an autoencoder (reconstruction-error based anomaly score) as a secondary signal — but the statistical baseline must always be present and must always be shown alongside any deep-learning output, per the no-black-box rule.
 
-STEP 3 — EVENT-SEQUENCE MATCHING (PS requirement v, the technical core of prediction):
+STEP 3 — EVENT-SEQUENCE MATCHING (PS requirement v, the technical core of prediction):x
 Convert live telemetry into the same event-type-token sequence format used in Module 1's event_type_vocabulary.json. Implement sequence matching against every analog well's historical event sequence (from Module 2's analog_wells.json) using:
 - Sequence alignment (Needleman-Wunsch global alignment or Smith-Waterman local alignment — use Biopython's pairwise alignment module, or implement it directly; this is a well-established, explainable dynamic-programming algorithm, not a black box).
 When a strong partial match is found, compute risk using a Wilson score confidence interval (use `statsmodels.stats.proportion.proportion_confint` with method='wilson') over the matched analogs' actual outcomes — e.g. "3 of 5 matched analogs experienced this event next (60%, 95% CI: 23%-88%)" — NEVER report a bare percentage without its confidence interval, this is a core transparency requirement of this project.
