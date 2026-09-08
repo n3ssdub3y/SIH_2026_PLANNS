@@ -1,7 +1,7 @@
 # SIH 2026 Idea Presentation Master Guide: NWIS-Sentinel
 **Problem Statement ID:** SIH26121 | **Organization:** Oil India Limited (Ministry of Petroleum & Natural Gas)  
 **Project Title:** NWIS-Sentinel (Nearby Wells Intelligence System for Predictive Drilling & Hazard Mitigation)  
-**Team Guide & Content Blueprint:** For Ness (P1), Lakshuki (P2), and the SIH Team  
+**Team Guide & Content Blueprint for making the PPT:** For Siddhi (P5), Nakul (P6), and the SIH Team  
 
 ---
 
@@ -85,30 +85,22 @@ SLIDE 1: TITLE PAGE
   * SMART INDIA HACKATHON 2026
   * Problem Statement ID: `SIH26121`
   * Problem Statement Title: `Development of AI/ML/NLP based Nearby Wells Intelligence System (NWIS) for Oil and Gas Drilling Operations`
-  * Theme: `Smart Automation` *(or Clean & Green Energy)*
+  * Theme: `Smart Automation`
   * PS Category: `Software`
   * Team ID: `[Your Registered Team ID]`
   * Team Name: `[Your Registered Team Name]`
   * Idea Title: `NWIS-Sentinel: AI-Powered Offset-Well Intelligence & Real-Time Hazard Predictive System`
 
-### Slide Design & Visual Layout
-* **Visual Theme:** Deep Navy Slate (`#0B192C`) background with accents of Safety Amber (`#FF9800`) and Cyber Teal (`#00E5FF`).
-* **Visual Elements:**
-  * Top-Left: SIH 2026 Official Logo.
-  * Top-Right: Oil India Limited (OIL) Logo & Ministry of Petroleum and Natural Gas crest.
-  * Center: Bold project title badge: **NWIS-Sentinel** with subtitle: *"Transforming Legacy Well Data into Real-Time Autonomous Drilling Protection"*.
-  * Bottom Grid: 2-column metadata box (Left: PS ID, Category, Theme; Right: Team Name, Team Lead, Member Names, Institute Name).
-  * Background Watermark: Subtle wireframe diagram of a 3D oil wellbore trajectory.
 
 ---
 
 ```
 ================================================================================
-SLIDE 2: PROPOSED SOLUTION
+SLIDE 2: IDEA TITLE
 ================================================================================
 ```
 ### Official Template Headers & Pointers
-* **Title:** IDEA TITLE / Proposed Solution
+* **Title:** IDEA TITLE 
 * **Sub-Pointers to Address:**
   1. Detailed explanation of the proposed solution
   2. How it addresses the problem
@@ -133,14 +125,6 @@ SLIDE 2: PROPOSED SOLUTION
 * **The "Time-Travel" Backtest Engine:** Backtested on real Equinor Volve well `15/9-19A`, proving early warning **57 m and 4.5 hours prior to actual stuck pipe incident**.
 * **Physics-Informed Hybrid ML:** Combines geophysical formation pore-pressure trends with high-frequency temporal ML (XGBoost + Bi-LSTM), preventing false positives common in purely data-driven models.
 * **Offline Edge-Readiness:** Operates in low-bandwidth remote drilling locations with local on-rig inference, synchronizing with the cloud/DOC when connectivity permits.
-
-### Recommended Visual Asset for Slide 2
-* **Split Layout:**
-  * *Left 45% (The Problem vs Solution Graphic):*
-    * Top icon card: "Traditional Operations" (Siloed PDF archives, manual search, unexpected stuck pipe, $300k/day NPT).
-    * Arrow pointing down: "NWIS-Sentinel" (Automated OCR/NLP → TVD Stratigraphic Alignment → Predictive Telemetry AI).
-  * *Right 55% (Core Architecture / UI Preview):*
-    * Screenshot/Mockup showing: Map with offset wells radius + Formation cross-section + Hazard Alert Box ("WARNING: EVT_STUCK_PIPE Risk 84% at 3,120m — Hugin Sandstone").
 
 ---
 
@@ -218,14 +202,6 @@ SLIDE 4: FEASIBILITY AND VIABILITY
 | **Intermittent Rig Internet Connectivity** | Critical | **Edge-first architecture:** Local Docker node on rig runs real-time inference offline; syncs with central enterprise cloud once link is restored. |
 | **Operator Skepticism / "Black Box" Resistance** | Medium | **Full SHAP Explainability:** Every alert displays the top 3 contributing physical features (e.g., *"Torque fluctuation +34%, Standpipe pressure drop 12%"*) plus historical precedent well name. |
 
-### Recommended Visual Asset for Slide 4
-* **The "Time-Travel Backtest" Proof Graphic:**
-  * A horizontal depth/time axis showing Well `NO 15/9-19A`:
-    * `Depth 3,115 m (T - 4.5 Hours):` **NWIS-Sentinel ALERT ISSUED** (Red warning banner: "Stuck Pipe Warning - 87% Probability, Torque Variance High").
-    * `Depth 3,172 m (T = 0):` **Actual Historical Event Occurred** (String stuck during reaming).
-    * Large callout bracket between the two: **"4.5 Hours / 57 Meters Early Warning Window — Incident Preventable!"**
-
----
 
 ```
 ================================================================================
@@ -257,14 +233,6 @@ SLIDE 5: IMPACT AND BENEFITS
   * **Diesel & Carbon Reduction:** Eliminating 10 idle rig days per well reduces diesel consumption by ~40,000 liters (~105 tonnes of $\text{CO}_2$ emissions per prevented event).
   * **Reduced Mud & Chemical Spills:** Early lost circulation alerts reduce thousands of barrels of synthetic/oil-based mud lost into subsurface aquifers.
 
-### Recommended Visual Asset for Slide 5
-* **4-Pillar Impact Metric Cards (Large numbers in bold colored boxes):**
-  * Card 1: **"15%–30%"** $\rightarrow$ Reduction in Drilling NPT.
-  * Card 2: **"4.5 Hours"** $\rightarrow$ Advance Warning Before Catastrophic Failure.
-  * Card 3: **"$1.2M+"** $\rightarrow$ Average Cost Avoided Per Prevented Incident.
-  * Card 4: **"105 Tons"** $\rightarrow$ $\text{CO}_2$ Emissions Cut Per Prevented Fishing Job.
-* Bottom: A sleek comparative bar chart showing "Traditional Reactive Rig Operations (High NPT)" vs "NWIS-Sentinel Enabled Operations (Minimized NPT)".
-
 ---
 
 ```
@@ -293,17 +261,6 @@ SLIDE 6: RESEARCH AND REFERENCES
 #### 3. Technical Open-Source Foundation & Project Artifacts
 * **spaCy & HuggingFace Transformers:** For domain NER and zero-shot taxonomy mapping.
 * **WITSML 1.4.1.1 / Energistics Standards:** Industry-standard schema for real-time drilling data streaming.
-* **GitHub Repository & Reproducibility:** Fully reproducible pipeline code, schemas, and processed datasets published at: `https://github.com/n3ssdub3y/SIH_2026`.
-
-### Recommended Visual Asset for Slide 6
-* **3-Column Verification & Credibility Layout:**
-  * *Column 1 (Academic & SPE Citations):* Icons of SPE / IADC papers with formal reference strings.
-  * *Column 2 (Data Provenance Badges):* Logos/Badges for Equinor Volve Field, FORCE 2020 Benchmark, and WITSML Standard.
-  * *Column 3 (Project Verification Badges):*
-    * "159 Wells Processed"
-    * "1,959 Structured Events"
-    * "63 Ground-Truth Incidents"
-    * "GitHub Verified Codebase" (with QR Code linking to repository).
 
 ---
 
@@ -371,46 +328,6 @@ Normal Drilling Phase                                            T minus 4.5 Hou
 * **Visual Concept:**
   * Top Half: Map view with a bullseye radius circle around "Active Wellbore X". Surrounding offset wells (Well A: 2.1 km, Well B: 4.8 km, Well C: 9.3 km) are color-coded (Red = historical stuck pipe, Amber = mud loss, Green = normal).
   * Bottom Half: Subsurface cross-section showing geological layers (Skade Sand $\rightarrow$ Shetland Chalk $\rightarrow$ Hugin Reservoir). Vertical well trajectories penetrate layers. When Well X approaches 3,100 m in the Hugin formation, red dashed hazard projection lines highlight that Well A and Well B both experienced mud loss at that exact depth.
-
----
-
-## Part 5: Web-Researched Presentation Winning Hacks for SIH 2026
-
-From analyzing past SIH national winners and hackathon evaluation rubrics:
-
-### 5.1 The "60-Second Scan" Rule
-* Hackathon evaluators review dozens of presentations consecutively. They **do not read text blocks**.
-* **Visual Rule:** Every slide must pass the "Glance Test": within 5 seconds, an evaluator should know the core message through a **bold takeaway headline**, a **central diagram**, and **3–4 bullet points with bold leading keywords**.
-* *Bad Example:* "We are using natural language processing to extract data from daily drilling reports which are stored in PDF format."
-* *Winning Example:* "**Automated OCR/NLP Pipeline:** Ingests legacy PDF DDRs, extracting 18 canonical hazard classes across 159 wells with >91% precision."
-
-### 5.2 Professional Color Palette & Typography
-* **Primary Background:** Deep Slate / Obsidian Navy (`#0A192F` or `#0F172A`) — gives an ultra-modern, high-tech engineering feel.
-* **Card & Container Fills:** Dark Blue Gray (`#1E293B`) with subtle 1px border lines (`#334155`).
-* **Text Colors:** Pure White (`#FFFFFF`) for headers; Light Slate (`#94A3B8`) for body bullets.
-* **Accent Colors (Used Strategically):**
-  * Cyber Teal (`#00E5FF`): For data flow, architecture, and technology badges.
-  * Safety Amber / Orange (`#FF9800`): For hazard alerts, risk warnings, and NPT cost stats.
-  * Neon Green (`#10B981`): For verified completed results, accuracy scores, and savings metrics.
-* **Typography:** Clean sans-serif fonts: **Inter**, **Montserrat**, or **Outfit** (Header: 24–28 pt Bold, Subheader: 16–18 pt Semi-Bold, Body: 12–14 pt Regular).
-
-### 5.3 What Disqualifies Teams vs. What Wins SIH
-| Trap That Gets Teams Rejected | Winning Technique in NWIS-Sentinel |
-| :--- | :--- |
-| **Vague "AI" Claims:** Stating "we use AI and ML" without naming models, architectures, or features. | **Specific Architecture:** We explicitly cite XGBoost, Bi-LSTM, spaCy NER, SHAP explainability, and WITSML telemetry channels. |
-| **Fabricated or Mock Data:** Showing random dummy charts with no real provenance. | **Real World Provenance:** Built on 1,759 real Equinor Volve DDRs, 118 FORCE 2020 wells, and real 16.6k WITSML telemetry. |
-| **No Working Prototype:** Promising everything as "future work". | **Proven Progress:** Module 1 is **100% complete**, verified, and pushed to GitHub with exact metrics (1,959 events, 63 hazards). |
-| **Ignoring Operational Feasibility:** Pitching complex models that need cloud connectivity on an offshore rig. | **Edge-Readiness:** Proposing a local edge-node architecture that runs offline on the rig floor and syncs asynchronously. |
-| **Generic Impact:** Saying "this will help India's economy." | **Quantified Impact:** "Prevents stuck pipe incidents causing 25–44% of NPT, saving $1.2M+ per incident and 105 tons of CO2." |
-
-### 5.4 Pre-Submission Quality Checklist for the Team
-- [ ] Strictly 6 slides total (Slide 1 Title + Slides 2–6 Content).
-- [ ] Slide 7 (Important Instructions) has been **deleted**.
-- [ ] Exported as high-resolution **PDF** (no PPTX).
-- [ ] File size is kept under 10 MB (compress images if necessary).
-- [ ] Team details (Team Name, Team ID, Members, College) on Slide 1 match the SIH portal registration exactly.
-- [ ] Problem Statement ID (`SIH26121`) and Problem Statement Title match the official portal listing word-for-word.
-- [ ] No grammar or spelling errors in technical terms (*WITSML*, *Lithology*, *Stratigraphy*, *Pack-off*, *Lost Circulation*).
 
 ---
 
