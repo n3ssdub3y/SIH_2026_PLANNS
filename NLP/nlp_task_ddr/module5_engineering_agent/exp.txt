@@ -1,0 +1,46 @@
+Ran command: `python -c "
+import json
+with open(r'd:\12345\SIH_2026_PLANNS\NLP\nlp_task_ddr\results\module1_outputs\flagged_real_incidents.json', 'r', encoding='utf-8') as f:
+    incidents = json.load(f)
+    
+print('Sample 1:')
+print(json.dumps(incidents[0], indent=2))
+print('\nSample 2:')
+for inc in incidents:
+    if inc.get('hazard') == 'mud_loss':
+        print(json.dumps(inc, indent=2))
+        break
+"`
+
+Here are a few realistic test scenarios based directly on the actual incident and sequence datasets in the project. You can copy/paste these into the Streamlit dashboard to test how the RAG + LLM agent responds.
+
+### Test Scenario 1: Stuck Pipe (Actual Volve Data)
+* **Well ID**: `15/9-F-9A`
+* **Depth (m)**: `303.5`
+* **Formation**: `Unknown`
+* **Current Hazard Focus**: `stuck_pipe`
+* **Event Timeline**: `EVT_TIGHT_HOLE, EVT_TIGHT_HOLE, EVT_TIGHT_HOLE, EVT_TIGHT_HOLE`
+* **Question**: "At this depth, we are seeing repeated tight hole events. What happened in similar historical wells, and what interventions were attempted?"
+
+### Test Scenario 2: Mud Loss (Actual Volve Data)
+* **Well ID**: `NO`
+* **Depth (m)**: `2651.0`
+* **Formation**: `Sandstone`
+* **Current Hazard Focus**: `mud_loss`
+* **Event Timeline**: `NORMAL, FLOW ANOMALY, ROP DECREASE` *(or leave blank)*
+* **Question**: "We are about to drill from 2651m to 2920m. Are there historical records of mud losses in this section for similar wells? What actions were taken?"
+
+### Test Scenario 3: High-Level Explanatory Query
+* **Well ID**: `15/9-F-9A`
+* **Depth (m)**: `3150`
+* **Current Hazard Focus**: `torque_spike`
+* **Question**: "Why is this current situation matching these specific historical wells? What are the strongest common factors according to the historical evidence, and did they experience stuck pipe or just torque spikes?"
+
+### Test Scenario 4: Natural Language Only
+*(Leave the timeline empty and just type this into the chat)*
+* **Question**: "The torque has been increasing steadily over the last 100 meters, and the ROP is dropping. We suspect overpressure or an incoming stuck pipe incident. Based on analog wells, what is the most likely outcome, and what preventative interventions worked historically?"
+
+**What to look for when testing:**
+1. **Grounding**: The LLM should explicitly state if evidence is mixed, and tell you if it didn't find any relevant snippets.
+2. **Citations**: Look for the `[Well ID - EVT_TYPE - Depth]` format in the text.
+3. **Expandable Evidence**: After Gemini replies, click the "**View Evidence Used**" dropdown below its response. You should see the exact raw text snippets that were retrieved from the ChromaDB vector store that Gemini used to generate its answer.
