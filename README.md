@@ -28,6 +28,7 @@ That's it. Three browser tabs will open automatically.
 | **Module 2** — Geospatial Map | [http://localhost:5001](http://localhost:5001) | Leaflet interactive map, 159 wells, AHP hazard rankings |
 | **Module 3** — Live Risk Monitor | [http://localhost:5003/monitor](http://localhost:5003/monitor) | Real-time CUSUM/Z-score alerts, +106.5 m early warning dashboard |
 | **Module 4** — Knowledge Graph & AI Studio | [http://localhost:5004](http://localhost:5004) | 4,037-node Vis.js graph, GraphRAG search, Gemini AI briefings |
+| **Module 5** — Engineering Agent | [http://localhost:8501](http://localhost:8501) | Evidence-grounded Gemini decision support, ChromaDB vector retrieval |
 
 > Press **Ctrl+C** in the terminal to stop all services cleanly.
 
@@ -50,7 +51,7 @@ or from PowerShell:
 
 ## 🛠️ Manual Launch (Separate Terminals)
 
-If you want full control — open **4 separate terminals**, all inside `NLP/nlp_task_ddr/`.
+If you want full control — open separate terminals, all inside `NLP/nlp_task_ddr/`.
 
 **Terminal 1 — Module 2 (Geospatial & AHP Similarity Map)**
 ```bash
@@ -76,6 +77,12 @@ python module3/anomaly_server.py --port 5003 --simulator-url ws://localhost:5002
 ```bash
 python module4/app.py
 # → http://localhost:5004
+```
+
+**Terminal 5 — Module 5 (Engineering RAG + LLM Agent)**
+```bash
+python -m streamlit run module5_engineering_agent/app.py
+# → http://localhost:8501
 ```
 
 ---
@@ -116,6 +123,9 @@ curl "http://localhost:5004/api/graph/stats"
 
 # Module 4 — status summary
 curl "http://localhost:5004/api/status"
+
+# Module 5 — engineering agent UI (returns HTTP 200)
+curl -I "http://localhost:8501"
 ```
 
 ---
