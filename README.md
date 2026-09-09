@@ -4,7 +4,7 @@
 
 ---
 
-## ⚡ Quick Start (One Command, All 4 Modules)
+## ⚡ Quick Start (One Command, All 5 Modules)
 
 > **Working directory for ALL commands: `NLP/nlp_task_ddr/`**
 >
@@ -17,18 +17,18 @@ cd NLP/nlp_task_ddr
 # Step 2 — install all dependencies (do this once)
 pip install -r requirements.txt
 
-# Step 3 — launch all 4 modules simultaneously
+# Step 3 — launch all 5 modules simultaneously
 python run_all_modules.py
 ```
 
-That's it. Three browser tabs will open automatically.
+That's it. Four interactive browser tabs will open automatically.
 
 | Module | URL | What You See |
 |---|---|---|
 | **Module 2** — Geospatial Map | [http://localhost:5001](http://localhost:5001) | Leaflet interactive map, 159 wells, AHP hazard rankings |
 | **Module 3** — Live Risk Monitor | [http://localhost:5003/monitor](http://localhost:5003/monitor) | Real-time CUSUM/Z-score alerts, +106.5 m early warning dashboard |
 | **Module 4** — Knowledge Graph & AI Studio | [http://localhost:5004](http://localhost:5004) | 4,037-node Vis.js graph, GraphRAG search, Gemini AI briefings |
-| **Module 5** — Engineering Agent | [http://localhost:8501](http://localhost:8501) | Evidence-grounded Gemini decision support, ChromaDB vector retrieval |
+| **Module 5** — Engineering Decision Support | [http://localhost:5005](http://localhost:5005) | Dark console, 1-click scenarios, Gemini RAG, ChromaDB vector store |
 
 > Press **Ctrl+C** in the terminal to stop all services cleanly.
 
@@ -81,8 +81,8 @@ python module4/app.py
 
 **Terminal 5 — Module 5 (Engineering RAG + LLM Agent)**
 ```bash
-python -m streamlit run module5_engineering_agent/app.py
-# → http://localhost:8501
+python module5_engineering_agent/app.py
+# → http://localhost:5005
 ```
 
 ---
@@ -124,8 +124,9 @@ curl "http://localhost:5004/api/graph/stats"
 # Module 4 — status summary
 curl "http://localhost:5004/api/status"
 
-# Module 5 — engineering agent UI (returns HTTP 200)
-curl -I "http://localhost:8501"
+# Module 5 — engineering agent UI (returns HTTP 200) & health check
+curl -I "http://localhost:5005"
+curl "http://localhost:5005/api/health"
 ```
 
 ---
@@ -138,11 +139,12 @@ Key libraries used:
 
 | Library | Used In |
 |---|---|
-| `Flask`, `flask-cors` | Module 2 & 4 web servers |
+| `Flask`, `flask-cors` | Module 2, 4 & 5 web servers |
 | `fastapi`, `uvicorn`, `websockets` | Module 3 real-time servers |
 | `networkx` | Module 4 knowledge graph |
 | `sentence-transformers` | Module 4 GraphRAG semantic search |
-| `google-generativeai`, `google-genai` | Module 4 Gemini AI briefings |
+| `chromadb` | Module 5 vector store (2,022 offset records) |
+| `google-generativeai`, `google-genai` | Module 4 & 5 Gemini AI briefings & agent |
 | `scikit-learn`, `scipy`, `numpy`, `pandas` | Anomaly detection & AHP calculations |
 | `statsmodels` | Wilson Score confidence intervals (Module 3) |
 | `fastdtw` | Fast Dynamic Time Warping (Module 3) |
@@ -158,12 +160,13 @@ Key libraries used:
 | **5002** | Module 3 Telemetry Simulator | HTTP + WebSocket (`ws://localhost:5002/ws/telemetry`) |
 | **5003** | Module 3 Anomaly & Risk Server | HTTP + WebSocket (`ws://localhost:5003/ws/anomaly`) + Monitor UI |
 | **5004** | Module 4 Knowledge Graph & Briefing Studio | HTTP |
+| **5005** | Module 5 Engineering Decision Support Console | HTTP |
 
 ---
 
-## 🔑 Optional: Gemini API Key (for AI Briefing in Module 4)
+## 🔑 Optional: Gemini API Key (for Modules 4 & 5)
 
-Module 4 generates AI Pre-Spud briefings using Google Gemini. To use it:
+Modules 4 and 5 generate AI briefings and decision support using Google Gemini. Both modules also feature an automated **Local Evidence Synthesis Engine** as an offline fallback if no API key is provided. To use live Gemini generation:
 
 **Option A — Enter in the browser UI:**  
 Open [http://localhost:5004](http://localhost:5004) → paste your key in the *API Key* field → click Generate Briefing.

@@ -20,8 +20,9 @@ websockets>=11.0
 fastdtw>=0.3.4
 matplotlib>=3.7.0
 
-# Module 4: Knowledge Graph, GraphRAG & LLM Briefing
+# Module 4 & 5: LLM Briefing & Engineering Agent
 networkx>=3.0
 sentence-transformers>=2.2.0
 google-generativeai>=0.8.0
 google-genai>=2.0.0
+chromadb>=0.5.0

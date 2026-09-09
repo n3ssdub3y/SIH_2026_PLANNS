@@ -73,6 +73,14 @@ MODULES = [
         "port": 5004,
         "url": "http://localhost:5004",
         "description": "Vis.js 4,000+ node interactive graph, GraphRAG search, and AI Pre-Spud Briefing studio."
+    },
+    {
+        "id": "module5",
+        "name": "Module 5: Engineering RAG + LLM Agent",
+        "cmd": [PYTHON_EXE, str(BASE_DIR / "module5_engineering_agent" / "app.py"), "--port", "5005"],
+        "port": 5005,
+        "url": "http://localhost:5005",
+        "description": "Evidence-grounded engineering decision support console powered by Gemini and ChromaDB."
     }
 ]
 
@@ -141,7 +149,7 @@ def main():
             time.sleep(1.2)  # brief stagger to allow socket binding
 
         print(f"\n{BOLD}{GREEN}{'=' * 75}{RESET}")
-        print(f"{BOLD}{GREEN}  ALL 4 NWIS-SENTINEL MODULES ARE ACTIVE & RUNNING!{RESET}")
+        print(f"{BOLD}{GREEN}  ALL 5 NWIS-SENTINEL MODULES ARE ACTIVE & RUNNING!{RESET}")
         print(f"{BOLD}{GREEN}{'=' * 75}{RESET}\n")
 
         print(f"  {BOLD}1. Module 2 (Geospatial & Offset Similarity Map):{RESET}")
@@ -160,10 +168,15 @@ def main():
         print(f"     -> {CYAN}http://localhost:5004{RESET}")
         print(f"     Interactive Vis.js graph, GraphRAG retrieval, and Gemini Pre-Spud briefings.\n")
 
+        print(f"  {BOLD}5. Module 5 (Engineering RAG + LLM Decision Support Agent):{RESET}")
+        print(f"     -> {CYAN}http://localhost:5005{RESET}")
+        print(f"     Evidence-grounded engineering console, 1-click scenarios & ChromaDB vector store.\n")
+
         print(f"{YELLOW}Press Ctrl+C at any time to gracefully shut down all services.{RESET}\n")
 
         if not args.no_browser:
             time.sleep(1.0)
+            webbrowser.open("http://localhost:5005")
             webbrowser.open("http://localhost:5004")
             webbrowser.open("http://localhost:5003/monitor")
             webbrowser.open("http://localhost:5001")

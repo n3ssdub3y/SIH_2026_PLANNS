@@ -1,7 +1,8 @@
-fastapi
+flask
+flask-cors
 pydantic
 chromadb
+google-genai
 google-generativeai
-streamlit
 python-dotenv
 requests
