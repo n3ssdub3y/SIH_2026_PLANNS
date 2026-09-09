@@ -1,0 +1,95 @@
+{
+  "briefing_id": "BRF_20260909T150956_3B5D8A",
+  "timestamp": "2026-09-09T15:10:20.489345+00:00",
+  "well_id": "35/9-5",
+  "hazard": "stuck_pipe",
+  "risk_score_from_module3": null,
+  "risk_level_from_module3": "UNKNOWN",
+  "measured_depth_m": null,
+  "wilson_ci": {},
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-1.5-flash",
+  "raw_llm_output": "For Well 35/9-5, the NWIS-Sentinel system is currently monitoring for a STUCK PIPE hazard. The risk level for this hazard is UNKNOWN, and no specific risk score or Wilson 95% confidence interval is available. An actionable alert has NOT YET been triggered, remaining in monitoring status, and current depth information is not provided. Top analog offset wells include 35/11-15 S (AHP score=0.922), 35/6-2 S (AHP score=0.918), 15/9-14 (AHP score=0.907), and 34/12-1 (AHP score=0.907). However, no evidence has been retrieved to indicate whether these specific analogs experienced stuck pipe incidents.",
+  "briefing_sentences": [
+    {
+      "text": "For Well 35/9-5, the NWIS-Sentinel system is currently monitoring for a STUCK PIPE hazard.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "The risk level for this hazard is UNKNOWN, and no specific risk score or Wilson 95% confidence interval is available.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "An actionable alert has NOT YET been triggered, remaining in monitoring status, and current depth information is not provided.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Top analog offset wells include 35/11-15 S (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "922), 35/6-2 S (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "918), 15/9-14 (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "907), and 34/12-1 (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "907).",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "However, no evidence has been retrieved to indicate whether these specific analogs experienced stuck pipe incidents.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 9,
+    "sentences_passed": 0,
+    "sentences_failed": 9,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 0,
+  "analog_wells_used": 5
+}

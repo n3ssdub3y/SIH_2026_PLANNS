@@ -1,3 +1,27 @@
-pandas
-requests
-python-dotenv
+# NWIS-Sentinel | SIH 2026 | Full Project Dependencies (Modules 1 - 4)
+
+# Core & Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+python-dotenv>=1.0.0
+requests>=2.28.0
+
+# Module 2 & 4: Web Servers & APIs
+Flask>=2.3.0
+flask-cors>=4.0.0
+Jinja2>=3.1.0
+
+# Module 3: Real-Time Telemetry & Anomaly Detection
+fastapi>=0.100.0
+uvicorn>=0.22.0
+websockets>=11.0
+fastdtw>=0.3.4
+matplotlib>=3.7.0
+
+# Module 4: Knowledge Graph, GraphRAG & LLM Briefing
+networkx>=3.0
+sentence-transformers>=2.2.0
+google-generativeai>=0.8.0
+google-genai>=2.0.0

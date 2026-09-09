@@ -1,0 +1,95 @@
+{
+  "briefing_id": "BRF_20260909T145457_A6244F",
+  "timestamp": "2026-09-09T14:55:18.836867+00:00",
+  "well_id": "36/7-3",
+  "hazard": "mud_loss",
+  "risk_score_from_module3": null,
+  "risk_level_from_module3": "UNKNOWN",
+  "measured_depth_m": null,
+  "wilson_ci": {},
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-1.5-flash",
+  "raw_llm_output": "NWIS-Sentinel reports that the risk level for MUD LOSS on Well ID 36/7-3 is currently UNKNOWN. The system has not provided a risk score, confidence interval, or specific current depth. Monitoring is underway, and an actionable alert has NOT YET been issued. While top analog wells like 35/11-13 (AHP score=0.727), 35/9-8 (AHP score=0.651), 33/9-17 (AHP score=0.650), and 35/11-12 (AHP score=0.605) have been identified, no specific evidence regarding past mud loss incidents for these analogs has been retrieved. Therefore, we cannot determine if there is any disagreement on past incidents from these wells at this time.",
+  "briefing_sentences": [
+    {
+      "text": "NWIS-Sentinel reports that the risk level for MUD LOSS on Well ID 36/7-3 is currently UNKNOWN.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "The system has not provided a risk score, confidence interval, or specific current depth.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Monitoring is underway, and an actionable alert has NOT YET been issued.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "While top analog wells like 35/11-13 (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "727), 35/9-8 (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "651), 33/9-17 (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "650), and 35/11-12 (AHP score=0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "605) have been identified, no specific evidence regarding past mud loss incidents for these analogs has been retrieved.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Therefore, we cannot determine if there is any disagreement on past incidents from these wells at this time.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 9,
+    "sentences_passed": 0,
+    "sentences_failed": 9,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 0,
+  "analog_wells_used": 5
+}

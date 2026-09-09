@@ -1,0 +1,24 @@
+{
+  "total_nodes": 4037,
+  "total_edges": 12392,
+  "node_counts_by_type": {
+    "Hazard": 5,
+    "Intervention": 12,
+    "Outcome": 5,
+    "Well": 159,
+    "Formation": 59,
+    "ReportSnippet": 1898,
+    "Event": 1898,
+    "Unknown": 1
+  },
+  "edge_counts_by_type": {
+    "DRILLED_THROUGH": 1105,
+    "ANALOG_FOR_HAZARD": 1225,
+    "HAD_EVENT": 1898,
+    "EXTRACTED_FROM": 1898,
+    "LED_TO": 1899,
+    "FOLLOWED_BY": 1918,
+    "MITIGATED_BY": 2160,
+    "CLASSIFIED_AS": 289
+  }
+}

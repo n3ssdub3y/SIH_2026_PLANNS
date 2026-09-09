@@ -1,0 +1,197 @@
+{
+  "briefing_id": "BRF_20260909T145328_1DDF50",
+  "timestamp": "2026-09-09T14:53:56.261382+00:00",
+  "well_id": "15/9-F-9A",
+  "hazard": "stuck_pipe",
+  "risk_score_from_module3": 0.8,
+  "risk_level_from_module3": "CRITICAL",
+  "measured_depth_m": null,
+  "wilson_ci": {
+    "lower": 0.4902,
+    "center": 0.8,
+    "upper": 0.9433,
+    "n_trials": 10,
+    "n_successes": 8,
+    "method": "wilson",
+    "alpha": 0.05
+  },
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-1.5-flash",
+  "raw_llm_output": "For Well 15/9-F-9A, the risk of STUCK PIPE is currently CRITICAL, with a risk score of 0.8. The 95% confidence interval for this score is [0.4902, 0.9433], and 8 out of 10 matched offset wells show similar patterns. However, the detailed evidence snippets provided from top analog wells primarily describe partial mud losses [SNIPPET_SYNTH-W10_2010-01-28_MUD_LOSS] [SNIPPET_SYNTH-W22_2010-10-31_MUD_LOSS] [SNIPPET_SYNTH-W28_2011-03-18_MUD_LOSS] [SNIPPET_SYNTH-W22_2010-03-05_MUD_LOSS] [SNIPPET_SYNTH-W12_2011-01-29_MUD_LOSS] and one gas influx event [SNIPPET_SYNTH-W28_2010-11-18_KICK], rather than direct stuck pipe incidents. Specifically, Well SYNTH-W10 reported a 39.0 bbl pit drop due to partial mud loss at 1519.4m [SNIPPET_SYNTH-W10_2010-01-28_MUD_LOSS], and Well SYNTH-W22 experienced partial mud losses at 4176.7m with a 66.0 bbl pit drop [SNIPPET_SYNTH-W22_2010-10-31_MUD_LOSS] and at 1701.8m with a 132.0 bbl pit drop [SNIPPET_SYNTH-W22_2010-03-05_MUD_LOSS]. An actionable alert for STUCK PIPE is NOT YET active, but monitoring continues.",
+  "briefing_sentences": [
+    {
+      "text": "For Well 15/9-F-9A, the risk of STUCK PIPE is currently CRITICAL, with a risk score of 0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "8.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "The 95% confidence interval for this score is [0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "4902, 0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "9433], and 8 out of 10 matched offset wells show similar patterns.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "However, the detailed evidence snippets provided from top analog wells primarily describe partial mud losses and one gas influx event, rather than direct stuck pipe incidents.",
+      "citations": [
+        "SNIPPET_SYNTH-W10_2010-01-28_MUD_LOSS",
+        "SNIPPET_SYNTH-W22_2010-10-31_MUD_LOSS",
+        "SNIPPET_SYNTH-W28_2011-03-18_MUD_LOSS",
+        "SNIPPET_SYNTH-W22_2010-03-05_MUD_LOSS",
+        "SNIPPET_SYNTH-W12_2011-01-29_MUD_LOSS",
+        "SNIPPET_SYNTH-W28_2010-11-18_KICK"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W10_2010-01-28_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (losses)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W22_2010-10-31_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (losses)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W28_2011-03-18_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (losses)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W22_2010-03-05_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (losses)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W12_2011-01-29_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (losses, partial)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W28_2010-11-18_KICK",
+          "passed": true,
+          "reason": "Citation verified: 3 matching keywords (gas, influx, mud)."
+        }
+      ]
+    },
+    {
+      "text": "Specifically, Well SYNTH-W10 reported a 39.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "0 bbl pit drop due to partial mud loss at 1519.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "4m, and Well SYNTH-W22 experienced partial mud losses at 4176.",
+      "citations": [
+        "SNIPPET_SYNTH-W10_2010-01-28_MUD_LOSS"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W10_2010-01-28_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (losses)."
+        }
+      ]
+    },
+    {
+      "text": "7m with a 66.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "0 bbl pit drop and at 1701.",
+      "citations": [
+        "SNIPPET_SYNTH-W22_2010-10-31_MUD_LOSS"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W22_2010-10-31_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 3 matching keywords (drop, bbl, pit)."
+        }
+      ]
+    },
+    {
+      "text": "8m with a 132.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "0 bbl pit drop.",
+      "citations": [
+        "SNIPPET_SYNTH-W22_2010-03-05_MUD_LOSS"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W22_2010-03-05_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 3 matching keywords (drop, bbl, pit)."
+        }
+      ]
+    },
+    {
+      "text": "An actionable alert for STUCK PIPE is NOT YET active, but monitoring continues.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 14,
+    "sentences_passed": 4,
+    "sentences_failed": 10,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 8,
+  "analog_wells_used": 5
+}

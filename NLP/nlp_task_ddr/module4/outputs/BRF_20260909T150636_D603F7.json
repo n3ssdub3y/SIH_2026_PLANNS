@@ -1,0 +1,131 @@
+{
+  "briefing_id": "BRF_20260909T150636_D603F7",
+  "timestamp": "2026-09-09T15:07:36.987638+00:00",
+  "well_id": "15/9-F-9A",
+  "hazard": "mud_loss",
+  "risk_score_from_module3": 0.6,
+  "risk_level_from_module3": "HIGH",
+  "measured_depth_m": null,
+  "wilson_ci": {
+    "lower": 0.3127,
+    "center": 0.6,
+    "upper": 0.8318,
+    "n_trials": 10,
+    "n_successes": 6,
+    "method": "wilson",
+    "alpha": 0.05
+  },
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-1.5-flash",
+  "raw_llm_output": "For Well 15/9-F-9A, the NWIS-Sentinel system predicts a HIGH risk of MUD LOSS, with a score of 0.6 (95% CI: [0.3127, 0.8318]). Six out of ten similar offset wells showed patterns where mud loss incidents occurred. Five of these analogs experienced partial losses, requiring LCM application to bring losses to background [SNIPPET_SYNTH-W31_2011-07-25_MUD_LOSS][SNIPPET_SYNTH-W28_2010-07-21_MUD_LOSS][SNIPPET_SYNTH-W12_2011-01-29_MUD_LOSS][SNIPPET_SYNTH-W22_2010-07-03_MUD_LOSS][SNIPPET_SYNTH-W36_2010-08-14_MUD_LOSS]. However, the analogs do disagree, as SYNTH-W04 shows routine drilling with no anomalies encountered [SNIPPET_SYNTH-W04_2010-01-10_NONE]. This situation is currently for monitoring only, and an actionable alert is NOT YET triggered.",
+  "briefing_sentences": [
+    {
+      "text": "For Well 15/9-F-9A, the NWIS-Sentinel system predicts a HIGH risk of MUD LOSS, with a score of 0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "6 (95% CI: [0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "3127, 0.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "8318]).",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Six out of ten similar offset wells showed patterns where mud loss incidents occurred.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Five of these analogs experienced partial losses, requiring LCM application to bring losses to background.",
+      "citations": [
+        "SNIPPET_SYNTH-W31_2011-07-25_MUD_LOSS",
+        "SNIPPET_SYNTH-W28_2010-07-21_MUD_LOSS",
+        "SNIPPET_SYNTH-W12_2011-01-29_MUD_LOSS",
+        "SNIPPET_SYNTH-W22_2010-07-03_MUD_LOSS",
+        "SNIPPET_SYNTH-W36_2010-08-14_MUD_LOSS"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W31_2011-07-25_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 4 matching keywords (losses, partial, lcm, background)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W28_2010-07-21_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 4 matching keywords (losses, partial, lcm, background)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W12_2011-01-29_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 4 matching keywords (losses, partial, lcm, background)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W22_2010-07-03_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 4 matching keywords (losses, partial, lcm, background)."
+        },
+        {
+          "node_id": "SNIPPET_SYNTH-W36_2010-08-14_MUD_LOSS",
+          "passed": true,
+          "reason": "Citation verified: 4 matching keywords (losses, partial, lcm, background)."
+        }
+      ]
+    },
+    {
+      "text": "However, the analogs do disagree, as SYNTH-W04 shows routine drilling with no anomalies encountered.",
+      "citations": [
+        "SNIPPET_SYNTH-W04_2010-01-10_NONE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W04_2010-01-10_NONE",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (anomalies)."
+        }
+      ]
+    },
+    {
+      "text": "This situation is currently for monitoring only, and an actionable alert is NOT YET triggered.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 8,
+    "sentences_passed": 2,
+    "sentences_failed": 6,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 8,
+  "analog_wells_used": 5
+}

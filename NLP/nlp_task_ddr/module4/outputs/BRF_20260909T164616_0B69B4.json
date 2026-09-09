@@ -1,0 +1,63 @@
+{
+  "briefing_id": "BRF_20260909T164616_0B69B4",
+  "timestamp": "2026-09-09T16:46:40.955233+00:00",
+  "well_id": "7/1-1",
+  "hazard": "mud_loss",
+  "risk_score_from_module3": null,
+  "risk_level_from_module3": "UNKNOWN",
+  "measured_depth_m": null,
+  "wilson_ci": {},
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-1.5-flash",
+  "raw_llm_output": "For Well 7/1-1, the current risk level for mud loss is UNKNOWN. The system reports no specific risk score, confidence interval, or current depth for this assessment. No analog offset wells currently show similar patterns related to mud loss events, resulting in an N/A match count. However, the top analog wells identified by AHP geospatial similarity are 16/7-4, 15/9-15, 16/7-6, and 15/9-17. No actionable alert has been issued at this time; the system remains in monitoring mode.",
+  "briefing_sentences": [
+    {
+      "text": "For Well 7/1-1, the current risk level for mud loss is UNKNOWN.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "The system reports no specific risk score, confidence interval, or current depth for this assessment.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "No analog offset wells currently show similar patterns related to mud loss events, resulting in an N/A match count.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "However, the top analog wells identified by AHP geospatial similarity are 16/7-4, 15/9-15, 16/7-6, and 15/9-17.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "No actionable alert has been issued at this time; the system remains in monitoring mode.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 0,
+    "sentences_failed": 5,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 0,
+  "analog_wells_used": 5
+}
