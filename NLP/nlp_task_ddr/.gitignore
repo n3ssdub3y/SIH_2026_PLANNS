@@ -1,4 +1,4 @@
-﻿# Virtual Environment
+# Virtual Environment
 venv/
 env/
 ENV/
@@ -15,3 +15,6 @@ __pycache__/
 .vscode/
 .idea/
 Thumbs.db
+
+# Runtime logs
+logs/
