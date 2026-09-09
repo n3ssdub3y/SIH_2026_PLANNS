@@ -3,10 +3,12 @@ NWIS-Sentinel | SIH 2026 | PS SIH26121
 Master Orchestrator: Run All Modules Simultaneously
 
 Launches and supervises:
-  - Module 2: Geospatial & Offset Similarity Engine (Flask @ port 5001)
-  - Module 3 Simulator: Real-Time Telemetry Replay (FastAPI/Uvicorn @ port 5002)
-  - Module 3 Anomaly Server: Risk Prediction & Monitor (FastAPI/Uvicorn @ port 5003)
-  - Module 4: Knowledge Graph, GraphRAG & LLM Briefing Studio (Flask @ port 5004)
+  - Dashboard:           Central Portal (Flask @ port 5000)
+  - Module 2:            Geospatial & Offset Similarity Engine (Flask @ port 5001)
+  - Module 3 Simulator:  Real-Time Telemetry Replay (FastAPI/Uvicorn @ port 5002)
+  - Module 3 Anomaly:    Risk Prediction & Monitor (FastAPI/Uvicorn @ port 5003)
+  - Module 4:            Knowledge Graph, GraphRAG & LLM Briefing Studio (Flask @ port 5004)
+  - Module 5:            Engineering RAG + LLM Agent (Flask @ port 5005)
 
 Usage:
   python run_all_modules.py
@@ -38,6 +40,14 @@ YELLOW = "\033[93m"
 RED    = "\033[91m"
 
 MODULES = [
+    {
+        "id": "dashboard",
+        "name": "Dashboard: Central Portal",
+        "cmd": [PYTHON_EXE, str(BASE_DIR / "dashboard" / "app.py"), "--port", "5000"],
+        "port": 5000,
+        "url": "http://localhost:5000",
+        "description": "BSPWM-style central portal — entry point to all NWIS-Sentinel modules."
+    },
     {
         "id": "module2",
         "name": "Module 2: Geospatial & Offset Similarity Engine",
@@ -102,7 +112,9 @@ def main():
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Update simulator speed if specified
-    MODULES[1]["cmd"][5] = str(args.speed)
+    for m in MODULES:
+        if m["id"] == "module3_sim":
+            m["cmd"][5] = str(args.speed)
 
     print(f"\n{BOLD}{CYAN}{'=' * 75}{RESET}")
     print(f"{BOLD}{CYAN}     NWIS-Sentinel | SIH 2026 | PS SIH26121 | System Orchestrator{RESET}")
@@ -176,6 +188,7 @@ def main():
 
         if not args.no_browser:
             time.sleep(1.0)
+            webbrowser.open("http://localhost:5000")  # Dashboard first
             webbrowser.open("http://localhost:5005")
             webbrowser.open("http://localhost:5004")
             webbrowser.open("http://localhost:5003/monitor")

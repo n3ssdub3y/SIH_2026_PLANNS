@@ -1,13 +1,13 @@
-# NWIS-Sentinel: Modules 1–4 Execution & Integration Guide
+# NWIS-Sentinel: Modules 1–5 & Central Dashboard Integration Guide
 ### SIH 2026 | Problem Statement SIH26121 | Oil India Limited
 
-This directory contains the complete source code, deliverables, datasets, test suites, and web applications for all 4 modules of the NWIS-Sentinel system.
+This directory contains the complete source code, deliverables, datasets, test suites, and web applications for the Central Operations Dashboard and all 5 modules of the NWIS-Sentinel system.
 
 ---
 
 ## ⚡ Instant 1-Click Launch (All Modules Simultaneously)
 
-Run all 4 modules under a single supervisor with live logs:
+Run the Central Dashboard and all modules under a single supervisor with live logs:
 
 ```bash
 python run_all_modules.py
@@ -15,10 +15,12 @@ python run_all_modules.py
 *Or double click `start_all.bat` on Windows.*
 
 ### Active Localhost Services:
+- **Central Operations Dashboard (Terminal/BSPWM Portal):** [`http://localhost:5000`](http://localhost:5000)
 - **Module 2 (Geospatial & Offset Similarity Map):** [`http://localhost:5001`](http://localhost:5001)
 - **Module 3 (Real-Time Telemetry Streaming Server):** [`http://localhost:5002`](http://localhost:5002) (WebSocket: `ws://localhost:5002/ws/telemetry`)
 - **Module 3 (Risk & Anomaly Monitor Dashboard):** [`http://localhost:5003/monitor`](http://localhost:5003/monitor)
 - **Module 4 (Knowledge Graph, GraphRAG & AI Briefing):** [`http://localhost:5004`](http://localhost:5004)
+- **Module 5 (Engineering RAG & Decision Support Agent):** [`http://localhost:5005`](http://localhost:5005)
 
 ---
 
@@ -33,15 +35,21 @@ python run_all_modules.py
    - `python -m pytest module4/ -v` (Module 4 tests - 14 passing)
 4. **Execution:**
    - Launch all modules: `python run_all_modules.py --no-browser`
-   - Individual modules can be run via:
+   - Individual services can be run via:
+     - Dashboard: `python dashboard/app.py --port 5000`
      - Module 2: `python module2/app.py`
      - Module 3 Sim: `python module3/simulator_server.py --port 5002 --speed 5.0`
      - Module 3 Anomaly: `python module3/anomaly_server.py --port 5003 --simulator-url ws://localhost:5002/ws/telemetry`
      - Module 4: `python module4/app.py`
+     - Module 5: `python module5_engineering_agent/app.py --port 5005`
 
 ---
 
 ## 📋 Module Deliverables & Outputs
+
+### Central Operations Dashboard (Port 5000)
+- `dashboard/app.py`: Flask portal server.
+- `dashboard/templates/dashboard.html`: Terminal/BSPWM-themed command center with real-time port health polling.
 
 ### Module 1 — Data Foundation, OCR & NLP Extraction
 - `results/module1_outputs/wells_metadata.json`: 159 wells with trajectory, coordinates, and formation tops.
@@ -65,3 +73,9 @@ python run_all_modules.py
 - `module4/outputs/graph_stats.json`: Graph metrics, degree distributions, and node counts.
 - `module4/templates/module4.html`: Full-screen dark-theme Vis.js canvas with spring distance sliders, hazard filters, and GraphRAG search.
 - `module4/llm_briefing.py`: Google Gemini AI Studio briefing generator with strict anti-hallucination rules and automated `[NODE_ID]` citation verification.
+
+### Module 5 — Engineering RAG & Decision Support Agent (Port 5005)
+- `module5_engineering_agent/app.py`: Flask server with full REST API (`/api/ask`, `/api/scenarios`, `/api/health`).
+- `module5_engineering_agent/templates/module5.html`: Dark glassmorphic engineering console with slide-out scenario selector.
+- `module5_engineering_agent/vector_store/chroma_db/`: Persistent ChromaDB collection containing 2,022 indexed offset event records.
+- `module5_engineering_agent/agent/agent.py`: Engineering decision support agent with automated local synthesis fallback.

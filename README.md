@@ -4,7 +4,7 @@
 
 ---
 
-## ⚡ Quick Start (One Command, All 5 Modules)
+## ⚡ Quick Start (One Command, All Modules + Dashboard)
 
 > **Working directory for ALL commands: `NLP/nlp_task_ddr/`**
 >
@@ -17,14 +17,15 @@ cd NLP/nlp_task_ddr
 # Step 2 — install all dependencies (do this once)
 pip install -r requirements.txt
 
-# Step 3 — launch all 5 modules simultaneously
+# Step 3 — launch central dashboard and all modules simultaneously
 python run_all_modules.py
 ```
 
-That's it. Four interactive browser tabs will open automatically.
+That's it. Five interactive browser tabs will open automatically.
 
-| Module | URL | What You See |
+| Service / Module | URL | What You See |
 |---|---|---|
+| **Central Operations Dashboard** | [http://localhost:5000](http://localhost:5000) | BSPWM/terminal unified portal, system specs, live port monitor & 1-click launchers |
 | **Module 2** — Geospatial Map | [http://localhost:5001](http://localhost:5001) | Leaflet interactive map, 159 wells, AHP hazard rankings |
 | **Module 3** — Live Risk Monitor | [http://localhost:5003/monitor](http://localhost:5003/monitor) | Real-time CUSUM/Z-score alerts, +106.5 m early warning dashboard |
 | **Module 4** — Knowledge Graph & AI Studio | [http://localhost:5004](http://localhost:5004) | 4,037-node Vis.js graph, GraphRAG search, Gemini AI briefings |
@@ -52,6 +53,12 @@ or from PowerShell:
 ## 🛠️ Manual Launch (Separate Terminals)
 
 If you want full control — open separate terminals, all inside `NLP/nlp_task_ddr/`.
+
+**Terminal 0 — Central Operations Dashboard (BSPWM Portal)**
+```bash
+python dashboard/app.py --port 5000
+# → http://localhost:5000
+```
 
 **Terminal 1 — Module 2 (Geospatial & AHP Similarity Map)**
 ```bash
@@ -81,7 +88,7 @@ python module4/app.py
 
 **Terminal 5 — Module 5 (Engineering RAG + LLM Agent)**
 ```bash
-python module5_engineering_agent/app.py
+python module5_engineering_agent/app.py --port 5005
 # → http://localhost:5005
 ```
 
@@ -112,6 +119,9 @@ Expected result: **64 passed**.
 ## 🔌 API Health Check (Quick Sanity Test While Servers Are Running)
 
 ```bash
+# Dashboard — central portal UI
+curl -I "http://localhost:5000"
+
 # Module 2 — analog wells for a given well + hazard
 curl "http://localhost:5001/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=3"
 
@@ -139,7 +149,7 @@ Key libraries used:
 
 | Library | Used In |
 |---|---|
-| `Flask`, `flask-cors` | Module 2, 4 & 5 web servers |
+| `Flask`, `flask-cors` | Dashboard, Module 2, 4 & 5 web servers |
 | `fastapi`, `uvicorn`, `websockets` | Module 3 real-time servers |
 | `networkx` | Module 4 knowledge graph |
 | `sentence-transformers` | Module 4 GraphRAG semantic search |
@@ -156,6 +166,7 @@ Key libraries used:
 
 | Port | Service | Protocol |
 |---|---|---|
+| **5000** | Central Operations Dashboard (BSPWM Portal) | HTTP |
 | **5001** | Module 2 Flask Map Server | HTTP |
 | **5002** | Module 3 Telemetry Simulator | HTTP + WebSocket (`ws://localhost:5002/ws/telemetry`) |
 | **5003** | Module 3 Anomaly & Risk Server | HTTP + WebSocket (`ws://localhost:5003/ws/anomaly`) + Monitor UI |
@@ -169,7 +180,7 @@ Key libraries used:
 Modules 4 and 5 generate AI briefings and decision support using Google Gemini. Both modules also feature an automated **Local Evidence Synthesis Engine** as an offline fallback if no API key is provided. To use live Gemini generation:
 
 **Option A — Enter in the browser UI:**  
-Open [http://localhost:5004](http://localhost:5004) → paste your key in the *API Key* field → click Generate Briefing.
+Open [http://localhost:5004](http://localhost:5004) or [http://localhost:5005](http://localhost:5005) → paste your key in the *API Key* field.
 
 **Option B — Set as environment variable (auto-loads):**
 ```bash
@@ -192,29 +203,33 @@ python run_all_modules.py
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
+║                CENTRAL OPERATIONS DASHBOARD (Port 5000)                  ║
+║      BSPWM / Terminal Command Center · Health Monitor · 1-Click Launch    ║
+╚═════════════════════════════╦════════════════════════════════════════════╝
+                              │
+╔═════════════════════════════╩════════════════════════════════════════════╗
 ║                     DATA FOUNDATION (Module 1)                          ║
 ║  159 wells · 1,959 DDR events (18 token classes) · 16,670 telemetry rows║
 ╚═════════════════════════════╦════════════════════════════════════════════╝
                               │
-            ┌─────────────────┴──────────────────┐
-            ▼                                    ▼
-╔═══════════════════════════╗     ╔══════════════════════════════════════╗
-║  MODULE 2 (Port 5001)     ║     ║  MODULE 3 (Ports 5002 & 5003)        ║
-║  Geospatial & AHP         ║     ║  Real-Time Telemetry & Anomaly       ║
-║  • 5-hazard AHP ranking   ║     ║  • WITSML replay simulator           ║
-║  • 59 formation tops      ║     ║  • CUSUM + Z-score detection         ║
-║  • Leaflet map UI         ║     ║  • Smith-Waterman + Wilson CI        ║
-╚═════════════╦═════════════╝     ║  • +106.48 m early warning           ║
-              │                   ╚═════════════════╦════════════════════╝
-              └─────────────────────────────────────┘
-                                  │
-                                  ▼
+            ┌─────────────────┼──────────────────┐
+            ▼                 ▼                  ▼
+╔═════════════════════╗ ╔═════════════════════╗ ╔══════════════════════════╗
+║ MODULE 2 (Port 5001)║ ║ MODULE 3 (5002/5003)║ ║ MODULE 4 (Port 5004)     ║
+║ Geospatial & AHP    ║ ║ Real-Time Telemetry ║ ║ Knowledge Graph,         ║
+║ • 5-hazard AHP      ║ ║ • WITSML simulator  ║ ║   GraphRAG & Gemini      ║
+║ • 59 formations     ║ ║ • CUSUM / Z-score   ║ ║ • 4,037 nodes            ║
+║ • Leaflet map UI    ║ ║ • +106.5m warning   ║ ║ • AI Briefings           ║
+╚═══════════╦═════════╝ ╚══════════╦══════════╝ ╚════════════╦═════════════╝
+            │                      │                         │
+            └──────────────────────┼─────────────────────────┘
+                                   ▼
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                      MODULE 4 (Port 5004)                               ║
-║  Knowledge Graph + GraphRAG + Gemini AI Briefing Studio                 ║
-║  • 4,037 nodes · 12,392 edges — Vis.js interactive canvas               ║
-║  • Two-stage GraphRAG: AHP pre-filter → semantic retrieval              ║
-║  • Forced-citation AI briefings (immutable risk scores from Module 3)   ║
+║                      MODULE 5 (Port 5005)                               ║
+║           Engineering RAG + LLM Decision Support Agent                   ║
+║  • ChromaDB vector store (2,022 indexed offset event records)            ║
+║  • Multi-turn rig-floor engineering advisor with citations               ║
+║  • 5 one-click realistic drilling crisis scenarios                       ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -230,15 +245,20 @@ SIH_2026_PLANNS/
 │
 └── NLP/nlp_task_ddr/                  ← ALL project code lives here
     ├── requirements.txt               ← pip install -r requirements.txt
-    ├── run_all_modules.py             ← Master launcher (start all 4)
+    ├── run_all_modules.py             ← Master launcher (start dashboard + all 4 modules)
     ├── start_all.bat / start_all.ps1  ← Local launcher scripts
     ├── check_setup.py                 ← Module 1 data integrity check
     ├── final_verify_m2.py             ← Module 2 AHP & outputs check
     │
+    ├── dashboard/                     ← Port 5000 (Central Operations Portal)
+    │   ├── app.py
+    │   ├── README.md
+    │   └── templates/dashboard.html
+    │
     ├── results/
     │   └── module1_outputs/
     │       ├── wells_metadata.json    ← 159 wells
-    │       ├── events.jsonl           ← 1,959 drilling events
+    │       ├── events.jsonl           ← 1,959 daily drilling events
     │       ├── flagged_real_incidents.json
     │       └── telemetry/15_9-F-9A.csv  ← 16,670 rows real Volve MWD
     │
@@ -264,19 +284,30 @@ SIH_2026_PLANNS/
     │       ├── risk_predictions.jsonl ← Live risk scores (grows at runtime)
     │       └── sequence_matches.json
     │
-    └── module4/                       ← Port 5004
-        ├── app.py
-        ├── knowledge_graph.py
-        ├── graph_rag.py
-        ├── llm_briefing.py
-        ├── test_module4.py            ← 14 automated tests
-        ├── templates/
-        │   ├── module4.html
-        │   └── vis-network.min.js     ← Bundled offline (no CDN needed)
-        └── outputs/
-            ├── knowledge_graph.gpickle  ← Pre-built, loads in ~1 sec
-            ├── graph_stats.json
-            └── BRF_*.json               ← Generated briefings (runtime output)
+    ├── module4/                       ← Port 5004
+    │   ├── app.py
+    │   ├── knowledge_graph.py
+    │   ├── graph_rag.py
+    │   ├── llm_briefing.py
+    │   ├── test_module4.py            ← 14 automated tests
+    │   ├── templates/
+    │   │   ├── module4.html
+    │   │   └── vis-network.min.js     ← Bundled offline (no CDN needed)
+    │   └── outputs/
+    │       ├── knowledge_graph.gpickle  ← Pre-built, loads in ~1 sec
+    │       ├── graph_stats.json
+    │       └── BRF_*.json               ← Generated briefings (runtime output)
+    │
+    └── module5_engineering_agent/     ← Port 5005
+        ├── app.py                     ← Flask server
+        ├── README.md                  ← Module 5 documentation
+        ├── templates/module5.html     ← Bespoke engineering console
+        ├── agent/                     ← Hybrid LLM / Local synthesis agent
+        ├── retrieval/                 ← ChromaDB vector store wrapper
+        ├── ingestion/                 ← Data loader for Modules 1 & 2
+        ├── schemas/                   ← Pydantic data schemas
+        └── vector_store/
+            └── chroma_db/             ← 2,022 indexed records
 ```
 
 ---

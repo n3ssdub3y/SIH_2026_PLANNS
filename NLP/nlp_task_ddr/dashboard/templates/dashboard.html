@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NWIS-Sentinel | Dashboard</title>
+  <meta name="description" content="NWIS-Sentinel Central Portal — SIH 2026 PS SIH26121. Access all drilling intelligence modules from one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset ────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Desktop ──────────────────────────────────────────────────── */
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #0d1117;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── BSPWM Top Bar ────────────────────────────────────────────── */
+    .bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 26px;
+      background: #161b22;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      z-index: 100;
+      font-size: 11px;
+      color: #8b949e;
+      gap: 0;
+    }
+
+    .bar-workspaces {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .ws {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+      color: #8b949e;
+      cursor: default;
+      border-radius: 3px;
+      transition: all 0.15s;
+    }
+    .ws.active {
+      background: #21262d;
+      color: #58a6ff;
+      font-weight: 600;
+    }
+    .ws.occupied {
+      color: #c9d1d9;
+    }
+
+    .bar-tag {
+      margin-left: 6px;
+      padding: 1px 8px;
+      background: #21262d;
+      border-radius: 3px;
+      color: #8b949e;
+      font-size: 10px;
+    }
+
+    .bar-center {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: #6e7681;
+      letter-spacing: 0.2px;
+    }
+
+    .bar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+    }
+    .bar-stat { color: #8b949e; }
+    .bar-stat span { color: #c9d1d9; font-weight: 500; }
+    .bar-stat.warn span { color: #f85149; }
+    .bar-stat.ok span { color: #3fb950; }
+
+    /* ── Desktop Canvas Background ───────────────────────────────── */
+    .desktop {
+      position: fixed;
+      inset: 26px 0 0 0;
+      background: #020610;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #matrixCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── Terminal window ──────────────────────────────────────────── */
+    .terminal {
+      position: relative;
+      z-index: 10;
+      width: min(920px, 95vw);
+      background: rgba(3, 8, 18, 0.50); /* 50% transparent */
+      border-radius: 10px;
+      border: 1px solid rgba(0, 229, 255, 0.45);
+      box-shadow:
+        0 28px 90px rgba(0,0,0,0.85),
+        0 0 55px rgba(0, 229, 255, 0.22),
+        0 0 0 1px rgba(0, 229, 255, 0.12) inset;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Title bar */
+    .titlebar {
+      height: 38px;
+      background: rgba(8, 20, 36, 0.50);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 8px;
+      position: relative;
+    }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .dot:hover { filter: brightness(1.3); }
+    .dot.close  { background: #ff5f56; }
+    .dot.min    { background: #ffbd2e; }
+    .dot.max    { background: #27c93f; }
+    .titlebar-text {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      font-size: 11px;
+      color: #6e7681;
+      letter-spacing: 0.3px;
+    }
+    .titlebar-text span { color: #8b949e; }
+
+    /* Terminal body */
+    .term-body {
+      padding: 28px 36px 32px;
+    }
+
+    /* ── Neofetch section ──────────────────────────────────────────── */
+    .neofetch {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .ascii-art {
+      font-size: 10.5px;
+      line-height: 1.35;
+      color: #58a6ff;
+      white-space: pre;
+      flex-shrink: 0;
+      user-select: none;
+      text-shadow: 0 0 12px rgba(88,166,255,0.4);
+    }
+
+    .sysinfo {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding-top: 4px;
+    }
+
+    .sysinfo-user {
+      font-size: 14px;
+      font-weight: 600;
+      color: #58a6ff;
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+    }
+    .sysinfo-user::after {
+      content: '';
+      display: block;
+      margin-top: 4px;
+      height: 1px;
+      width: 100%;
+      background: #30363d;
+    }
+
+    .sysinfo-row {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .si-key {
+      color: #58a6ff;
+      font-weight: 600;
+      min-width: 80px;
+    }
+    .si-val {
+      color: #c9d1d9;
+    }
+
+    .color-blocks {
+      display: flex;
+      gap: 3px;
+      margin-top: 10px;
+    }
+    .cb {
+      width: 16px; height: 16px;
+      border-radius: 2px;
+    }
+
+    /* ── Prompt line ─────────────────────────────────────────────── */
+    .prompt-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      font-size: 13px;
+    }
+    .prompt-user { color: #58a6ff; font-weight: 500; }
+    .prompt-path { color: #c9d1d9; }
+    .prompt-sym  { color: #c9d1d9; }
+    .prompt-cmd  { color: #e6edf3; }
+    .cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: #c9d1d9;
+      border-radius: 1px;
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 1px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ── Module cards grid ───────────────────────────────────────── */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .module-card {
+      background: rgba(13, 17, 23, 0.70);
+      border: 1px solid rgba(48, 54, 61, 0.85);
+      border-radius: 6px;
+      padding: 14px 16px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .module-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(88,166,255,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .module-card:hover {
+      border-color: #58a6ff;
+      background: #161b22;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(88,166,255,0.15);
+    }
+    .module-card:hover::before { opacity: 1; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .card-icon {
+      font-size: 13px;
+      color: #58a6ff;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .card-icon.dir  { color: #58a6ff; }
+    .card-icon.file { color: #3fb950; }
+    .card-icon.exec { color: #d2a8ff; }
+    .card-icon.sock { color: #ffa657; }
+
+    .card-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e6edf3;
+      letter-spacing: 0.2px;
+      word-break: break-all;
+      line-height: 1.3;
+    }
+    .card-name span {
+      color: #58a6ff;
+    }
+
+    .card-desc {
+      font-size: 10.5px;
+      color: #6e7681;
+      line-height: 1.6;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 10px;
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: 1px solid;
+    }
+    .badge-blue   { color: #58a6ff; border-color: rgba(88,166,255,0.35); background: rgba(88,166,255,0.08); }
+    .badge-green  { color: #3fb950; border-color: rgba(63,185,80,0.35);  background: rgba(63,185,80,0.08);  }
+    .badge-purple { color: #d2a8ff; border-color: rgba(210,168,255,0.35); background: rgba(210,168,255,0.08);}
+    .badge-orange { color: #ffa657; border-color: rgba(255,166,87,0.35); background: rgba(255,166,87,0.08); }
+
+    .card-port {
+      position: absolute;
+      top: 10px; right: 12px;
+      font-size: 9px;
+      color: #484f58;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Hover glow per card ────────────────────────────────────── */
+    .mc-m2:hover { border-color: #58a6ff; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(88,166,255,0.2); }
+    .mc-m3:hover { border-color: #3fb950; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(63,185,80,0.2); }
+    .mc-m4:hover { border-color: #d2a8ff; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(210,168,255,0.2); }
+    .mc-m5:hover { border-color: #ffa657; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,166,87,0.2); }
+
+    /* ── Typing animation on prompt ─────────────────────────────── */
+    .prompt-cmd {
+      overflow: hidden;
+      white-space: nowrap;
+      animation: typing 0.8s steps(8, end) 0.4s both;
+    }
+    @keyframes typing {
+      from { width: 0; }
+      to   { width: auto; }
+    }
+
+    /* Cards fade in staggered */
+    .module-card {
+      opacity: 0;
+      animation: cardIn 0.4s ease both;
+    }
+    .module-card:nth-child(1) { animation-delay: 0.9s; }
+    .module-card:nth-child(2) { animation-delay: 1.05s; }
+    .module-card:nth-child(3) { animation-delay: 1.2s; }
+    .module-card:nth-child(4) { animation-delay: 1.35s; }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Live clock */
+    #clock { transition: color 0.3s; }
+
+    /* ── Footer status line ─────────────────────────────────────── */
+    .status-line {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #484f58;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #3fb950;
+      box-shadow: 0 0 6px #3fb950;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .modules-grid { grid-template-columns: 1fr 1fr; }
+      .neofetch { flex-direction: column; gap: 16px; }
+      .term-body { padding: 18px 20px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── BSPWM Top Bar ──────────────────────────────────────────────── -->
+<div class="bar">
+  <div class="bar-workspaces">
+    <div class="ws active">1</div>
+    <div class="ws occupied">2</div>
+    <div class="ws">3</div>
+    <div class="ws">4</div>
+    <div class="ws">5</div>
+  </div>
+  <div class="bar-tag">[bspwm]</div>
+
+  <div class="bar-center" id="clock">Thu Sep 10, 03:14 AM</div>
+
+  <div class="bar-right">
+    <div class="bar-stat ok" style="cursor:pointer;user-select:none;" onclick="toggleRain()" title="Toggle Matrix Binary Stream">MATRIX: <span id="matrixState">STREAMING</span></div>
+    <div class="bar-stat ok">CPU: <span id="cpuStat">4%</span></div>
+    <div class="bar-stat ok">RAM: <span id="ramStat">2.1G</span></div>
+    <div class="bar-stat" id="netStat">NET: <span>↑↓</span></div>
+  </div>
+</div>
+
+<!-- ── Desktop ────────────────────────────────────────────────────── -->
+<div class="desktop">
+
+  <!-- ── Matrix Binary Rain Background (0s & 1s) ────────────────────── -->
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- ── Terminal Window ──────────────────────────────────────────── -->
+  <div class="terminal">
+
+    <!-- Titlebar -->
+    <div class="titlebar">
+      <div class="dot close"  title="Close"   onclick="window.close()"></div>
+      <div class="dot min"    title="Minimize"></div>
+      <div class="dot max"    title="Maximize"></div>
+      <div class="titlebar-text">alacritty — <span>nwis@sentinel:~/system</span></div>
+    </div>
+
+    <!-- Body -->
+    <div class="term-body">
+
+      <!-- Neofetch -->
+      <div class="neofetch">
+
+        <!-- ASCII art logo -->
+        <div class="ascii-art" id="ascii">        /\
+       /  \
+      / /\ \
+     / /  \ \
+    / / /\ \ \
+   / / /  \ \ \
+  / / / /\ \ \ \
+ /_/_/  \/_/\/_/
+  NWIS
+SENTINEL</div>
+
+        <!-- System info -->
+        <div class="sysinfo">
+          <div class="sysinfo-user">nwis@sentinel</div>
+
+          <div class="sysinfo-row"><span class="si-key">Platform</span><span class="si-val">NWIS-Sentinel x86_64</span></div>
+          <div class="sysinfo-row"><span class="si-key">Project</span> <span class="si-val">SIH 2026 — PS SIH26121</span></div>
+          <div class="sysinfo-row"><span class="si-key">Partner</span> <span class="si-val">Oil India Limited</span></div>
+          <div class="sysinfo-row"><span class="si-key">Stack</span>   <span class="si-val">Flask · FastAPI · Gemini · ChromaDB</span></div>
+          <div class="sysinfo-row"><span class="si-key">Wells</span>   <span class="si-val">159 wells · Volve + Synthetic</span></div>
+          <div class="sysinfo-row"><span class="si-key">Modules</span><span class="si-val">4 active (5001 – 5005)</span></div>
+          <div class="sysinfo-row"><span class="si-key">Status</span> <span class="si-val" id="statusVal">● All systems operational</span></div>
+
+          <div class="color-blocks">
+            <div class="cb" style="background:#161b22;border:1px solid #30363d;"></div>
+            <div class="cb" style="background:#21262d;"></div>
+            <div class="cb" style="background:#58a6ff;"></div>
+            <div class="cb" style="background:#3fb950;"></div>
+            <div class="cb" style="background:#d2a8ff;"></div>
+            <div class="cb" style="background:#ffa657;"></div>
+            <div class="cb" style="background:#f85149;"></div>
+            <div class="cb" style="background:#c9d1d9;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prompt -->
+      <div class="prompt-line">
+        <span class="prompt-user">nwis@sentinel</span>
+        <span class="prompt-path">~/system</span>
+        <span class="prompt-sym">#</span>
+        <span class="prompt-cmd">ls -la</span>
+        <span class="cursor"></span>
+      </div>
+
+      <!-- Module cards -->
+      <div class="modules-grid">
+
+        <!-- Module 2 -->
+        <a class="module-card mc-m2" href="http://localhost:5001" target="_blank" id="card-m2">
+          <div class="card-port">:5001</div>
+          <div class="card-header">
+            <span class="card-icon dir">📁</span>
+            <div class="card-name"><span>module2</span>/</div>
+          </div>
+          <div class="card-desc">Geospatial &amp; Offset<br>Similarity Engine.</div>
+          <div class="card-badge badge-blue">● Leaflet · AHP · 159 Wells</div>
+        </a>
+
+        <!-- Module 3 -->
+        <a class="module-card mc-m3" href="http://localhost:5003/monitor" target="_blank" id="card-m3">
+          <div class="card-port">:5003</div>
+          <div class="card-header">
+            <span class="card-icon file">📡</span>
+            <div class="card-name"><span>module3</span>.live</div>
+          </div>
+          <div class="card-desc">Real-Time Telemetry<br>&amp; Anomaly Monitor.</div>
+          <div class="card-badge badge-green">● CUSUM · Z-Score · WebSocket</div>
+        </a>
+
+        <!-- Module 4 -->
+        <a class="module-card mc-m4" href="http://localhost:5004" target="_blank" id="card-m4">
+          <div class="card-port">:5004</div>
+          <div class="card-header">
+            <span class="card-icon exec">🕸</span>
+            <div class="card-name"><span>module4</span>.graph</div>
+          </div>
+          <div class="card-desc">Knowledge Graph,<br>GraphRAG &amp; LLM Studio.</div>
+          <div class="card-badge badge-purple">● Vis.js · GraphRAG · Gemini</div>
+        </a>
+
+        <!-- Module 5 -->
+        <a class="module-card mc-m5" href="http://localhost:5005" target="_blank" id="card-m5">
+          <div class="card-port">:5005</div>
+          <div class="card-header">
+            <span class="card-icon sock">🤖</span>
+            <div class="card-name"><span>module5</span>.agent</div>
+          </div>
+          <div class="card-desc">Engineering RAG<br>Decision Support Agent.</div>
+          <div class="card-badge badge-orange">● ChromaDB · LLM · Scenarios</div>
+        </a>
+
+      </div>
+
+      <!-- Status line -->
+      <div class="status-line">
+        <div class="status-dot"></div>
+        <span>4 modules indexed · Use Ctrl+C in orchestrator to shut down · Port range 5001–5005</span>
+      </div>
+
+    </div><!-- /term-body -->
+  </div><!-- /terminal -->
+
+</div><!-- /desktop -->
+
+<script>
+  /* ── Live clock ─────────────────────────────────────────────────── */
+  function updateClock() {
+    const now = new Date();
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = days[now.getDay()];
+    const m = months[now.getMonth()];
+    const dd = now.getDate();
+    let h = now.getHours();
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('clock').textContent = `${d} ${m} ${dd}, ${h}:${mm} ${ampm}`;
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+
+  /* ── Simulated CPU / RAM ─────────────────────────────────────────── */
+  function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+  function updateStats() {
+    const cpu = randInt(2, 18);
+    const ram = (randInt(18, 32) / 10).toFixed(1);
+    document.getElementById('cpuStat').textContent = cpu + '%';
+    document.getElementById('ramStat').textContent = ram + 'G';
+    const cpuEl = document.getElementById('cpuStat').parentElement;
+    cpuEl.className = 'bar-stat ' + (cpu > 12 ? 'warn' : 'ok');
+  }
+  setInterval(updateStats, 3000);
+
+  /* ── Health check – ping each module port ────────────────────────── */
+  async function checkHealth() {
+    const modules = [
+      { id: 'card-m2', url: 'http://localhost:5001', port: 5001 },
+      { id: 'card-m3', url: 'http://localhost:5003/monitor', port: 5003 },
+      { id: 'card-m4', url: 'http://localhost:5004', port: 5004 },
+      { id: 'card-m5', url: 'http://localhost:5005', port: 5005 },
+    ];
+    let allUp = true;
+    for (const mod of modules) {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 800);
+        const r = await fetch(mod.url, { signal: ctrl.signal, mode: 'no-cors' });
+        clearTimeout(t);
+        // no-cors succeeds = port is alive
+        const card = document.getElementById(mod.id);
+        if (card) card.style.opacity = '1';
+      } catch (e) {
+        allUp = false;
+        const card = document.getElementById(mod.id);
+        if (card) {
+          card.style.opacity = '0.55';
+          card.style.borderColor = '#21262d';
+        }
+      }
+    }
+    const sv = document.getElementById('statusVal');
+    if (sv) {
+      sv.textContent = allUp
+        ? '● All systems operational'
+        : '⚠ Some modules offline — run run_all_modules.py';
+      sv.style.color = allUp ? '#3fb950' : '#ffa657';
+    }
+  }
+  // Run after cards animate in
+  setTimeout(checkHealth, 2000);
+  setInterval(checkHealth, 15000);
+
+  /* ── ASCII art typing effect ─────────────────────────────────────── */
+  const asciiLines = [
+    "        /\\",
+    "       /  \\",
+    "      / /\\ \\",
+    "     / /  \\ \\",
+    "    / / /\\ \\ \\",
+    "   / / /  \\ \\ \\",
+    "  / / / /\\ \\ \\ \\",
+    " /_/_/  \\/_/\\/_/",
+    "   NWIS",
+    " SENTINEL"
+  ];
+  let lineIdx = 0;
+  const asciiEl = document.getElementById('ascii');
+  asciiEl.textContent = '';
+  function typeLine() {
+    if (lineIdx < asciiLines.length) {
+      asciiEl.textContent += asciiLines[lineIdx] + '\n';
+      lineIdx++;
+      setTimeout(typeLine, 55);
+    }
+  }
+  setTimeout(typeLine, 100);
+
+  /* ── Multi-Layer Cyan Glitch & Hallucinating Binary Rain Engine ───── */
+  const mCanvas = document.getElementById('matrixCanvas');
+  const mCtx = mCanvas.getContext('2d');
+  let mWidth = 0, mHeight = 0;
+  let isRainActive = true;
+  let animFrameId = null;
+  let frameCount = 0;
+
+  // 4 parallax depth layers including out-of-focus bokeh layer from reference image
+  // Speeds tuned down to 30 scale for an ultra-calm, hypnotic stream
+  const rainLayers = [
+    {
+      name: 'bokeh', // Out-of-focus, dreamy blurred large digits (like right side of image)
+      fontSize: 48,
+      speedMin: 0.6,
+      speedMax: 1.2,
+      opacity: 0.40,
+      color: '#0891b2',
+      headColor: '#67e8f9',
+      density: 0.12,
+      glow: 28,
+      blur: true,
+      columns: []
+    },
+    {
+      name: 'background', // Fine dense cyan code matrix
+      fontSize: 12,
+      speedMin: 0.38,
+      speedMax: 0.8,
+      opacity: 0.40,
+      color: '#0284c7',
+      headColor: '#38bdf8',
+      density: 0.95,
+      glow: 0,
+      columns: []
+    },
+    {
+      name: 'midground', // Classic vibrant cyan rain
+      fontSize: 20,
+      speedMin: 0.8,
+      speedMax: 1.8,
+      opacity: 0.80,
+      color: '#06b6d4',
+      headColor: '#e0f7fa',
+      density: 0.50,
+      glow: 10,
+      columns: []
+    },
+    {
+      name: 'foreground', // Razor-sharp electric neon cyan with bright ice-white glowing heads
+      fontSize: 34,
+      speedMin: 1.5,
+      speedMax: 3.0,
+      opacity: 0.98,
+      color: '#00f0ff',
+      headColor: '#ffffff',
+      density: 0.26,
+      glow: 20,
+      columns: []
+    }
+  ];
+
+  function resizeMatrix() {
+    mWidth = mCanvas.width = window.innerWidth;
+    mHeight = mCanvas.height = window.innerHeight - 26; // minus top bar
+    initRainColumns();
+  }
+
+  function initRainColumns() {
+    rainLayers.forEach(layer => {
+      const colWidth = layer.fontSize * 1.25;
+      const count = Math.max(6, Math.floor((mWidth / colWidth) * layer.density));
+      const step = mWidth / count;
+      layer.columns = [];
+
+      for (let i = 0; i < count; i++) {
+        const streamLength = Math.floor(10 + Math.random() * 26);
+        const bits = [];
+        for (let b = 0; b < streamLength; b++) {
+          bits.push(Math.random() > 0.5 ? '1' : '0');
+        }
+
+        layer.columns.push({
+          x: i * step + (Math.random() * 8 - 4),
+          y: Math.random() * -mHeight * 1.6, // stagger entrance above screen
+          speed: layer.speedMin + Math.random() * (layer.speedMax - layer.speedMin),
+          length: streamLength,
+          bits: bits,
+          flipTimer: Math.floor(Math.random() * 10)
+        });
+      }
+    });
+  }
+
+  function renderMatrixRain() {
+    if (!isRainActive) return;
+    frameCount++;
+
+    // Deep void trailing persistence with dark cyan tint
+    mCtx.fillStyle = 'rgba(2, 6, 16, 0.18)';
+    mCtx.fillRect(0, 0, mWidth, mHeight);
+
+    // ── Render 4 depth layers of falling 0s & 1s ──────────────────────
+    rainLayers.forEach(layer => {
+      mCtx.font = `bold ${layer.fontSize}px "JetBrains Mono", monospace`;
+
+      layer.columns.forEach(col => {
+        col.y += col.speed;
+
+        // Reset when stream exits screen bottom
+        if (col.y - (col.length * layer.fontSize * 1.15) > mHeight) {
+          col.y = -Math.random() * layer.fontSize * 12;
+          col.speed = layer.speedMin + Math.random() * (layer.speedMax - layer.speedMin);
+          col.length = Math.floor(10 + Math.random() * 26);
+          col.bits = [];
+          for (let b = 0; b < col.length; b++) {
+            col.bits.push(Math.random() > 0.5 ? '1' : '0');
+          }
+        }
+
+        // Bit mutation / flickering
+        col.flipTimer++;
+        if (col.flipTimer % 4 === 0) {
+          const randIdx = Math.floor(Math.random() * col.bits.length);
+          col.bits[randIdx] = col.bits[randIdx] === '0' ? '1' : '0';
+        }
+
+        // Draw vertical binary stream
+        for (let i = 0; i < col.length; i++) {
+          const charY = col.y - (i * layer.fontSize * 1.12);
+          if (charY < -layer.fontSize || charY > mHeight + layer.fontSize) continue;
+
+          const bit = col.bits[i] || (i % 2 === 0 ? '1' : '0');
+
+          if (i === 0) {
+            // Bright Ice-White & Cyan Glowing Head
+            mCtx.fillStyle = layer.headColor;
+            mCtx.globalAlpha = 1.0;
+            if (layer.glow > 0) {
+              mCtx.shadowColor = '#00f0ff';
+              mCtx.shadowBlur = layer.glow;
+            }
+            mCtx.fillText(bit, col.x, charY);
+            mCtx.shadowBlur = 0;
+          } else {
+            // Fading Cyan/Teal Trail
+            const fade = Math.pow(1 - (i / col.length), 1.15);
+            mCtx.fillStyle = layer.color;
+            mCtx.globalAlpha = fade * layer.opacity;
+
+            if (layer.blur) {
+              mCtx.shadowColor = '#00e5ff';
+              mCtx.shadowBlur = layer.glow;
+              mCtx.fillText(bit, col.x, charY);
+              mCtx.shadowBlur = 0;
+            } else {
+              mCtx.fillText(bit, col.x, charY);
+            }
+          }
+        }
+      });
+    });
+
+    mCtx.globalAlpha = 1.0;
+
+    // ── Hallucinating Glitch & CRT Interference Lines ─────────────────
+    // 1. Subtle horizontal digital scanlines / static streaks
+    if (Math.random() < 0.45) {
+      const numLines = Math.floor(1 + Math.random() * 4);
+      for (let s = 0; s < numLines; s++) {
+        const lineY = Math.random() * mHeight;
+        const lineH = Math.random() > 0.8 ? 2 : 1;
+        const lineW = Math.random() * mWidth * 0.8;
+        const lineX = Math.random() * (mWidth - lineW);
+        mCtx.fillStyle = Math.random() > 0.6 ? 'rgba(0, 240, 255, 0.18)' : 'rgba(56, 189, 248, 0.10)';
+        mCtx.fillRect(lineX, lineY, lineW, lineH);
+      }
+    }
+
+    // 2. Hallucinatory CRT Glitch Slice Displacement (every 50-80 frames)
+    if (frameCount % Math.floor(45 + Math.random() * 35) === 0) {
+      const sliceY = Math.random() * (mHeight - 40);
+      const sliceH = Math.floor(6 + Math.random() * 26);
+      const shiftX = Math.floor((Math.random() - 0.5) * 18);
+      try {
+        mCtx.drawImage(mCanvas, 0, sliceY, mWidth, sliceH, shiftX, sliceY, mWidth, sliceH);
+        // Cyan ghosting artifact
+        mCtx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+        mCtx.fillRect(0, sliceY, mWidth, sliceH);
+      } catch (e) {}
+    }
+
+    animFrameId = requestAnimationFrame(renderMatrixRain);
+  }
+
+  function toggleRain() {
+    isRainActive = !isRainActive;
+    const stateEl = document.getElementById('matrixState');
+    if (stateEl) {
+      stateEl.textContent = isRainActive ? 'CYAN STREAMING' : 'PAUSED';
+      stateEl.parentElement.className = 'bar-stat ' + (isRainActive ? 'ok' : 'warn');
+    }
+    if (isRainActive) {
+      renderMatrixRain();
+    } else {
+      cancelAnimationFrame(animFrameId);
+    }
+  }
+
+  window.addEventListener('resize', resizeMatrix);
+  resizeMatrix();
+  renderMatrixRain();
+</script>
+
+</body>
+</html>
