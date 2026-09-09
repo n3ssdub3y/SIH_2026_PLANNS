@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NWIS-Sentinel | Module 5 — Engineering RAG + LLM Agent</title>
+  <meta name="description" content="NWIS-Sentinel Module 5: Evidence-grounded drilling engineering decision support agent powered by Gemini and ChromaDB." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Design Tokens (Exact Match to Modules 2, 3, 4) ───────────────── */
+    :root {
+      --bg:          #050a14;
+      --bg2:         #0a1220;
+      --bg3:         #0f1a2e;
+      --bg-card:     rgba(15, 26, 46, 0.7);
+      --glass:       rgba(255, 255, 255, 0.04);
+      --glass-hover: rgba(255, 255, 255, 0.08);
+      --glass-active:rgba(59, 158, 255, 0.15);
+      --border:      rgba(255, 255, 255, 0.09);
+      --border-glow: rgba(59, 158, 255, 0.35);
+      --primary:     #3b9eff;
+      --primary-dim: #1e6eb5;
+      --accent:      #00d9a6;
+      --accent2:     #f59e0b;
+      --danger:      #ef4444;
+      --warn:        #f97316;
+      --success:     #22c55e;
+      --text:        #e2eaf8;
+      --text2:       #8ca0c0;
+      --text3:       #546c8c;
+      --mono:        'JetBrains Mono', monospace;
+      --sans:        'Inter', sans-serif;
+      --radius:      12px;
+      --radius-lg:   18px;
+      --shadow:      0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px;
+      background: linear-gradient(90deg, rgba(10,18,32,0.98) 0%, rgba(15,26,46,0.95) 100%);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 30;
+    }
+    .logo-box { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 16px rgba(59,158,255,0.35);
+    }
+    .logo-text { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: 0.3px; }
+    .logo-sub  { font-size: 11px; color: var(--text2); font-weight: 400; }
+    .module-badge {
+      padding: 4px 12px;
+      background: linear-gradient(135deg, rgba(59,158,255,0.2), rgba(0,217,166,0.12));
+      border: 1px solid rgba(59,158,255,0.3);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+    }
+    .scenario-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: linear-gradient(135deg, rgba(59,158,255,0.15), rgba(0,217,166,0.1));
+      border: 1px solid rgba(59,158,255,0.4);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .scenario-toggle-btn:hover {
+      background: linear-gradient(135deg, rgba(59,158,255,0.25), rgba(0,217,166,0.2));
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(59,158,255,0.3);
+    }
+    .header-spacer { flex: 1; }
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--text2);
+      background: rgba(0,217,166,0.08);
+      border: 1px solid rgba(0,217,166,0.25);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ── Main Layout ─────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      overflow: hidden;
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* ── Custom Scenario Selection Flyout Modal/Panel ───────────────── */
+    .scenario-modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 10, 20, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 24px;
+      animation: fadeIn 0.15s ease-out;
+    }
+    .scenario-modal-overlay.open {
+      display: flex;
+    }
+    .scenario-modal-card {
+      width: 580px;
+      max-height: 90vh;
+      background: var(--bg2);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.8), 0 0 24px rgba(59,158,255,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-close-btn {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .modal-close-btn:hover {
+      background: rgba(239,68,68,0.2);
+      border-color: var(--danger);
+      color: #fff;
+    }
+    .scenario-list {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .scenario-card-item {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .scenario-card-item:hover {
+      background: var(--glass-hover);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .scenario-card-item.selected {
+      background: rgba(59,158,255,0.12);
+      border-color: var(--primary);
+      box-shadow: 0 0 16px rgba(59,158,255,0.25);
+    }
+    .scenario-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .scenario-card-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scenario-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+    .badge-stuck { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+    .badge-loss  { background: rgba(249,115,22,0.2); color: #fb923c; border: 1px solid rgba(249,115,22,0.4); }
+    .badge-kick  { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+    .badge-spike { background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); }
+    .badge-plan  { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.4); }
+
+    .scenario-card-desc {
+      font-size: 11.5px;
+      color: var(--text2);
+      line-height: 1.45;
+    }
+    .scenario-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text3);
+      padding-top: 4px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .scenario-card-meta span strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── Left Panel (Drilling Situation Console) ─────────────────────── */
+    .left-panel {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 18px 20px;
+      gap: 16px;
+    }
+
+    /* Active Scenario Display Trigger Box */
+    .scenario-trigger-box {
+      background: linear-gradient(135deg, rgba(15,26,46,0.95), rgba(10,18,32,0.95));
+      border: 1px solid rgba(59,158,255,0.3);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+    .scenario-trigger-box:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 16px rgba(59,158,255,0.25);
+      transform: translateY(-1px);
+    }
+    .st-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .st-icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(59,158,255,0.2), rgba(0,217,166,0.15));
+      border: 1px solid rgba(59,158,255,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .st-sub { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; }
+    .st-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .st-btn {
+      padding: 6px 12px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+    .section-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 6px;
+    }
+
+    /* Form Fields */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      display: flex;
+      justify-content: space-between;
+    }
+    .field-unit {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: var(--mono);
+    }
+    .field-input {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12.5px;
+      outline: none;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .field-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59,158,255,0.2);
+    }
+
+    /* Hazard Pills */
+    .hazard-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .hazard-pill {
+      padding: 6px 11px;
+      border-radius: 16px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+    .hazard-pill:hover {
+      background: var(--glass-hover);
+      color: var(--text);
+    }
+    .hazard-pill.active {
+      background: rgba(239,68,68,0.2);
+      border-color: var(--danger);
+      color: #ff8888;
+      box-shadow: 0 0 10px rgba(239,68,68,0.25);
+    }
+    .hazard-pill.active[data-hazard="mud_loss"] {
+      background: rgba(249,115,22,0.2);
+      border-color: var(--warn);
+      color: #ffaa66;
+      box-shadow: 0 0 10px rgba(249,115,22,0.25);
+    }
+    .hazard-pill.active[data-hazard="none"] {
+      background: rgba(34,197,94,0.2);
+      border-color: var(--success);
+      color: #88ffaa;
+      box-shadow: 0 0 10px rgba(34,197,94,0.25);
+    }
+    .hazard-pill.active[data-hazard="overpressure"] {
+      background: rgba(239,68,68,0.2);
+      border-color: var(--danger);
+      color: #ff8888;
+      box-shadow: 0 0 10px rgba(239,68,68,0.25);
+    }
+    .hazard-pill.active[data-hazard="torque_spike"] {
+      background: rgba(168,85,247,0.2);
+      border-color: #a855f7;
+      color: #d8b4fe;
+      box-shadow: 0 0 10px rgba(168,85,247,0.25);
+    }
+
+    /* Timeline Sequence */
+    .timeline-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      min-height: 40px;
+      padding: 8px 10px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .timeline-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,158,255,0.15);
+      border: 1px solid rgba(59,158,255,0.35);
+      color: var(--primary);
+      padding: 4px 9px;
+      border-radius: 12px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+    .timeline-chip .chip-remove {
+      cursor: pointer;
+      color: var(--text3);
+      font-size: 13px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .timeline-chip .chip-remove:hover { color: var(--danger); }
+    .timeline-input {
+      flex: 1;
+      min-width: 110px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 11px;
+      font-family: var(--mono);
+    }
+
+    /* Analog Wells */
+    .analogs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .analog-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11.5px;
+    }
+    .analog-id {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .analog-tag {
+      font-size: 10.5px;
+      color: var(--text3);
+    }
+
+    /* ── Right Panel (Chat & Reasoning Studio) ───────────────────────── */
+    .right-panel {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Suggested Prompts Bar */
+    .prompts-bar {
+      padding: 12px 24px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .prompts-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      white-space: nowrap;
+    }
+    .prompt-chip {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .prompt-chip:hover {
+      background: var(--glass-hover);
+      border-color: var(--primary);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    /* Chat Messages Stream */
+    .chat-stream {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .msg-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 90%;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .msg-group.user { align-self: flex-end; }
+    .msg-group.agent { align-self: flex-start; max-width: 95%; }
+    .msg-sender {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .msg-group.user .msg-sender { justify-content: flex-end; }
+    .msg-bubble-user {
+      background: linear-gradient(135deg, rgba(59,158,255,0.22), rgba(59,158,255,0.08));
+      border: 1px solid rgba(59,158,255,0.35);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 16px 16px 4px 16px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .agent-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 16px 4px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow);
+      border-left: 3px solid var(--accent);
+    }
+    .agent-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .agent-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text2);
+    }
+    .uncertainty-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .uncertainty-low { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .uncertainty-med { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .uncertainty-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+    .agent-body {
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: #e5edf8;
+      white-space: pre-wrap;
+    }
+    .agent-body strong { color: #ffffff; font-weight: 600; }
+
+    /* Citations Bar */
+    .citations-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .citations-header {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .citation-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .citation-chip {
+      background: rgba(0,217,166,0.1);
+      border: 1px solid rgba(0,217,166,0.3);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 500;
+    }
+    .evidence-toggle {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+    }
+    .evidence-toggle:hover { text-decoration: underline; }
+    .evidence-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .evidence-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11.5px;
+    }
+    .evidence-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+    }
+    .evidence-card-text {
+      color: var(--text2);
+      line-height: 1.45;
+    }
+
+    /* ── Bottom Chat Bar ─────────────────────────────────────────────── */
+    .chat-bottom-bar {
+      padding: 16px 24px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    .chat-input-wrapper {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 4px 14px;
+      transition: all 0.2s;
+    }
+    .chat-input-wrapper:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59,158,255,0.25);
+    }
+    .chat-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13.5px;
+      resize: none;
+      max-height: 120px;
+      min-height: 42px;
+      padding: 10px 0;
+      line-height: 1.4;
+    }
+    .send-btn {
+      padding: 11px 22px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(59,158,255,0.3);
+      height: 46px;
+    }
+    .send-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59,158,255,0.45);
+    }
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────────────── -->
+  <header>
+    <div class="logo-box">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-text">NWIS-Sentinel <span style="font-weight:400; color:var(--text2);">| Engineering Agent</span></div>
+        <div class="logo-sub">Oil India Limited &bull; Smart India Hackathon 2026 &bull; PS SIH26121</div>
+      </div>
+    </div>
+
+    <div class="module-badge">MODULE 5 &bull; RAG + LLM DECISION SUPPORT</div>
+
+    <!-- Quick Scenario Modal Trigger Button -->
+    <button id="openScenarioModalBtn" class="scenario-toggle-btn">
+      <span>⚡ Select Scenario Panel</span>
+      <span>▾</span>
+    </button>
+
+    <div class="header-spacer"></div>
+
+    <div class="status-group">
+      <div class="status-badge" title="ChromaDB vector store containing offset well events">
+        <span class="pulse-dot"></span>
+        <span>ChromaDB Ready (2,022 events)</span>
+      </div>
+      <div class="status-badge" style="background:rgba(59,158,255,0.08); border-color:rgba(59,158,255,0.25);">
+        <span style="color:var(--primary); font-size:12px;">🧠</span>
+        <span style="color:var(--primary);">Gemini 2.5 Flash</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main Workspace ──────────────────────────────────────────────── -->
+  <main>
+    <!-- ── Interactive Scenario Flyout Selection Panel ────────────────── -->
+    <div class="scenario-modal-overlay" id="scenarioModal">
+      <div class="scenario-modal-card">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span>⚡</span>
+            <span>Select Pre-configured Operational Scenario</span>
+          </div>
+          <button class="modal-close-btn" id="closeScenarioModalBtn">&times;</button>
+        </div>
+        <div class="scenario-list">
+          <div class="scenario-card-item" data-id="1">
+            <div class="scenario-card-top">
+              <span class="scenario-card-title">Scenario 1: Shallow Stuck Pipe Warning</span>
+              <span class="scenario-badge badge-stuck">Stuck Pipe</span>
+            </div>
+            <div class="scenario-card-desc">Top hole section with repeated tight hole events and erratic torque signatures.</div>
+            <div class="scenario-card-meta">
+              <span>Well: <strong>15/9-F-9A</strong></span>
+              <span>Depth: <strong>303.5 m</strong></span>
+              <span>Formation: <strong>Surface / Top Hole</strong></span>
+            </div>
+          </div>
+
+          <div class="scenario-card-item" data-id="2">
+            <div class="scenario-card-top">
+              <span class="scenario-card-title">Scenario 2: Mud Loss in Reservoir Section</span>
+              <span class="scenario-badge badge-loss">Mud Loss</span>
+            </div>
+            <div class="scenario-card-desc">Flow out dropped and pump pressure decreasing while drilling through reservoir sandstone.</div>
+            <div class="scenario-card-meta">
+              <span>Well: <strong>NO (Offset)</strong></span>
+              <span>Depth: <strong>2651.0 m</strong></span>
+              <span>Formation: <strong>Sandstone</strong></span>
+            </div>
+          </div>
+
+          <div class="scenario-card-item" data-id="3">
+            <div class="scenario-card-top">
+              <span class="scenario-card-title">Scenario 3: Overpressure / Kick Detection</span>
+              <span class="scenario-badge badge-kick">Overpressure</span>
+            </div>
+            <div class="scenario-card-desc">Sudden drilling break encountered at 3420m with active pit volume increase.</div>
+            <div class="scenario-card-meta">
+              <span>Well: <strong>15/9-F-14</strong></span>
+              <span>Depth: <strong>3420.0 m</strong></span>
+              <span>Formation: <strong>Hugin Fm.</strong></span>
+            </div>
+          </div>
+
+          <div class="scenario-card-item" data-id="4">
+            <div class="scenario-card-top">
+              <span class="scenario-card-title">Scenario 4: Severe Torque Spikes in Reactive Shale</span>
+              <span class="scenario-badge badge-spike">Torque Spike</span>
+            </div>
+            <div class="scenario-card-desc">Severe torque spikes and symptoms of pack-off while drilling reactive shale section.</div>
+            <div class="scenario-card-meta">
+              <span>Well: <strong>15/9-F-11</strong></span>
+              <span>Depth: <strong>1850.0 m</strong></span>
+              <span>Formation: <strong>Lista Fm. (Reactive Shale)</strong></span>
+            </div>
+          </div>
+
+          <div class="scenario-card-item" data-id="5">
+            <div class="scenario-card-top">
+              <span class="scenario-card-title">Scenario 5: Exploratory Planning Question</span>
+              <span class="scenario-badge badge-plan">Planning</span>
+            </div>
+            <div class="scenario-card-desc">Lookahead risk planning for next 300 meters depth range based on historical offset wells.</div>
+            <div class="scenario-card-meta">
+              <span>Well: <strong>15/9-F-9A</strong></span>
+              <span>Depth: <strong>3150.0 m</strong></span>
+              <span>Formation: <strong>Limestone</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Left: Situation & Drilling Telemetry Console ──────────────── -->
+    <aside class="left-panel">
+      <!-- Active Scenario Trigger Card -->
+      <div class="scenario-trigger-box" id="scenarioTriggerBox" title="Click to open full scenario selection panel">
+        <div class="st-left">
+          <div class="st-icon">⚡</div>
+          <div style="min-width: 0;">
+            <div class="st-sub">ACTIVE OPERATIONAL SCENARIO</div>
+            <div class="st-title" id="activeScenarioLabel">Scenario 1: Shallow Stuck Pipe Warning</div>
+          </div>
+        </div>
+        <div class="st-btn">
+          <span>Change</span>
+          <span>▾</span>
+        </div>
+      </div>
+
+      <!-- Well Identification & Geology Card -->
+      <div class="section-card">
+        <div class="section-header">
+          <span>Well Identification & Geology</span>
+        </div>
+        <div class="grid-2">
+          <div class="field-group">
+            <label class="field-label">Well ID</label>
+            <input id="wellIdInput" type="text" class="field-input" value="15/9-F-9A" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">
+              <span>Depth</span>
+              <span class="field-unit">(meters)</span>
+            </label>
+            <input id="depthInput" type="number" step="0.5" class="field-input" value="303.5" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Formation Name</label>
+          <input id="formationInput" type="text" class="field-input" value="Unknown" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Current Hazard Focus</label>
+          <div class="hazard-pills" id="hazardPills">
+            <div class="hazard-pill" data-hazard="none">None</div>
+            <div class="hazard-pill active" data-hazard="stuck_pipe">Stuck Pipe</div>
+            <div class="hazard-pill" data-hazard="mud_loss">Mud Loss</div>
+            <div class="hazard-pill" data-hazard="overpressure">Overpressure</div>
+            <div class="hazard-pill" data-hazard="torque_spike">Torque Spike</div>
+            <div class="hazard-pill" data-hazard="cementing">Cementing</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Telemetry State Card (2-column clean layout) -->
+      <div class="section-card">
+        <div class="section-header">
+          <span>Real-time Telemetry State</span>
+        </div>
+        <div class="grid-2">
+          <div class="field-group">
+            <label class="field-label">
+              <span>Torque</span>
+              <span class="field-unit">kNm</span>
+            </label>
+            <input id="torqueInput" type="number" step="0.1" class="field-input" value="22.5" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">
+              <span>WOB</span>
+              <span class="field-unit">kN</span>
+            </label>
+            <input id="wobInput" type="number" step="1" class="field-input" value="110.0" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field-group">
+            <label class="field-label">
+              <span>ROP</span>
+              <span class="field-unit">m/hr</span>
+            </label>
+            <input id="ropInput" type="number" step="0.5" class="field-input" value="5.5" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">
+              <span>RPM</span>
+              <span class="field-unit">rev/min</span>
+            </label>
+            <input id="rpmInput" type="number" step="1" class="field-input" value="90.0" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field-group">
+            <label class="field-label">
+              <span>Flow In</span>
+              <span class="field-unit">L/min</span>
+            </label>
+            <input id="flowInput" type="number" step="1" class="field-input" value="420.0" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">
+              <span>Pressure</span>
+              <span class="field-unit">bar</span>
+            </label>
+            <input id="pressureInput" type="number" step="1" class="field-input" value="310.0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Sequence Timeline Builder Card -->
+      <div class="section-card">
+        <div class="section-header">
+          <span>Event Timeline Sequence</span>
+          <span style="font-size:10px; color:var(--text3);">Type & Press Enter</span>
+        </div>
+        <div class="timeline-container" id="timelineContainer">
+          <input id="timelineInput" type="text" class="timeline-input" placeholder="+ Add event code..." />
+        </div>
+      </div>
+
+      <!-- Top Analog Offset Wells Card -->
+      <div class="section-card">
+        <div class="section-header">
+          <span>Top Analog Offset Wells (Module 2)</span>
+          <span id="analogsCount" style="color:var(--accent); font-size:10px; font-weight:700;">5 Wells</span>
+        </div>
+        <div class="analogs-list" id="analogsList">
+          <div class="analog-item"><span class="analog-id">15/9-F-11</span><span class="analog-tag">Rank 1 &bull; Offset analog</span></div>
+          <div class="analog-item"><span class="analog-id">15/9-F-14</span><span class="analog-tag">Rank 2 &bull; Offset analog</span></div>
+          <div class="analog-item"><span class="analog-id">15/9-F-15</span><span class="analog-tag">Rank 3 &bull; Offset analog</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Right: Engineering Agent Chat Studio ───────────────────────── -->
+    <section class="right-panel">
+      <!-- Quick Prompt Suggestions -->
+      <div class="prompts-bar">
+        <span class="prompts-label">Suggested:</span>
+        <button class="prompt-chip" data-prompt="We are drilling the top hole section and experiencing repeated tight hole events with erratic torque. Based on historical data for this well and its top analogs, what is the probability this escalates into a stuck pipe event, and what successful interventions were recorded?">Stuck Pipe Probability?</button>
+        <button class="prompt-chip" data-prompt="What interventions were historically successful in mitigating this hazard in these offset wells?">Successful Interventions?</button>
+        <button class="prompt-chip" data-prompt="Why mud loss instead of stuck pipe given this telemetry signature?">Why Mud Loss vs Stuck Pipe?</button>
+        <button class="prompt-chip" data-prompt="What is the expected Non-Productive Time (NPT) associated with this type of incident?">Expected NPT?</button>
+      </div>
+
+      <!-- Chat Messages Container -->
+      <div class="chat-stream" id="chatStream">
+        <!-- Initial Welcome Message -->
+        <div class="msg-group agent">
+          <div class="msg-sender">
+            <span>🤖</span>
+            <span>NWIS Engineering Decision Agent</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-meta">
+              <div class="agent-meta-left">
+                <span>Model: <strong>Gemini 2.5 Flash</strong></span>
+                <span>&bull;</span>
+                <span>Retrieval: <strong>ChromaDB Top-5 Analogs</strong></span>
+              </div>
+              <span class="uncertainty-pill uncertainty-low">System Ready</span>
+            </div>
+            <div class="agent-body">
+Hello, Drilling Engineer. I am your evidence-grounded decision support agent.
+
+I have direct access to **1,959 historical drilling events**, **63 validated real incidents**, and **AHP-ranked offset wells** from Modules 1 and 2.
+
+Click **"Select Scenario Panel"** in the top bar or on the left console to switch between pre-configured drilling scenarios, or modify parameters directly and ask any operational query below.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Chat Bar -->
+      <div class="chat-bottom-bar">
+        <div class="chat-input-wrapper">
+          <textarea id="questionInput" class="chat-input" rows="1" placeholder="Ask a drilling engineering question about the current well situation..."></textarea>
+        </div>
+        <button id="sendBtn" class="send-btn">
+          <span>Consult Agent</span>
+          <span>&rarr;</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ── Pre-configured Scenarios Data ──────────────────────────────────
+    const SCENARIOS = {
+      "1": {
+        title: "Scenario 1: Shallow Stuck Pipe Warning (15/9-F-9A)",
+        well_id: "15/9-F-9A",
+        depth: 303.50,
+        torque: 22.50,
+        wob: 110.00,
+        rop: 5.50,
+        flow: 420.00,
+        pressure: 310.00,
+        rpm: 90.00,
+        formation: "Unknown",
+        hazard: "stuck_pipe",
+        timeline: ["EVT_ROUTINE_DRILLING", "EVT_TIGHT_HOLE", "EVT_TIGHT_HOLE", "EVT_TIGHT_HOLE"],
+        question: "We are drilling the top hole section and experiencing repeated tight hole events with erratic torque. Based on historical data for this well and its top analogs, what is the probability this escalates into a stuck pipe event, and what successful interventions were recorded?"
+      },
+      "2": {
+        title: "Scenario 2: Mud Loss in Reservoir Section (NO)",
+        well_id: "NO",
+        depth: 2651.00,
+        torque: 15.00,
+        wob: 130.00,
+        rop: 25.00,
+        flow: 250.00,
+        pressure: 180.00,
+        rpm: 110.00,
+        formation: "Sandstone",
+        hazard: "mud_loss",
+        timeline: ["NORMAL", "FLOW ANOMALY", "ROP DECREASE", "PUMP PRESSURE DROP"],
+        question: "Flow out has dropped and pump pressure is decreasing while drilling through the Sandstone formation at 2651m. What historical evidence do we have for partial or total mud losses in this area, and how much volume was typically lost before circulation was regained?"
+      },
+      "3": {
+        title: "Scenario 3: Overpressure / Kick Detection (15/9-F-14)",
+        well_id: "15/9-F-14",
+        depth: 3420.00,
+        torque: 20.00,
+        wob: 150.00,
+        rop: 35.00,
+        flow: 460.00,
+        pressure: 350.00,
+        rpm: 120.00,
+        formation: "Hugin Fm.",
+        hazard: "overpressure",
+        timeline: ["EVT_ROUTINE_DRILLING", "EVT_DRILLING_BREAK", "EVT_FLOW_INCREASE"],
+        question: "We just hit a sudden drilling break at 3420m and the active pit volume is starting to increase. Do the historical analogs show kick events in this specific formation? If so, what mud weights were required to kill the well?"
+      },
+      "4": {
+        title: "Scenario 4: Severe Torque Spikes in Reactive Shale (15/9-F-11)",
+        well_id: "15/9-F-11",
+        depth: 1850.00,
+        torque: 35.00,
+        wob: 90.00,
+        rop: 4.00,
+        flow: 400.00,
+        pressure: 280.00,
+        rpm: 80.00,
+        formation: "Lista Fm. (Reactive Shale)",
+        hazard: "torque_spike",
+        timeline: ["EVT_ROUTINE_DRILLING", "EVT_TORQUE_SPIKE", "EVT_TORQUE_SPIKE", "EVT_PACK_OFF_SYMPTOM"],
+        question: "We are seeing extreme torque spikes and symptoms of pack-off while drilling reactive shale at 1850m. Looking at the retrieved historical evidence, is this typically resolved by pumping a sweep, reaming, or altering the mud properties?"
+      },
+      "5": {
+        title: "Scenario 5: Exploratory Planning Question (15/9-F-9A)",
+        well_id: "15/9-F-9A",
+        depth: 3150.00,
+        torque: 18.00,
+        wob: 120.00,
+        rop: 8.00,
+        flow: 420.00,
+        pressure: 310.00,
+        rpm: 90.00,
+        formation: "Limestone",
+        hazard: "none",
+        timeline: [],
+        question: "We are planning the next 300 meters of this well. Based on the top analog wells, what is the most common hazard encountered in this depth range, and what is the typical Non-Productive Time (NPT) associated with it?"
+      }
+    };
+
+    // ── Current State ──────────────────────────────────────────────────
+    let currentTimeline = ["EVT_ROUTINE_DRILLING", "EVT_TIGHT_HOLE", "EVT_TIGHT_HOLE", "EVT_TIGHT_HOLE"];
+    let currentHazard = "stuck_pipe";
+
+    // DOM Elements
+    const scenarioModal = document.getElementById("scenarioModal");
+    const openScenarioModalBtn = document.getElementById("openScenarioModalBtn");
+    const closeScenarioModalBtn = document.getElementById("closeScenarioModalBtn");
+    const scenarioTriggerBox = document.getElementById("scenarioTriggerBox");
+    const activeScenarioLabel = document.getElementById("activeScenarioLabel");
+    const scenarioCards = document.querySelectorAll(".scenario-card-item");
+
+    const wellIdInput = document.getElementById("wellIdInput");
+    const depthInput = document.getElementById("depthInput");
+    const formationInput = document.getElementById("formationInput");
+    const torqueInput = document.getElementById("torqueInput");
+    const wobInput = document.getElementById("wobInput");
+    const ropInput = document.getElementById("ropInput");
+    const flowInput = document.getElementById("flowInput");
+    const pressureInput = document.getElementById("pressureInput");
+    const rpmInput = document.getElementById("rpmInput");
+    const timelineContainer = document.getElementById("timelineContainer");
+    const timelineInput = document.getElementById("timelineInput");
+    const questionInput = document.getElementById("questionInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatStream = document.getElementById("chatStream");
+    const hazardPills = document.querySelectorAll(".hazard-pill");
+    const analogsList = document.getElementById("analogsList");
+    const analogsCount = document.getElementById("analogsCount");
+
+    // ── Scenario Modal Controls ────────────────────────────────────────
+    function openModal() {
+      scenarioModal.classList.add("open");
+    }
+    function closeModal() {
+      scenarioModal.classList.remove("open");
+    }
+
+    openScenarioModalBtn.addEventListener("click", openModal);
+    scenarioTriggerBox.addEventListener("click", openModal);
+    closeScenarioModalBtn.addEventListener("click", closeModal);
+    scenarioModal.addEventListener("click", (e) => {
+      if (e.target === scenarioModal) closeModal();
+    });
+
+    // ── Scenario Selection Handler ─────────────────────────────────────
+    function selectScenario(id) {
+      const sc = SCENARIOS[id];
+      if (!sc) return;
+
+      // Update Active Label
+      activeScenarioLabel.innerText = sc.title;
+
+      // Update Form Fields
+      wellIdInput.value = sc.well_id;
+      depthInput.value = sc.depth;
+      formationInput.value = sc.formation;
+      torqueInput.value = sc.torque;
+      wobInput.value = sc.wob;
+      ropInput.value = sc.rop;
+      flowInput.value = sc.flow;
+      pressureInput.value = sc.pressure;
+      rpmInput.value = sc.rpm;
+
+      currentTimeline = [...sc.timeline];
+      currentHazard = sc.hazard;
+
+      // Update Hazard Pills
+      hazardPills.forEach(p => {
+        if (p.dataset.hazard === sc.hazard) p.classList.add("active");
+        else p.classList.remove("active");
+      });
+
+      // Update Modal Selected State
+      scenarioCards.forEach(card => {
+        if (card.dataset.id === id) card.classList.add("selected");
+        else card.classList.remove("selected");
+      });
+
+      renderTimeline();
+
+      // Populate Suggested Question
+      questionInput.value = sc.question;
+      questionInput.style.height = "auto";
+      questionInput.style.height = Math.min(questionInput.scrollHeight, 120) + "px";
+
+      closeModal();
+    }
+
+    scenarioCards.forEach(card => {
+      card.addEventListener("click", () => {
+        selectScenario(card.dataset.id);
+      });
+    });
+
+    // ── Render Timeline ────────────────────────────────────────────────
+    function renderTimeline() {
+      const oldChips = timelineContainer.querySelectorAll(".timeline-chip");
+      oldChips.forEach(c => c.remove());
+
+      currentTimeline.forEach((item, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "timeline-chip";
+        chip.innerHTML = `
+          <span>${item}</span>
+          <span class="chip-remove" onclick="removeTimelineItem(${idx})">&times;</span>
+        `;
+        timelineContainer.insertBefore(chip, timelineInput);
+      });
+    }
+
+    function removeTimelineItem(index) {
+      currentTimeline.splice(index, 1);
+      renderTimeline();
+    }
+
+    timelineInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && timelineInput.value.trim()) {
+        e.preventDefault();
+        currentTimeline.push(timelineInput.value.trim().toUpperCase());
+        timelineInput.value = "";
+        renderTimeline();
+      }
+    });
+
+    // ── Hazard Pill Selection ──────────────────────────────────────────
+    hazardPills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        hazardPills.forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        currentHazard = pill.dataset.hazard;
+      });
+    });
+
+    // ── Quick Prompt Chips ─────────────────────────────────────────────
+    document.querySelectorAll(".prompt-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        questionInput.value = chip.dataset.prompt;
+        questionInput.style.height = "auto";
+        questionInput.style.height = Math.min(questionInput.scrollHeight, 120) + "px";
+        questionInput.focus();
+      });
+    });
+
+    // ── Auto-resize Textarea ───────────────────────────────────────────
+    questionInput.addEventListener("input", () => {
+      questionInput.style.height = "auto";
+      questionInput.style.height = Math.min(questionInput.scrollHeight, 120) + "px";
+    });
+
+    questionInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendQuery();
+      }
+    });
+
+    sendBtn.addEventListener("click", sendQuery);
+
+    // ── Chat Submission ────────────────────────────────────────────────
+    async function sendQuery() {
+      const question = questionInput.value.trim();
+      if (!question) return;
+
+      // 1. Append User Message
+      appendUserMessage(question);
+      questionInput.value = "";
+      questionInput.style.height = "42px";
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = `<span>Thinking...</span><span class="pulse-dot"></span>`;
+
+      // 2. Append Loading Card
+      const loadingId = "agent-loading-" + Date.now();
+      appendLoadingCard(loadingId);
+
+      // 3. Send Request
+      const payload = {
+        question: question,
+        current_situation: {
+          well_id: wellIdInput.value.trim() || null,
+          depth: parseFloat(depthInput.value) || null,
+          torque: parseFloat(torqueInput.value) || null,
+          wob: parseFloat(wobInput.value) || null,
+          rop: parseFloat(ropInput.value) || null,
+          flow: parseFloat(flowInput.value) || null,
+          pressure: parseFloat(pressureInput.value) || null,
+          rpm: parseFloat(rpmInput.value) || null,
+          formation: formationInput.value.trim() || null,
+          hazard: currentHazard !== "none" ? currentHazard : null
+        },
+        event_sequence: currentTimeline
+      };
+
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: "Request failed" }));
+          throw new Error(errData.detail || "Server error");
+        }
+
+        const data = await res.json();
+        replaceLoadingWithAgentResponse(loadingId, data);
+        updateAnalogWellsCard(data.historical_wells);
+
+      } catch (err) {
+        replaceLoadingWithError(loadingId, err.message);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<span>Consult Agent</span><span>&rarr;</span>`;
+      }
+    }
+
+    function appendUserMessage(text) {
+      const group = document.createElement("div");
+      group.className = "msg-group user";
+      group.innerHTML = `
+        <div class="msg-sender">
+          <span>Drilling Engineer</span>
+          <span>👤</span>
+        </div>
+        <div class="msg-bubble-user">${escapeHtml(text)}</div>
+      `;
+      chatStream.appendChild(group);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function appendLoadingCard(id) {
+      const group = document.createElement("div");
+      group.className = "msg-group agent";
+      group.id = id;
+      group.innerHTML = `
+        <div class="msg-sender">
+          <span>🤖</span>
+          <span>NWIS Engineering Decision Agent</span>
+        </div>
+        <div class="agent-card" style="border-left-color: var(--primary);">
+          <div class="agent-meta">
+            <span style="font-size:11px; color:var(--text2);">Retrieving ChromaDB vectors and evaluating offset wells...</span>
+            <span class="uncertainty-pill uncertainty-med">Processing</span>
+          </div>
+          <div class="agent-body" style="color:var(--text2);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="pulse-dot"></span>
+              <span>Grounding decision support against 2,022 historical records...</span>
+            </div>
+          </div>
+        </div>
+      `;
+      chatStream.appendChild(group);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function replaceLoadingWithAgentResponse(id, data) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      let uncClass = "uncertainty-low";
+      const uncText = data.uncertainty || "Grounded";
+      if (uncText.toLowerCase().includes("high")) uncClass = "uncertainty-high";
+      else if (uncText.toLowerCase().includes("medium")) uncClass = "uncertainty-med";
+
+      let citationsHtml = "";
+      if (data.citations && data.citations.length > 0) {
+        const chips = data.citations.map(c => `<span class="citation-chip">${escapeHtml(c)}</span>`).join("");
+        citationsHtml = `
+          <div class="citations-box">
+            <div class="citations-header">
+              <span>Verified Historical Citations (${data.citations.length})</span>
+              <button class="evidence-toggle" onclick="toggleEvidence('${id}-ev')">
+                <span>View Evidence Records</span>
+                <span id="${id}-ev-arrow">&#9662;</span>
+              </button>
+            </div>
+            <div class="citation-chips">${chips}</div>
+            <div class="evidence-cards" id="${id}-ev" style="display:none;">
+              ${buildEvidenceCards(data.evidence)}
+            </div>
+          </div>
+        `;
+      }
+
+      el.innerHTML = `
+        <div class="msg-sender">
+          <span>🤖</span>
+          <span>NWIS Engineering Decision Agent</span>
+        </div>
+        <div class="agent-card">
+          <div class="agent-meta">
+            <div class="agent-meta-left">
+              <span>Model: <strong>Gemini 2.5 Flash</strong></span>
+              <span>&bull;</span>
+              <span>Analogs: <strong>${data.historical_wells ? data.historical_wells.length : 0} Wells</strong></span>
+            </div>
+            <span class="uncertainty-pill ${uncClass}">${escapeHtml(uncText)}</span>
+          </div>
+          <div class="agent-body">${formatMarkdown(data.answer)}</div>
+          ${citationsHtml}
+        </div>
+      `;
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function replaceLoadingWithError(id, errorMsg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      el.innerHTML = `
+        <div class="msg-sender"><span>⚠️</span><span>System Alert</span></div>
+        <div class="agent-card" style="border-left-color: var(--danger);">
+          <div class="agent-meta">
+            <span style="color:var(--danger); font-weight:600; font-size:11px;">Error Generating Response</span>
+            <span class="uncertainty-pill uncertainty-high">Failed</span>
+          </div>
+          <div class="agent-body" style="color:#ff9999;">${escapeHtml(errorMsg)}</div>
+        </div>
+      `;
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function buildEvidenceCards(evidenceList) {
+      if (!evidenceList || evidenceList.length === 0) {
+        return `<div style="font-size:11px; color:var(--text3);">No raw records returned.</div>`;
+      }
+
+      return evidenceList.map(e => `
+        <div class="evidence-card">
+          <div class="evidence-card-header">
+            <span>${escapeHtml(e.citation_id)}</span>
+            <span>${e.hazard ? e.hazard.toUpperCase() : 'EVENT'}</span>
+          </div>
+          <div class="evidence-card-text">${escapeHtml(e.raw_text)}</div>
+        </div>
+      `).join("");
+    }
+
+    window.toggleEvidence = function(containerId) {
+      const box = document.getElementById(containerId);
+      const arrow = document.getElementById(containerId + "-arrow");
+      if (!box) return;
+      if (box.style.display === "none") {
+        box.style.display = "flex";
+        if (arrow) arrow.innerHTML = "&#9652;";
+      } else {
+        box.style.display = "none";
+        if (arrow) arrow.innerHTML = "&#9662;";
+      }
+    };
+
+    function updateAnalogWellsCard(analogWells) {
+      if (!analogWells || analogWells.length === 0) return;
+      analogsCount.innerText = `${analogWells.length} Wells`;
+      analogsList.innerHTML = analogWells.map((w, idx) => `
+        <div class="analog-item">
+          <span class="analog-id">${escapeHtml(w)}</span>
+          <span class="analog-tag">Rank ${idx + 1} &bull; Offset analog</span>
+        </div>
+      `).join("");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatMarkdown(text) {
+      if (!text) return "";
+      let html = escapeHtml(text);
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      html = html.replace(/`(.*?)`/g, '<code style="background:var(--bg3); padding:2px 5px; border-radius:4px; font-family:var(--mono); color:var(--accent);">$1</code>');
+      return html;
+    }
+
+    // Initialize Default Scenario 1
+    selectScenario("1");
+  </script>
+</body>
+</html>

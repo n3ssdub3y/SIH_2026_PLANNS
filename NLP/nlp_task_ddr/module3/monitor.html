@@ -1,1020 +1,1208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NWIS-Sentinel — Module 3 Drilling Intelligence & Flagship Backtest</title>
-<meta name="description" content="Live drilling telemetry streaming monitor, physics anomaly detector, and flagship historical backtest for NWIS-Sentinel Module 3."/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg-primary: #0a0e1a;
-    --bg-secondary: #111827;
-    --bg-card: rgba(17, 24, 39, 0.9);
-    --bg-glass: rgba(255, 255, 255, 0.04);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-active: rgba(99, 179, 237, 0.5);
-    --text-primary: #f0f4ff;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --accent-blue: #3b82f6;
-    --accent-cyan: #06b6d4;
-    --accent-orange: #f97316;
-    --accent-green: #22c55e;
-    --accent-red: #ef4444;
-    --accent-amber: #f59e0b;
-    --accent-purple: #a855f7;
-    --radius: 10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    min-height: 100vh;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NWIS-Sentinel — Module 3 | Telemetry &amp; Anomaly Engine</title>
+  <meta name="description" content="Module 3: Live Telemetry Streaming, Physics Anomaly Detector, and Flagship Historical Backtest." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  /* Header */
-  header {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .title-group h1 {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .title-group h1 span { color: var(--accent-cyan); }
-  .title-group p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-  .badge {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .badge-blue {
-    background: rgba(59, 130, 246, 0.15);
-    color: #93c5fd;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-  }
-  .badge-green {
-    background: rgba(34, 197, 94, 0.15);
-    color: #86efac;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-  }
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .status-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    background: var(--bg-glass);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent-red);
-    box-shadow: 0 0 8px var(--accent-red);
-    transition: all 0.3s ease;
-  }
-  .status-dot.connected {
-    background: var(--accent-green);
-    box-shadow: 0 0 10px var(--accent-green);
-  }
+    :root {
+      --bg-desktop: #020610;
+      --bg-bar: #161b22;
+      --border-bar: #21262d;
+      --bg-terminal: rgba(13, 18, 28, 0.92);
+      --bg-card: rgba(13, 17, 23, 0.65);
+      --bg-card-hover: rgba(22, 27, 34, 0.85);
+      --border-neon: rgba(0, 229, 255, 0.45);
+      --border-neon-subtle: rgba(0, 229, 255, 0.22);
+      --border-muted: rgba(48, 54, 61, 0.80);
+      --cyan-bright: #00f0ff;
+      --cyan-glow: #38bdf8;
+      --cyan-dim: #0284c7;
+      --text-main: #f0f6fc;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-green: #3fb950;
+      --accent-yellow: #d29922;
+      --accent-orange: #f0883e;
+      --accent-red: #f85149;
+      --accent-purple: #bc8cff;
+      --radius: 8px;
+    }
 
-  /* Navigation Tabs */
-  .nav-tabs {
-    display: flex;
-    gap: 10px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 12px;
-    overflow-x: auto;
-  }
-  .tab-btn {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .tab-btn:hover {
-    color: var(--text-primary);
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .tab-btn.active {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border-color: rgba(59, 130, 246, 0.5);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-  }
-  .tab-tag {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.2);
-    color: #4ade80;
-    font-weight: 700;
-  }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: radial-gradient(circle at 50% 12%, #0d1628 0%, #060911 100%);
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: hidden;
+    }
 
-  .tab-pane {
-    display: none;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .tab-pane.active {
-    display: flex;
-  }
+    /* Custom Cyber Scrollbar */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: rgba(3, 8, 18, 0.7); }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.7); }
 
-  /* ═══ TAB 2: FLAGSHIP BACKTEST HERO STYLES ═══ */
-  .hero-banner {
-    background: linear-gradient(135deg, rgba(6, 78, 59, 0.4) 0%, rgba(17, 24, 39, 0.85) 100%);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    border-radius: var(--radius);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  }
-  .hero-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .hero-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #f8fafc;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .hero-badge {
-    background: #059669;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
+    /* ── BSPWM / Polybar Top Desktop Bar ──────────────────────────── */
+    .bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 26px;
+      background: var(--bg-bar);
+      border-bottom: 1px solid var(--border-bar);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      z-index: 1000;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
 
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-  }
-  .kpi-card {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .kpi-card.highlight {
-    border-color: rgba(16, 185, 129, 0.5);
-    background: rgba(6, 78, 59, 0.25);
-  }
-  .kpi-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-  }
-  .kpi-value {
-    font-size: 26px;
-    font-weight: 800;
-    font-family: 'JetBrains Mono', monospace;
-    color: #34d399;
-  }
-  .kpi-sub {
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
+    .bar-workspaces {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .ws {
+      padding: 1px 7px;
+      height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 3px;
+      transition: all 0.15s;
+    }
+    .ws:hover {
+      background: #21262d;
+      color: var(--text-main);
+    }
+    .ws.active {
+      background: #21262d;
+      color: var(--cyan-bright);
+      font-weight: 700;
+      border: 1px solid var(--border-neon-subtle);
+    }
 
-  /* Incident & Audit Callout Grid */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 16px;
-  }
-  .info-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .info-card h3 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .info-text {
-    font-size: 12px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-  }
-  .incident-quote {
-    background: rgba(239, 68, 68, 0.08);
-    border-left: 3px solid var(--accent-red);
-    padding: 10px 14px;
-    border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #fca5a5;
-  }
-  .audit-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-  .audit-list li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .audit-list li span.check {
-    color: var(--accent-green);
-    font-weight: bold;
-  }
+    .bar-tag {
+      margin-left: 6px;
+      padding: 1px 7px;
+      background: #21262d;
+      border-radius: 3px;
+      color: #8b949e;
+      font-size: 10px;
+    }
+    .bar-tag.live {
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--cyan-bright);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
 
-  /* Interactive Plot Viewer Card */
-  .plot-container-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .plot-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .plot-header h2 {
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-primary);
-  }
-  .plot-actions {
-    display: flex;
-    gap: 10px;
-  }
-  .plot-frame {
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius);
-    padding: 10px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .plot-frame img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    cursor: zoom-in;
-    transition: transform 0.2s ease;
-  }
-  .plot-frame img:hover {
-    transform: scale(1.008);
-  }
+    .bar-center {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+    .bar-center span { color: var(--cyan-bright); }
 
-  /* Milestones Timeline */
-  .timeline-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-  .timeline {
-    position: relative;
-    padding-left: 24px;
-    margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 7px;
-    top: 6px;
-    bottom: 6px;
-    width: 2px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .t-step {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .t-step::before {
-    content: '';
-    position: absolute;
-    left: -24px;
-    top: 4px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #1e293b;
-    border: 2px solid var(--accent-blue);
-  }
-  .t-step.warn::before { border-color: var(--accent-amber); }
-  .t-step.crit::before { border-color: var(--accent-orange); }
-  .t-step.sustained::before { border-color: var(--accent-green); background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
-  .t-step.incident::before { border-color: var(--accent-red); background: var(--accent-red); box-shadow: 0 0 10px var(--accent-red); }
-  .t-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .t-depth {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--accent-cyan);
-    background: rgba(6, 182, 212, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-  .t-desc {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
+    .bar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+    }
+    .bar-stat { color: var(--text-secondary); }
+    .bar-stat span { color: #c9d1d9; font-weight: 500; }
+    .bar-stat.warn span { color: var(--accent-red); }
+    .bar-stat.ok span { color: var(--accent-green); }
+    .bar-stat.cyan span { color: var(--cyan-bright); }
 
-  /* ═══ TAB 1: LIVE STREAM STYLES ═══ */
-  .grid-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 14px;
-  }
-  .stat-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .stat-card:hover { border-color: var(--border-active); }
-  .stat-card .label { font-size: 11px; color: var(--text-muted); }
-  .stat-card .value {
-    font-size: 22px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--accent-cyan);
-  }
-  .stat-card .unit { font-size: 11px; color: var(--text-muted); }
+    /* ── Desktop Canvas Wrapper ──────────────────────────────────── */
+    .desktop-wrap {
+      position: relative;
+      z-index: 10;
+      padding: 42px 16px 50px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
 
-  .controls-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .ctrl-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .ctrl-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 500;
-    min-width: 100px;
-  }
-  .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
-  button {
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .speed-btn {
-    background: var(--bg-glass);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-  }
-  .speed-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
-  .speed-btn.active {
-    background: rgba(6, 182, 212, 0.15);
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-  }
-  .btn-action {
-    background: rgba(59, 130, 246, 0.2);
-    border: 1px solid var(--accent-blue);
-    color: #93c5fd;
-  }
-  .btn-danger {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid var(--accent-red);
-    color: #fca5a5;
-  }
+    /* ── Alacritty Terminal Window ───────────────────────────────── */
+    .terminal {
+      width: min(1340px, 97vw);
+      background: var(--bg-terminal);
+      border-radius: 10px;
+      border: 1px solid var(--border-neon);
+      box-shadow:
+        0 28px 90px rgba(0,0,0,0.85),
+        0 0 55px rgba(0, 229, 255, 0.22),
+        0 0 0 1px rgba(0, 229, 255, 0.12) inset;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
 
-  .progress-container { width: 100%; margin-top: 4px; }
-  .progress-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-  .progress-track {
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-    border-radius: 3px;
-    transition: width 0.3s ease;
-  }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to   { opacity: 1; transform: none; }
+    }
 
-  .step-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .step-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .step-header h2 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .step-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
-    text-transform: uppercase;
-  }
-  .step-badge-amber { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-  .step-badge-purple { background: rgba(168,85,247,0.15); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.3); }
+    /* Titlebar */
+    .titlebar {
+      height: 38px;
+      background: rgba(8, 20, 36, 0.65);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 8px;
+      position: relative;
+      user-select: none;
+    }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .dot:hover { filter: brightness(1.3); }
+    .dot.close  { background: #ff5f56; }
+    .dot.min    { background: #ffbd2e; }
+    .dot.max    { background: #27c93f; }
 
-  .alert-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 240px;
-    overflow-y: auto;
-  }
-  .alert-item {
-    background: var(--bg-glass);
-    border-left: 4px solid var(--accent-blue);
-    border-radius: 0 6px 6px 0;
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .alert-item.WARN { border-left-color: var(--accent-amber); }
-  .alert-item.ALERT { border-left-color: var(--accent-orange); }
-  .alert-item.CRITICAL { border-left-color: var(--accent-red); background: rgba(239,68,68,0.06); }
-  .alert-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .alert-badge {
-    font-size: 9px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
-  }
-  .WARN-badge     { background: rgba(245,158,11,0.2); color: #fcd34d; }
-  .ALERT-badge    { background: rgba(249,115,22,0.2); color: #fdba74; }
-  .CRITICAL-badge { background: rgba(239,68,68,0.2);  color: #fca5a5; }
-  .detector-badge {
-    font-size: 9px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 4px;
-    background: rgba(99,179,237,0.15);
-    color: #90cdf4;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .alert-hazard { font-size: 11px; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
-  .alert-depth  { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-left: auto; }
-  .alert-expl   { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+    .titlebar-text {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      font-size: 11px;
+      color: #6e7681;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .titlebar-text span { color: var(--cyan-bright); }
 
-  /* Risk Cards Grid */
-  .risk-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 12px;
-  }
-  .risk-card {
-    background: var(--bg-glass);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .risk-card-top { display: flex; justify-content: space-between; align-items: center; }
-  .risk-hazard-name { font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
-  .risk-level-badge { font-size: 9px; font-weight: 700; padding: 2px 9px; border-radius: 999px; text-transform: uppercase; }
-  .LOW-risk      { background: rgba(34,197,94,0.15);   color: #86efac; }
-  .MEDIUM-risk   { background: rgba(245,158,11,0.15);  color: #fcd34d; }
-  .HIGH-risk     { background: rgba(249,115,22,0.15);  color: #fdba74; }
-  .CRITICAL-risk { background: rgba(239,68,68,0.18);   color: #fca5a5; }
-  .risk-ci-bar-container { position: relative; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; }
-  .risk-ci-band { position: absolute; height: 8px; border-radius: 4px; background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.35); transition: all 0.5s ease; }
-  .risk-ci-center { position: absolute; width: 3px; height: 14px; top: -3px; background: var(--accent-blue); border-radius: 2px; transform: translateX(-50%); transition: left 0.5s ease; }
-  .risk-ci-labels { display: flex; justify-content: space-between; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-top: 2px; }
-  .risk-meta { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .titlebar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-return {
+      font-size: 10px;
+      padding: 2px 8px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 4px;
+      color: var(--cyan-bright);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-return:hover {
+      background: var(--cyan-bright);
+      color: #020610;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+    }
 
-  /* Telemetry Table */
-  .table-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .table-wrapper { overflow-x: auto; max-height: 300px; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
-  th { text-align: left; padding: 8px 10px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
-  td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); white-space: nowrap; }
+    /* Terminal Body */
+    .term-body {
+      padding: 24px 28px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-  /* ═══ TAB 3: DELIVERABLES EXPLORER ═══ */
-  .deliverables-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-  }
-  .deliv-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .deliv-title {
-    font-size: 13px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    color: #93c5fd;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .deliv-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-  .deliv-meta { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-  .code-viewer {
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: #cbd5e1;
-    max-height: 400px;
-    overflow: auto;
-    white-space: pre-wrap;
-    line-height: 1.5;
-  }
-</style>
+
+    /* ── Terminal Command Prompt & Tabs ──────────────────────────── */
+    .prompt-box {
+      background: rgba(8, 14, 26, 0.65);
+      border: 1px solid var(--border-neon-subtle);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .prompt-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      flex-wrap: wrap;
+    }
+    .prompt-user { color: var(--cyan-bright); font-weight: 600; }
+    .prompt-path { color: #8b949e; }
+    .prompt-sym  { color: #c9d1d9; }
+    .prompt-cmd  { color: #e6edf3; }
+    .cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: var(--cyan-bright);
+      border-radius: 1px;
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      box-shadow: 0 0 6px var(--cyan-bright);
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Command Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    .tab-btn {
+      background: rgba(13, 17, 23, 0.85);
+      border: 1px solid var(--border-muted);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      border-color: var(--cyan-dim);
+      background: rgba(0, 229, 255, 0.08);
+    }
+    .tab-btn.active {
+      background: rgba(0, 229, 255, 0.16);
+      color: var(--cyan-bright);
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.22);
+    }
+    .tab-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(52, 211, 153, 0.2);
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+      animation: fadeIn 0.25s ease;
+    }
+    .tab-pane.active {
+      display: flex;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* ── Terminal Card Component ─────────────────────────────────── */
+    .term-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      backdrop-filter: blur(6px);
+      transition: border-color 0.2s;
+    }
+    .term-card:hover {
+      border-color: var(--border-neon-subtle);
+    }
+
+    .card-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 8px;
+    }
+    .card-header-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--cyan-bright);
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-green  { background: rgba(63, 185, 80, 0.18); color: #86efac; border: 1px solid rgba(63, 185, 80, 0.35); }
+    .badge-cyan   { background: rgba(0, 229, 255, 0.15); color: var(--cyan-bright); border: 1px solid rgba(0, 229, 255, 0.35); }
+    .badge-amber  { background: rgba(210, 153, 34, 0.2);  color: #fcd34d; border: 1px solid rgba(210, 153, 34, 0.35); }
+    .badge-purple { background: rgba(188, 140, 255, 0.2); color: #d8b4fe; border: 1px solid rgba(188, 140, 255, 0.35); }
+
+    /* ══ TAB 1: FLAGSHIP HISTORICAL BACKTEST ══ */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(6, 78, 59, 0.35) 0%, rgba(3, 18, 30, 0.75) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 35px rgba(52, 211, 153, 0.15);
+    }
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .hero-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f0fdf4;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-badge {
+      background: #059669;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .kpi-card {
+      background: rgba(6, 20, 32, 0.80);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .kpi-card.highlight {
+      border-color: rgba(52, 211, 153, 0.6);
+      background: rgba(6, 78, 59, 0.35);
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
+    }
+    .kpi-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-secondary);
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #34d399;
+      text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Plot Viewer */
+    .plot-frame {
+      background: #030a14;
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius);
+      padding: 10px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .plot-frame img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      cursor: zoom-in;
+      transition: transform 0.2s ease;
+    }
+    .plot-frame img:hover {
+      transform: scale(1.008);
+    }
+
+    /* Dual Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .incident-quote {
+      background: rgba(248, 81, 73, 0.08);
+      border-left: 3px solid var(--accent-red);
+      padding: 10px 14px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+    .audit-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+    .audit-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .audit-list li span.check {
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    /* Milestones Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .t-step {
+      background: rgba(13, 17, 23, 0.65);
+      border-left: 4px solid var(--cyan-dim);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .t-step.warn { border-left-color: var(--accent-yellow); }
+    .t-step.crit { border-left-color: var(--accent-orange); }
+    .t-step.sustained { border-left-color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
+    .t-step.incident { border-left-color: var(--accent-red); background: rgba(248, 81, 73, 0.08); }
+    .t-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .t-depth {
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: #21262d;
+      color: #c9d1d9;
+    }
+    .t-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* ══ TAB 2: LIVE TELEMETRY & ANOMALY STREAM ══ */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: rgba(13, 17, 23, 0.75);
+      border: 1px solid var(--border-neon-subtle);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.2s;
+    }
+    .stat-card:hover {
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+    }
+    .stat-card .label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--cyan-bright);
+      text-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+    }
+    .stat-card .unit {
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    /* Controls Deck */
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .ctrl-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 110px;
+    }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    button {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .speed-btn {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-muted);
+      color: var(--text-secondary);
+    }
+    .speed-btn:hover { background: rgba(0, 229, 255, 0.1); color: var(--cyan-bright); border-color: var(--cyan-dim); }
+    .speed-btn.active {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: var(--cyan-bright);
+      color: var(--cyan-bright);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+    }
+    .btn-action {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--cyan-bright);
+      color: var(--cyan-bright);
+    }
+    .btn-action:hover {
+      background: var(--cyan-bright);
+      color: #020610;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+    }
+    .btn-danger {
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid var(--accent-red);
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: var(--accent-red);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(248, 81, 73, 0.5);
+    }
+
+    /* Progress Track */
+    .progress-container { width: 100%; margin-top: 6px; }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0284c7, var(--cyan-bright));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px var(--cyan-bright);
+    }
+
+    /* Alert List */
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .alert-item {
+      background: rgba(13, 17, 23, 0.7);
+      border-left: 4px solid var(--cyan-bright);
+      border-radius: 0 4px 4px 0;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11px;
+    }
+    .alert-item.WARN { border-left-color: var(--accent-yellow); }
+    .alert-item.ALERT { border-left-color: var(--accent-orange); }
+    .alert-item.CRITICAL { border-left-color: var(--accent-red); background: rgba(248, 81, 73, 0.08); }
+
+    .alert-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .alert-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .WARN-badge     { background: rgba(210, 153, 34, 0.25); color: #fcd34d; }
+    .ALERT-badge    { background: rgba(240, 136, 62, 0.25); color: #fdba74; }
+    .CRITICAL-badge { background: rgba(248, 81, 73, 0.25);  color: #fca5a5; }
+    .detector-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--cyan-bright);
+    }
+    .alert-hazard { font-weight: 600; color: var(--text-main); }
+    .alert-depth  { color: var(--text-muted); margin-left: auto; }
+    .alert-expl   { color: var(--text-secondary); line-height: 1.4; }
+
+    /* Risk Cards */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .risk-card {
+      background: rgba(13, 17, 23, 0.65);
+      border: 1px solid var(--border-muted);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .risk-card-top { display: flex; justify-content: space-between; align-items: center; }
+    .risk-hazard-name { font-size: 11.5px; font-weight: 600; color: var(--cyan-bright); }
+    .risk-level-badge { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; }
+    .LOW-risk      { background: rgba(63, 185, 80, 0.18);   color: #86efac; }
+    .MEDIUM-risk   { background: rgba(210, 153, 34, 0.2);   color: #fcd34d; }
+    .HIGH-risk     { background: rgba(240, 136, 62, 0.2);   color: #fdba74; }
+    .CRITICAL-risk { background: rgba(248, 81, 73, 0.22);   color: #fca5a5; }
+
+    .risk-ci-bar-container { position: relative; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; }
+    .risk-ci-band { position: absolute; height: 8px; border-radius: 4px; background: rgba(0, 229, 255, 0.2); border: 1px solid rgba(0, 229, 255, 0.4); transition: all 0.5s ease; }
+    .risk-ci-center { position: absolute; width: 3px; height: 14px; top: -3px; background: var(--cyan-bright); border-radius: 2px; transform: translateX(-50%); transition: left 0.5s ease; box-shadow: 0 0 6px var(--cyan-bright); }
+    .risk-ci-labels { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+    .risk-meta { font-size: 10px; color: var(--text-muted); }
+
+    /* Tables */
+    .table-wrapper { overflow-x: auto; max-height: 280px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th { text-align: left; padding: 8px 10px; background: rgba(0, 229, 255, 0.05); border-bottom: 1px solid var(--border-muted); color: var(--cyan-bright); white-space: nowrap; }
+    td { padding: 7px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); color: var(--text-secondary); white-space: nowrap; }
+    tr:hover td { background: rgba(0, 229, 255, 0.03); color: var(--text-main); }
+
+    /* ══ TAB 3: DELIVERABLES & AUDIT ══ */
+    .deliverables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 14px;
+    }
+    .deliv-card {
+      background: rgba(13, 17, 23, 0.65);
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .deliv-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--cyan-bright);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .deliv-desc { font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; }
+    .deliv-meta { font-size: 10px; color: var(--text-muted); }
+
+    /* Terminal Footer Status */
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="title-group">
-      <h1>NWIS-<span>Sentinel</span> &nbsp;<span class="badge badge-blue">Module 3 — Prediction &amp; Backtest</span></h1>
-      <p>Real-Time Telemetry Simulation, Physics Anomaly Detector &amp; Flagship Historical Backtest</p>
-    </div>
-    <div class="header-actions">
-      <div class="status-pill">
-        <div class="status-dot" id="ws-dot"></div>
-        <span id="ws-status">Telemetry: Connecting...</span>
-      </div>
-      <div class="status-pill">
-        <div class="status-dot" id="anomaly-dot"></div>
-        <span id="anomaly-status">Anomaly Server: Connecting...</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Top Navigation Tabs -->
-  <nav class="nav-tabs">
-    <button class="tab-btn active" id="btn-tab-backtest" onclick="switchTab('tab-backtest')">
-      🎯 Flagship Historical Backtest (Step 4)
-      <span class="tab-tag">+106.5 m Lead Time</span>
-    </button>
-    <button class="tab-btn" id="btn-tab-live" onclick="switchTab('tab-live')">
-      ⚡ Live Telemetry &amp; Anomaly Stream (Steps 1–3)
-    </button>
-    <button class="tab-btn" id="btn-tab-deliverables" onclick="switchTab('tab-deliverables')">
-      📋 Executive Audit &amp; Deliverables (Step 5)
-    </button>
-  </nav>
-
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 2: FLAGSHIP HISTORICAL TIME-TRAVEL BACKTEST (DEFAULT FIRST VIEW)    -->
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-pane active" id="tab-backtest">
-
-    <!-- Hero Lead Time Result Card -->
-    <div class="hero-banner">
-      <div class="hero-header">
-        <div class="hero-title">
-          <span>🏆</span> Flagship Proof of Value: Historical Time-Travel Backtest
-        </div>
-        <span class="hero-badge">Zero Future Leakage Verified</span>
-      </div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card highlight">
-          <span class="kpi-label">Actionable Lead Distance</span>
-          <span class="kpi-value">+106.48 m</span>
-          <span class="kpi-sub">Advance warning before 619.0 m incident</span>
-        </div>
-        <div class="kpi-card highlight">
-          <span class="kpi-label">Telemetry Lead Time</span>
-          <span class="kpi-value">+44.07 min</span>
-          <span class="kpi-sub">2,644 telemetry rows ahead of incident</span>
-        </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Rig-Floor Operational Window</span>
-          <span class="kpi-value" style="color:#60a5fa">+4.26 hrs</span>
-          <span class="kpi-sub">At typical 25 m/hr field drilling ROP</span>
-        </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Precursor Initial Warning</span>
-          <span class="kpi-value" style="color:#fbbf24">+147.17 m</span>
-          <span class="kpi-sub">First critical rotary stalling anomaly</span>
-        </div>
-      </div>
+  <!-- ── BSPWM Top Bar ───────────────────────────────────────────── -->
+  <div class="bar">
+    <div class="bar-workspaces">
+      <a class="ws" href="http://localhost:5000" title="Central Dashboard">1:dash</a>
+      <a class="ws" href="http://localhost:5001" title="Module 2 Geospatial">2:geo</a>
+      <a class="ws active" href="#" title="Module 3 Telemetry (Active)">3:stream</a>
+      <a class="ws" href="http://localhost:5004" title="Module 4 Graph Studio">4:graph</a>
+      <a class="ws" href="http://localhost:5005" title="Module 5 Engineering Agent">5:agent</a>
     </div>
 
-    <!-- Interactive Plot Viewer Card -->
-    <div class="plot-container-card">
-      <div class="plot-header">
-        <h2>Dual-Tier Time-Series Backtest Plot (Telemetry Physics vs Wilson Score CI Risk)</h2>
-        <div class="plot-actions">
-          <a href="outputs/backtest_plot.png" target="_blank" style="text-decoration:none;">
-            <button class="speed-btn active">🔍 Open Full-Resolution Plot (300 DPI)</button>
-          </a>
-        </div>
-      </div>
-      <div class="plot-frame">
-        <img id="backtest-img" src="outputs/backtest_plot.png" alt="NWIS-Sentinel Module 3 Historical Backtest Plot" onerror="this.src='results/module3_outputs/backtest_plot.png'"/>
-      </div>
+    <span class="bar-tag">bspwm</span>
+    <span class="bar-tag live">module3.live</span>
+    <span class="bar-tag">Volve 15/9-F-9A</span>
+
+    <div class="bar-center">
+      nwis@sentinel:~/<span>module3_telemetry_monitor</span> (80x24)
     </div>
 
-    <!-- Incident Info & Causality Audit Grid -->
-    <div class="info-grid">
-      <div class="info-card">
-        <h3>📍 Confirmed Real Incident Case (Module 1 Flagged)</h3>
-        <p class="info-text">
-          <strong>Well Tested:</strong> Volve Well 15/9-F-9A (Equinor, North Sea)<br/>
-          <strong>Telemetry File:</strong> <code>15_9-F-9A.csv</code> (16,670 rows, 273.1m – 1206.0m MD)<br/>
-          <strong>Confirmed Incident Depth:</strong> <strong>619.00 m MD</strong> (Row 4,663)<br/>
-          <strong>Hazard Classification:</strong> <code>stuck_pipe</code> (EVT_STUCK_PIPE)
-        </p>
-        <div class="incident-quote">
-          "Replaced TDS service loop and tested TDS. Set 9 5/8\" safelock plug at 619 m... Troubleshot stuck tool, released tieback adapter and POOH tieback with stuck tool inside."
-        </div>
-        <p class="info-text" style="font-size:11px;">
-          <em>Rationale:</em> This is the only documented stuck tool/pipe operational incident in Volve with an exact depth matching the real high-frequency MWD telemetry window.
-        </p>
-      </div>
-
-      <div class="info-card">
-        <h3>🛡️ Zero Future Data Leakage Guarantee</h3>
-        <ul class="audit-list">
-          <li><span class="check">✓</span> <strong>Causal Invariance:</strong> At step t, the system has zero access to rows &gt; t.</li>
-          <li><span class="check">✓</span> <strong>Causal Normalization:</strong> Rolling mean &amp; std use only window [t-W+1, t].</li>
-          <li><span class="check">✓</span> <strong>Recursive CUSUM:</strong> Accumulators update recursively with no lookahead.</li>
-          <li><span class="check">✓</span> <strong>No Self-Matching:</strong> Target well 15/9-F-9A is strictly excluded from offset analogs.</li>
-          <li><span class="check">✓</span> <strong>Automated Verification:</strong> <code>test_leakage.py</code> passed 5/5 regression unit tests.</li>
-        </ul>
-      </div>
+    <div class="bar-right">
+      <div class="bar-stat">CPU: <span id="cpuStat">6%</span></div>
+      <div class="bar-stat">RAM: <span id="ramStat">2.4G</span></div>
+      <div class="bar-stat ok" id="wsBarStat">WS: <span id="wsBarText">CONNECTING</span></div>
+      <div class="bar-stat ok">SYS: <span style="color:#34d399;">ONLINE</span></div>
+      <div class="bar-stat" id="clock">Mon Sep 10, 04:35 AM</div>
     </div>
-
-    <!-- Timeline of Detection Milestones -->
-    <div class="timeline-card">
-      <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">
-        ⏱️ Operational Milestones Timeline (Replay from 273.1 m to 619.0 m)
-      </h3>
-      <div class="timeline">
-        <div class="t-step warn">
-          <div class="t-header">
-            <span>First Precursor Warning (Hookload Drift)</span>
-            <span class="t-depth">302.21 m MD (Row 191)</span>
-          </div>
-          <p class="t-desc">CUSUM detector flags sustained upward drift on Corrected Total Hookload (+316.8 m lead before sticking).</p>
-        </div>
-
-        <div class="t-step crit">
-          <div class="t-header">
-            <span>First Critical Anomaly Alert (Rotary Speed Collapse)</span>
-            <span class="t-depth">471.83 m MD (Row 1,446)</span>
-          </div>
-          <p class="t-desc">Rotary Speed collapses to 49.2 RPM against baseline 82.8 RPM (Z-score = -3.2σ). Signals beginning of rotational stalling (+147.2 m lead).</p>
-        </div>
-
-        <div class="t-step sustained">
-          <div class="t-header">
-            <span style="color:#34d399;">Sustained Multi-Channel Actionable Alarm</span>
-            <span class="t-depth" style="background:rgba(16,185,129,0.2); color:#6ee7b7;">512.52 m MD (Row 2,019)</span>
-          </div>
-          <p class="t-desc">Dual-channel rotary stalling + hookload overpull resistance lock into sustained alarms. Wilson CI Risk reaches 0.80 (CRITICAL). <strong>Actionable operational lead time: +106.48 m / +44.07 min / +4.26 hrs.</strong></p>
-        </div>
-
-        <div class="t-step incident">
-          <div class="t-header">
-            <span style="color:#f87171;">Actual Historical Incident: EVT_STUCK_PIPE</span>
-            <span class="t-depth" style="background:rgba(239,68,68,0.2); color:#fca5a5;">619.00 m MD (Row 4,663)</span>
-          </div>
-          <p class="t-desc">Drillstring mechanically stuck in hole. Operations halted for fishing, troubleshooting stuck tool, and POOH.</p>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 1: LIVE TELEMETRY & ANOMALY STREAM (STEPS 1, 2, 3)                  -->
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-pane" id="tab-live">
+  <!-- ── Desktop Canvas Wrapper ─────────────────────────────────── -->
+  <div class="desktop-wrap">
 
-    <!-- Sensor Display Cards -->
-    <div class="grid-stats">
-      <div class="stat-card">
-        <span class="label">Measured Depth (MD)</span>
-        <span class="value" id="val-md">—</span>
-        <span class="unit">meters</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Hole Depth (TVD)</span>
-        <span class="value" id="val-tvd">—</span>
-        <span class="unit">meters</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Rotary Speed (RPM)</span>
-        <span class="value" id="val-rpm">—</span>
-        <span class="unit">rpm</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Corrected Hookload</span>
-        <span class="value" id="val-hookload">—</span>
-        <span class="unit">kkgf</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Total Hookload</span>
-        <span class="value" id="val-tot-hookload">—</span>
-        <span class="unit">kkgf</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Mud Density In</span>
-        <span class="value" id="val-mud-in">—</span>
-        <span class="unit">g/cm³</span>
-      </div>
-    </div>
+    <!-- ── Alacritty Terminal Master Window ─────────────────────── -->
+    <div class="terminal">
 
-    <!-- Playback Control Card -->
-    <div class="controls-card">
-      <div class="ctrl-group">
-        <span class="ctrl-label">Playback Speed:</span>
-        <div class="btn-group">
-          <button class="speed-btn active" onclick="setSpeed(1.0)">1x (1.0s)</button>
-          <button class="speed-btn" onclick="setSpeed(2.0)">2x (0.5s)</button>
-          <button class="speed-btn" onclick="setSpeed(5.0)">5x (0.2s)</button>
-          <button class="speed-btn" onclick="setSpeed(10.0)">10x (0.1s)</button>
-          <button class="speed-btn" onclick="setSpeed(50.0)">50x</button>
+      <!-- Titlebar -->
+      <div class="titlebar">
+        <div class="dot close"  title="Exit to Portal" onclick="window.location.href='http://localhost:5000'"></div>
+        <div class="dot min"    title="Minimize"></div>
+        <div class="dot max"    title="Maximize"></div>
+        <div class="titlebar-text">alacritty — <span>nwis@sentinel:~/modules/module3-telemetry-monitor</span></div>
+
+        <div class="titlebar-right">
+          <a class="btn-return" href="http://localhost:5000">⎋ RETURN TO DASHBOARD</a>
         </div>
       </div>
 
-      <div class="ctrl-group">
-        <span class="ctrl-label">Controls:</span>
-        <div class="btn-group">
-          <button class="btn-action" id="btn-pause" onclick="togglePause()">⏸ Pause</button>
-          <button class="btn-danger" onclick="resetStream()">↺ Reset to Row 0</button>
+      <!-- Terminal Body -->
+      <div class="term-body">
+
+        <!-- Terminal Command Prompt & Tabs -->
+        <div class="prompt-box">
+          <div class="prompt-line">
+            <span class="prompt-user">nwis@sentinel</span>
+            <span class="prompt-path">~/module3</span>
+            <span class="prompt-sym">#</span>
+            <span class="prompt-cmd" id="cmd-exec">./telemetry_suite --mode flagship_backtest</span>
+            <span class="cursor"></span>
+          </div>
+
+          <nav class="nav-tabs">
+            <button class="tab-btn active" id="btn-tab-backtest" onclick="switchTab('tab-backtest')">
+              🎯 [01] FLAGSHIP_BACKTEST
+              <span class="tab-tag">+106.5m Lead</span>
+            </button>
+            <button class="tab-btn" id="btn-tab-live" onclick="switchTab('tab-live')">
+              ⚡ [02] LIVE_TELEMETRY_STREAM (Step 1–3)
+            </button>
+            <button class="tab-btn" id="btn-tab-deliverables" onclick="switchTab('tab-deliverables')">
+              📋 [03] EXECUTIVE_AUDIT_DELIVERABLES
+            </button>
+          </nav>
         </div>
-      </div>
 
-      <div class="progress-container">
-        <div class="progress-labels">
-          <span id="lbl-row-count">Row: 0 / 16,670</span>
-          <span id="lbl-pct">0.0%</span>
+        <!-- ═════════════════════════════════════════════════════════════ -->
+        <!-- TAB 1: FLAGSHIP HISTORICAL TIME-TRAVEL BACKTEST              -->
+        <!-- ═════════════════════════════════════════════════════════════ -->
+        <div class="tab-pane active" id="tab-backtest">
+
+          <!-- Hero Lead Time Result Card -->
+          <div class="hero-banner">
+            <div class="hero-header">
+              <div class="hero-title">
+                <span>🏆</span> FLAGSHIP PROOF OF VALUE: HISTORICAL TIME-TRAVEL BACKTEST
+              </div>
+              <span class="hero-badge">Zero Future Leakage Verified</span>
+            </div>
+
+            <div class="kpi-grid">
+              <div class="kpi-card highlight">
+                <span class="kpi-label">Actionable Lead Distance</span>
+                <span class="kpi-value">+106.48 m</span>
+                <span class="kpi-sub">Advance warning before 619.0 m incident</span>
+              </div>
+              <div class="kpi-card highlight">
+                <span class="kpi-label">Telemetry Lead Time</span>
+                <span class="kpi-value">+44.07 min</span>
+                <span class="kpi-sub">2,644 telemetry rows ahead of incident</span>
+              </div>
+              <div class="kpi-card">
+                <span class="kpi-label">Rig-Floor Operational Window</span>
+                <span class="kpi-value" style="color:#60a5fa">+4.26 hrs</span>
+                <span class="kpi-sub">At typical 25 m/hr field drilling ROP</span>
+              </div>
+              <div class="kpi-card">
+                <span class="kpi-label">Precursor Initial Warning</span>
+                <span class="kpi-value" style="color:#fbbf24">+147.17 m</span>
+                <span class="kpi-sub">First critical rotary stalling anomaly</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dual-Tier Plot Viewer Card -->
+          <div class="term-card">
+            <div class="card-header-bar">
+              <div class="card-header-title">
+                <span>📊</span> PLOT_VIEWER: backtest_plot.png [Telemetry Physics vs Wilson CI Risk]
+              </div>
+              <a href="outputs/backtest_plot.png" target="_blank" style="text-decoration:none;">
+                <button class="speed-btn active">🔍 Open Full-Resolution Plot (300 DPI)</button>
+              </a>
+            </div>
+            <div class="plot-frame">
+              <img id="backtest-img" src="outputs/backtest_plot.png" alt="NWIS-Sentinel Module 3 Historical Backtest Plot" onerror="this.src='results/module3_outputs/backtest_plot.png'"/>
+            </div>
+          </div>
+
+          <!-- Incident Info & Causality Audit Grid -->
+          <div class="info-grid">
+            <div class="term-card">
+              <div class="card-header-title">
+                <span>📍</span> CONFIRMED HISTORICAL INCIDENT CASE (MODULE 1 FLAGGED)
+              </div>
+              <p style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
+                <strong style="color:var(--text-main);">Target Well:</strong> Volve Well 15/9-F-9A (Equinor, North Sea)<br/>
+                <strong style="color:var(--text-main);">Telemetry Source:</strong> <code>15_9-F-9A.csv</code> (16,670 rows, 273.1m – 1206.0m MD)<br/>
+                <strong style="color:var(--text-main);">Confirmed Incident Depth:</strong> <strong style="color:#f87171;">619.00 m MD</strong> (Row 4,663)<br/>
+                <strong style="color:var(--text-main);">Hazard Classification:</strong> <code style="color:var(--cyan-bright);">stuck_pipe</code> (EVT_STUCK_PIPE)
+              </p>
+              <div class="incident-quote">
+                "Replaced TDS service loop and tested TDS. Set 9 5/8\" safelock plug at 619 m... Troubleshot stuck tool, released tieback adapter and POOH tieback with stuck tool inside."
+              </div>
+              <p style="font-size:11px; color:var(--text-muted);">
+                <em>Rig Rationale:</em> Confirmed real stuck tool operational incident in Volve with exact depth matching high-frequency MWD telemetry.
+              </p>
+            </div>
+
+            <div class="term-card">
+              <div class="card-header-title">
+                <span>🛡️</span> ZERO FUTURE DATA LEAKAGE GUARANTEE (5/5 PASS)
+              </div>
+              <ul class="audit-list">
+                <li><span class="check">✓</span> <strong>Causal Invariance:</strong> At step t, zero access to rows &gt; t.</li>
+                <li><span class="check">✓</span> <strong>Causal Normalization:</strong> Rolling stats strictly use window [t-W+1, t].</li>
+                <li><span class="check">✓</span> <strong>Recursive CUSUM:</strong> Accumulators update recursively with zero lookahead.</li>
+                <li><span class="check">✓</span> <strong>No Self-Matching:</strong> Target well 15/9-F-9A strictly excluded from analog pool.</li>
+                <li><span class="check">✓</span> <strong>Automated Unit Verification:</strong> <code>test_leakage.py</code> passed 5/5 regression unit tests.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Operational Milestones Timeline -->
+          <div class="term-card">
+            <div class="card-header-title">
+              <span>⏱️</span> OPERATIONAL MILESTONES TIMELINE (273.1m → 619.0m MD)
+            </div>
+            <div class="timeline">
+              <div class="t-step warn">
+                <div class="t-header">
+                  <span>First Precursor Warning (Hookload Drift)</span>
+                  <span class="t-depth">302.21 m MD (Row 191)</span>
+                </div>
+                <p class="t-desc">CUSUM detector flags sustained upward drift on Corrected Total Hookload (+316.8 m lead before sticking).</p>
+              </div>
+
+              <div class="t-step crit">
+                <div class="t-header">
+                  <span>First Critical Anomaly Alert (Rotary Speed Collapse)</span>
+                  <span class="t-depth">471.83 m MD (Row 1,446)</span>
+                </div>
+                <p class="t-desc">Rotary Speed collapses to 49.2 RPM against baseline 82.8 RPM (Z-score = -3.2σ). Signals beginning of rotational stalling (+147.2 m lead).</p>
+              </div>
+
+              <div class="t-step sustained">
+                <div class="t-header">
+                  <span style="color:#34d399;">Sustained Multi-Channel Actionable Alarm</span>
+                  <span class="t-depth" style="background:rgba(16,185,129,0.2); color:#6ee7b7;">512.52 m MD (Row 2,019)</span>
+                </div>
+                <p class="t-desc">Dual-channel rotary stalling + hookload overpull resistance lock into sustained alarms. Wilson CI Risk reaches 0.80 (CRITICAL). <strong>Actionable operational lead time: +106.48 m / +44.07 min / +4.26 hrs.</strong></p>
+              </div>
+
+              <div class="t-step incident">
+                <div class="t-header">
+                  <span style="color:#f87171;">Actual Historical Incident: EVT_STUCK_PIPE</span>
+                  <span class="t-depth" style="background:rgba(239,68,68,0.2); color:#fca5a5;">619.00 m MD (Row 4,663)</span>
+                </div>
+                <p class="t-desc">Drillstring mechanically stuck in hole. Operations halted for fishing, troubleshooting stuck tool, and POOH.</p>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="progress-fill"></div>
+
+        <!-- ═════════════════════════════════════════════════════════════ -->
+        <!-- TAB 2: LIVE TELEMETRY & ANOMALY STREAM                       -->
+        <!-- ═════════════════════════════════════════════════════════════ -->
+        <div class="tab-pane" id="tab-live">
+
+          <!-- 6 Telemetry HUD Sensors -->
+          <div class="grid-stats">
+            <div class="stat-card">
+              <span class="label">Measured Depth (MD)</span>
+              <span class="value" id="val-md">—</span>
+              <span class="unit">meters</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">Hole Depth (TVD)</span>
+              <span class="value" id="val-tvd">—</span>
+              <span class="unit">meters</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">Rotary Speed (RPM)</span>
+              <span class="value" id="val-rpm">—</span>
+              <span class="unit">rpm</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">Corrected Hookload</span>
+              <span class="value" id="val-hookload">—</span>
+              <span class="unit">kkgf</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">Total Hookload</span>
+              <span class="value" id="val-tot-hookload">—</span>
+              <span class="unit">kkgf</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">Mud Density In</span>
+              <span class="value" id="val-mud-in">—</span>
+              <span class="unit">g/cm³</span>
+            </div>
+          </div>
+
+          <!-- Playback Control Deck -->
+          <div class="term-card">
+            <div class="ctrl-group">
+              <span class="ctrl-label">Playback Speed:</span>
+              <div class="btn-group">
+                <button class="speed-btn active" onclick="setSpeed(1.0, event)">1x (1.0s)</button>
+                <button class="speed-btn" onclick="setSpeed(2.0, event)">2x (0.5s)</button>
+                <button class="speed-btn" onclick="setSpeed(5.0, event)">5x (0.2s)</button>
+                <button class="speed-btn" onclick="setSpeed(10.0, event)">10x (0.1s)</button>
+                <button class="speed-btn" onclick="setSpeed(50.0, event)">50x</button>
+              </div>
+            </div>
+
+            <div class="ctrl-group">
+              <span class="ctrl-label">Controls:</span>
+              <div class="btn-group">
+                <button class="btn-action" id="btn-pause" onclick="togglePause()">⏸ Pause</button>
+                <button class="btn-danger" onclick="resetStream()">↺ Reset to Row 0</button>
+              </div>
+            </div>
+
+            <div class="progress-container">
+              <div class="progress-labels">
+                <span id="lbl-row-count">Row: 0 / 16,670</span>
+                <span id="lbl-pct">0.0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Live Anomaly Alerts -->
+          <div class="term-card">
+            <div class="card-header-bar">
+              <div class="card-header-title">
+                <span>⚡</span> LIVE PHYSICAL ANOMALY ALERTS (STEP 2 — Z-SCORE &amp; CUSUM)
+              </div>
+              <span class="card-badge badge-amber" id="alert-count-badge">0 Alerts Fired</span>
+            </div>
+            <div class="alert-list" id="alert-list">
+              <div id="alert-empty" style="color:var(--text-muted);font-size:11.5px;text-align:center;padding:14px;">
+                Listening for live telemetry deviations...
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Sequence Matching & Wilson CI -->
+          <div class="term-card">
+            <div class="card-header-bar">
+              <div class="card-header-title">
+                <span>🧬</span> HAZARD RISK PROFILE (STEP 3 — SMITH-WATERMAN + WILSON SCORE CI)
+              </div>
+              <span class="card-badge badge-purple" id="seq-update-time">Awaiting Evaluation</span>
+            </div>
+            <div class="risk-grid" id="risk-grid">
+              <div id="risk-empty" style="color:var(--text-muted);font-size:11.5px;text-align:center;padding:14px;grid-column:1/-1;">
+                Sequence matching evaluates top-10 analog wells once alerts are detected.
+              </div>
+            </div>
+          </div>
+
+          <!-- Raw Incoming Telemetry Table -->
+          <div class="term-card">
+            <div class="card-header-bar">
+              <div class="card-header-title">
+                <span>📡</span> INCOMING RIG TELEMETRY STREAM (LAST 8 RECORDS)
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Row</th>
+                    <th>MD (m)</th>
+                    <th>RPM</th>
+                    <th>Hookload (kkgf)</th>
+                    <th>WOB (kkgf)</th>
+                    <th>Mud In (g/cm³)</th>
+                    <th>TVD (m)</th>
+                  </tr>
+                </thead>
+                <tbody id="telemetry-table-body">
+                  <tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Waiting for telemetry stream...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
-      </div>
-    </div>
 
-    <!-- Anomaly Alerts (Step 2) -->
-    <div class="step-card">
-      <div class="step-header">
-        <h2>⚡ Live Physical Anomaly Alerts (Step 2 — Z-Score &amp; CUSUM)</h2>
-        <span class="step-badge step-badge-amber" id="alert-count-badge">0 Alerts Fired</span>
-      </div>
-      <div class="alert-list" id="alert-list">
-        <div id="alert-empty" style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px;">
-          Listening for live telemetry deviations...
+        <!-- ═════════════════════════════════════════════════════════════ -->
+        <!-- TAB 3: EXECUTIVE DELIVERABLES & AUDIT                        -->
+        <!-- ═════════════════════════════════════════════════════════════ -->
+        <div class="tab-pane" id="tab-deliverables">
+
+          <div class="deliverables-grid">
+            <div class="deliv-card">
+              <span class="deliv-title">🎯 Flagship Backtest Audit</span>
+              <p class="deliv-desc">Executive evaluation report with computed lead time (+106.5 m / +44.1 min) and causality audit metrics.</p>
+              <span class="deliv-meta">3.8 KB &nbsp;|&nbsp; Verified Zero-Leakage</span>
+              <button class="speed-btn active" id="btn-audit-backtest" onclick="loadDeliverable('backtest', event)">Inspect Audit Summary</button>
+            </div>
+
+            <div class="deliv-card">
+              <span class="deliv-title">📊 Lead-Time Time-Series Plot</span>
+              <p class="deliv-desc">Publication-ready 300 DPI visualization of the telemetry curve, actionable alert, and actual incident.</p>
+              <span class="deliv-meta">507 KB &nbsp;|&nbsp; 3633 × 2401 px PNG</span>
+              <a href="outputs/backtest_plot.png" target="_blank" style="text-decoration:none;">
+                <button class="speed-btn" style="width:100%;">Open 300 DPI Plot</button>
+              </a>
+            </div>
+
+            <div class="deliv-card">
+              <span class="deliv-title">🛡️ Hazard Risk Forecast Table</span>
+              <p class="deliv-desc">Multi-hazard predictions with full feature breakdown and Wilson 95% confidence intervals (no black boxes).</p>
+              <span class="deliv-meta">3.1 MB &nbsp;|&nbsp; 662 Evaluation Records</span>
+              <button class="speed-btn" id="btn-audit-predictions" onclick="loadDeliverable('predictions', event)">View Risk Forecasts</button>
+            </div>
+
+            <div class="deliv-card">
+              <span class="deliv-title">🧬 Analog Sequence Alignments</span>
+              <p class="deliv-desc">Matched historical offset analogs and their Smith-Waterman alignment scores across 41 reference wells.</p>
+              <span class="deliv-meta">14.8 KB &nbsp;|&nbsp; Multi-Hazard Alignments</span>
+              <button class="speed-btn" id="btn-audit-sequence" onclick="loadDeliverable('sequence', event)">View Analog Matches</button>
+            </div>
+          </div>
+
+          <!-- In-Terminal Operational Verification Inspector -->
+          <div class="term-card">
+            <div class="card-header-bar">
+              <div class="card-header-title" id="viewer-title">
+                <span>📋</span> EXECUTIVE VERIFICATION &amp; AUDIT INSPECTOR
+              </div>
+              <span class="card-badge badge-purple" id="viewer-status">Audit Summary Active</span>
+            </div>
+            <div id="inspector-display-container" style="min-height:220px; overflow-x:auto;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
         </div>
-      </div>
-    </div>
 
-    <!-- Sequence Matching & Wilson CI (Step 3) -->
-    <div class="step-card">
-      <div class="step-header">
-        <h2>🧬 Hazard Risk Profile (Step 3 — Smith-Waterman + Wilson Score CI)</h2>
-        <span class="step-badge step-badge-purple" id="seq-update-time">Awaiting Evaluation</span>
-      </div>
-      <div class="risk-grid" id="risk-grid">
-        <div id="risk-empty" style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px;grid-column:1/-1;">
-          Sequence matching evaluates top-10 analog wells once alerts are detected.
+        <!-- Terminal Footer Status Line -->
+        <div class="status-line">
+          <div class="status-dot"></div>
+          <span>Module 3 Active · Telemetry Port 5002 · Risk Server Port 5003 · CUSUM/Z-Score Supervised</span>
         </div>
-      </div>
-    </div>
 
-    <!-- Raw Incoming Telemetry Table -->
-    <div class="table-card">
-      <div class="step-header">
-        <h2>Incoming Rig Telemetry Stream (Last 8 Records)</h2>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Row</th>
-              <th>MD (m)</th>
-              <th>RPM</th>
-              <th>Hookload (kkgf)</th>
-              <th>WOB (kkgf)</th>
-              <th>Mud In (g/cm³)</th>
-              <th>TVD (m)</th>
-            </tr>
-          </thead>
-          <tbody id="telemetry-table-body">
-            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Waiting for telemetry stream...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      </div><!-- /term-body -->
+    </div><!-- /terminal -->
 
-  </div>
+  </div><!-- /desktop-wrap -->
 
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: DELIVERABLES & AUDIT EXPLORER (STEP 5)                            -->
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: EXECUTIVE DELIVERABLES & AUDIT (STEP 5)                           -->
-  <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <div class="tab-pane" id="tab-deliverables">
-
-    <div class="deliverables-grid">
-      <div class="deliv-card">
-        <span class="deliv-title">🎯 Flagship Backtest Audit</span>
-        <p class="deliv-desc">Executive evaluation report with computed lead time (+106.5 m / +44.1 min) and causality audit metrics.</p>
-        <span class="deliv-meta">3.8 KB &nbsp;|&nbsp; Verified Zero-Leakage</span>
-        <button class="speed-btn active" id="btn-audit-backtest" onclick="loadDeliverable('backtest', event)">Inspect Audit Summary</button>
-      </div>
-
-      <div class="deliv-card">
-        <span class="deliv-title">📊 Lead-Time Time-Series Plot</span>
-        <p class="deliv-desc">Publication-ready 300 DPI visualization of the telemetry curve, actionable alert, and actual incident.</p>
-        <span class="deliv-meta">507 KB &nbsp;|&nbsp; 3633 × 2401 px PNG</span>
-        <a href="outputs/backtest_plot.png" target="_blank" style="text-decoration:none;">
-          <button class="speed-btn" style="width:100%;">Open 300 DPI Plot</button>
-        </a>
-      </div>
-
-      <div class="deliv-card">
-        <span class="deliv-title">🛡️ Hazard Risk Forecast Table</span>
-        <p class="deliv-desc">Multi-hazard predictions with full feature breakdown and Wilson 95% confidence intervals (no black boxes).</p>
-        <span class="deliv-meta">3.1 MB &nbsp;|&nbsp; 662 Evaluation Records</span>
-        <button class="speed-btn" id="btn-audit-predictions" onclick="loadDeliverable('predictions', event)">View Risk Forecasts</button>
-      </div>
-
-      <div class="deliv-card">
-        <span class="deliv-title">🧬 Analog Sequence Alignments</span>
-        <p class="deliv-desc">Matched historical offset analogs and their Smith-Waterman alignment scores across 41 reference wells.</p>
-        <span class="deliv-meta">14.8 KB &nbsp;|&nbsp; Multi-Hazard Alignments</span>
-        <button class="speed-btn" id="btn-audit-sequence" onclick="loadDeliverable('sequence', event)">View Analog Matches</button>
-      </div>
-    </div>
-
-    <!-- In-Browser Operational Verification Table (NO RAW JSON) -->
-    <div class="table-card">
-      <div class="step-header">
-        <h2 id="viewer-title">Executive Verification &amp; Audit Inspector</h2>
-        <span class="step-badge step-badge-purple" id="viewer-status">Audit Summary Active</span>
-      </div>
-      <div id="inspector-display-container" style="min-height:220px; overflow-x:auto;">
-        <!-- Dynamically rendered visual tables and KPI cards (no raw code dumps) -->
-      </div>
-    </div>
-
-  </div>
-
+  <!-- ── Scripts ─────────────────────────────────────────────────── -->
   <script>
-    // Tab Switching Logic
-    function switchTab(tabId) {
+    /* ── Live Clock ─────────────────────────────────────────────── */
+    function updateClock() {
+      const now = new Date();
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const d = days[now.getDay()];
+      const m = months[now.getMonth()];
+      const dd = now.getDate();
+      let h = now.getHours();
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      const el = document.getElementById('clock');
+      if (el) el.textContent = `${d} ${m} ${dd}, ${h}:${mm} ${ampm}`;
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    /* ── Simulated CPU / RAM ─────────────────────────────────────── */
+    function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+    function updateStats() {
+      const cpu = randInt(4, 16);
+      const ram = (randInt(22, 28) / 10).toFixed(1);
+      const cpuEl = document.getElementById('cpuStat');
+      const ramEl = document.getElementById('ramStat');
+      if (cpuEl) cpuEl.textContent = cpu + '%';
+      if (ramEl) ramEl.textContent = ram + 'G';
+    }
+    setInterval(updateStats, 3000);
+
+    /* ── Tab Switching with History State ────────────────────────── */
+    function switchTab(tabId, pushHistory = true) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
@@ -1022,9 +1210,21 @@
       const targetBtn = document.getElementById('btn-' + tabId);
       if (targetPane) targetPane.classList.add('active');
       if (targetBtn) targetBtn.classList.add('active');
+
+      const cmdEl = document.getElementById('cmd-exec');
+      if (cmdEl) {
+        let mode = 'flagship_backtest';
+        if (tabId === 'tab-live') mode = 'live_stream';
+        if (tabId === 'tab-deliverables') mode = 'audit_deliverables';
+        cmdEl.textContent = `./telemetry_suite --mode ${mode}`;
+      }
+
+      if (pushHistory && window.history && window.history.pushState) {
+        window.history.pushState({ tab: tabId }, '', '#' + tabId);
+      }
     }
 
-    // Deliverables Inspector Viewer (Transforms raw data into executive visual tables)
+    /* ── Deliverables Inspector ──────────────────────────────────── */
     function loadDeliverable(type, evt) {
       const container = document.getElementById('inspector-display-container');
       const title = document.getElementById('viewer-title');
@@ -1034,34 +1234,34 @@
       if (evt && evt.target) evt.target.classList.add('active');
 
       if (type === 'backtest') {
-        title.textContent = "Executive Time-Travel Backtest Verification Summary";
+        title.innerHTML = "<span>📋</span> EXECUTIVE TIME-TRAVEL BACKTEST VERIFICATION SUMMARY";
         status.textContent = "Step 4 Core Result — Verified";
         container.innerHTML = `
           <div style="display:flex; flex-direction:column; gap:16px;">
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
-              <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:8px; padding:12px 16px;">
-                <span style="font-size:11px; color:#86efac; text-transform:uppercase; font-weight:700;">Actionable Lead Distance</span>
-                <div style="font-size:22px; font-weight:800; color:#4ade80; margin-top:4px;">+106.48 m</div>
-                <span style="font-size:11px; color:var(--text-muted);">From 512.52 m to 619.00 m</span>
+              <div style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); border-radius:6px; padding:12px 14px;">
+                <span style="font-size:10px; color:#86efac; text-transform:uppercase; font-weight:700;">Actionable Lead Distance</span>
+                <div style="font-size:22px; font-weight:800; color:#34d399; margin-top:3px;">+106.48 m</div>
+                <span style="font-size:10.5px; color:var(--text-muted);">From 512.52 m to 619.00 m</span>
               </div>
-              <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:12px 16px;">
-                <span style="font-size:11px; color:#93c5fd; text-transform:uppercase; font-weight:700;">Operational Lead Time</span>
-                <div style="font-size:22px; font-weight:800; color:#60a5fa; margin-top:4px;">+44.07 min</div>
-                <span style="font-size:11px; color:var(--text-muted);">+4.26 hrs at 25 m/hr ROP</span>
+              <div style="background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); border-radius:6px; padding:12px 14px;">
+                <span style="font-size:10px; color:var(--cyan-bright); text-transform:uppercase; font-weight:700;">Operational Lead Time</span>
+                <div style="font-size:22px; font-weight:800; color:var(--cyan-bright); margin-top:3px;">+44.07 min</div>
+                <span style="font-size:10.5px; color:var(--text-muted);">+4.26 hrs at 25 m/hr ROP</span>
               </div>
-              <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:12px 16px;">
-                <span style="font-size:11px; color:#fcd34d; text-transform:uppercase; font-weight:700;">Precursor Warning</span>
-                <div style="font-size:22px; font-weight:800; color:#fbbf24; margin-top:4px;">+147.17 m</div>
-                <span style="font-size:11px; color:var(--text-muted);">First RPM stalling at 471.8 m</span>
+              <div style="background:rgba(210,153,34,0.1); border:1px solid rgba(210,153,34,0.3); border-radius:6px; padding:12px 14px;">
+                <span style="font-size:10px; color:#fcd34d; text-transform:uppercase; font-weight:700;">Precursor Warning</span>
+                <div style="font-size:22px; font-weight:800; color:#fbbf24; margin-top:3px;">+147.17 m</div>
+                <span style="font-size:10.5px; color:var(--text-muted);">First RPM stalling at 471.8 m</span>
               </div>
-              <div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:8px; padding:12px 16px;">
-                <span style="font-size:11px; color:#d8b4fe; text-transform:uppercase; font-weight:700;">Causality Guarantee</span>
-                <div style="font-size:22px; font-weight:800; color:#c084fc; margin-top:4px;">0% Leakage</div>
-                <span style="font-size:11px; color:var(--text-muted);">5/5 Unit Tests Verified</span>
+              <div style="background:rgba(188,140,255,0.1); border:1px solid rgba(188,140,255,0.3); border-radius:6px; padding:12px 14px;">
+                <span style="font-size:10px; color:#d8b4fe; text-transform:uppercase; font-weight:700;">Causality Guarantee</span>
+                <div style="font-size:22px; font-weight:800; color:#c084fc; margin-top:3px;">0% Leakage</div>
+                <span style="font-size:10.5px; color:var(--text-muted);">5/5 Regression Tests Verified</span>
               </div>
             </div>
 
-            <table style="width:100%; border-collapse:collapse; margin-top:6px;">
+            <table style="width:100%; border-collapse:collapse; margin-top:4px;">
               <thead>
                 <tr>
                   <th>Audit Metric</th>
@@ -1075,38 +1275,38 @@
                   <td><strong>Incident Target Well</strong></td>
                   <td>Volve Well 15/9-F-9A (Equinor, North Sea)</td>
                   <td>Real High-Frequency MWD Telemetry (16,670 rows)</td>
-                  <td><span class="step-badge" style="background:rgba(34,197,94,0.15);color:#86efac;">✓ Real Data</span></td>
+                  <td><span class="card-badge badge-green">✓ Real Data</span></td>
                 </tr>
                 <tr>
                   <td><strong>Incident Event</strong></td>
                   <td>NO_2014-02-05_EVT_STUCK_PIPE at 619.00 m MD</td>
                   <td>Confirmed Daily Drilling Report (DDR) Citation</td>
-                  <td><span class="step-badge" style="background:rgba(34,197,94,0.15);color:#86efac;">✓ Confirmed</span></td>
+                  <td><span class="card-badge badge-green">✓ Confirmed</span></td>
                 </tr>
                 <tr>
                   <td><strong>First Actionable Alarm</strong></td>
                   <td>512.52 m MD (Row 2,019) — Risk = 0.80 (Critical)</td>
                   <td>Dual CUSUM hookload overpull + rotary stall</td>
-                  <td><span class="step-badge" style="background:rgba(59,130,246,0.15);color:#93c5fd;">✓ Actionable</span></td>
+                  <td><span class="card-badge badge-cyan">✓ Actionable</span></td>
                 </tr>
                 <tr>
                   <td><strong>Causal Invariance</strong></td>
                   <td>Strict depth/time ordering; target well excluded from offset analogs</td>
                   <td>Zero Future Data Leakage Rule</td>
-                  <td><span class="step-badge" style="background:rgba(34,197,94,0.15);color:#86efac;">✓ 5/5 Tests Passed</span></td>
+                  <td><span class="card-badge badge-green">✓ 5/5 Tests Passed</span></td>
                 </tr>
                 <tr>
                   <td><strong>Module 4 Contract</strong></td>
                   <td>Outputs formatted in standardized JSON/PNG schemas for GraphRAG</td>
                   <td>NWIS-Sentinel System Architecture</td>
-                  <td><span class="step-badge" style="background:rgba(168,85,247,0.15);color:#d8b4fe;">✓ Ready for Integration</span></td>
+                  <td><span class="card-badge badge-purple">✓ Ready for Integration</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         `;
       } else if (type === 'predictions') {
-        title.textContent = "Live Hazard Risk Forecasts (Sample Evaluated Intervals)";
+        title.innerHTML = "<span>📋</span> LIVE HAZARD RISK FORECASTS (EVALUATED INTERVALS)";
         status.textContent = "Wilson Score 95% Confidence Intervals";
         container.innerHTML = '<div style="color:var(--text-muted);padding:14px;text-align:center;">Loading risk predictions table...</div>';
 
@@ -1140,22 +1340,20 @@
                     return `
                       <tr>
                         <td><strong>${r.measured_depth_m != null ? r.measured_depth_m.toFixed(1) + ' m' : '—'}</strong></td>
-                        <td><span style="font-family:'JetBrains Mono',monospace;color:#93c5fd;">${r.hazard}</span></td>
+                        <td><span style="color:var(--cyan-bright);">${r.hazard}</span></td>
                         <td><span class="alert-badge ${badgeClass}">${r.risk_level}</span></td>
                         <td><strong>${ce}%</strong></td>
                         <td>
-                          <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text-secondary);">[${lo}% – ${hi}%]</span>
-                          </div>
+                          <span style="font-size:11px; color:var(--text-secondary);">[${lo}% – ${hi}%]</span>
                         </td>
-                        <td>${r.actionable_threshold_crossed ? '<span style="color:#ef4444;font-weight:700;">🚨 YES (Alarm)</span>' : '<span style="color:#22c55e;">Normal</span>'}</td>
+                        <td>${r.actionable_threshold_crossed ? '<span style="color:#f87171;font-weight:700;">🚨 YES (Alarm)</span>' : '<span style="color:#3fb950;">Normal</span>'}</td>
                         <td style="font-size:11px; color:var(--text-secondary); max-width:320px;">${r.explanation || 'Physical parameters within safe baseline range.'}</td>
                       </tr>
                     `;
                   }).join('')}
                 </tbody>
               </table>
-              <div style="font-size:11px; color:var(--text-muted); margin-top:10px; text-align:right;">
+              <div style="font-size:10.5px; color:var(--text-muted); margin-top:8px; text-align:right;">
                 Showing representative records from 662 causal evaluations in <code>risk_predictions.jsonl</code>.
               </div>
             `;
@@ -1164,7 +1362,7 @@
             container.innerHTML = '<div style="color:var(--text-muted);padding:14px;">Telemetry predictions loaded into Module 4 cache.</div>';
           });
       } else if (type === 'sequence') {
-        title.textContent = "Smith-Waterman Offset Analog Alignments";
+        title.innerHTML = "<span>📋</span> SMITH-WATERMAN OFFSET ANALOG ALIGNMENTS";
         status.textContent = "Evaluated against 41 Offset Wells";
         container.innerHTML = '<div style="color:var(--text-muted);padding:14px;text-align:center;">Loading analog sequence alignment table...</div>';
 
@@ -1203,15 +1401,15 @@
                 <tbody>
                   ${rows.map(r => `
                     <tr>
-                      <td><span style="font-family:'JetBrains Mono',monospace;color:#93c5fd;">${r.hazard}</span></td>
+                      <td><span style="color:var(--cyan-bright);">${r.hazard}</span></td>
                       <td>${r.targetWell}</td>
                       <td><strong>${r.analogWell}</strong></td>
                       <td>
-                        <span style="font-weight:700; color:${Number(r.score) >= 70 ? '#f87171' : '#60a5fa'};">${r.score}% Match</span>
+                        <span style="font-weight:700; color:${Number(r.score) >= 70 ? '#f87171' : 'var(--cyan-bright)'};">${r.score}% Match</span>
                       </td>
-                      <td style="font-size:10px; font-family:'JetBrains Mono',monospace; color:#d8b4fe;">${r.alignedQuery}</td>
+                      <td style="font-size:10px; color:#d8b4fe;">${r.alignedQuery}</td>
                       <td>
-                        <span class="step-badge" style="background:${r.matchThreshold === 'HIGH CORRELATION' ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)'};color:${r.matchThreshold === 'HIGH CORRELATION' ? '#fca5a5' : '#93c5fd'};">
+                        <span class="card-badge ${r.matchThreshold === 'HIGH CORRELATION' ? 'badge-amber' : 'badge-cyan'}">
                           ${r.matchThreshold}
                         </span>
                       </td>
@@ -1219,7 +1417,7 @@
                   `).join('')}
                 </tbody>
               </table>
-              <div style="font-size:11px; color:var(--text-muted); margin-top:10px; text-align:right;">
+              <div style="font-size:10.5px; color:var(--text-muted); margin-top:8px; text-align:right;">
                 Smith-Waterman Dynamic Programming scoring: Match=+3, Mismatch=-2, Gap=-2.
               </div>
             `;
@@ -1233,7 +1431,7 @@
     // Default load backtest into inspector
     loadDeliverable('backtest');
 
-    // ══ Telemetry Streaming WebSocket Client ══
+    /* ── Telemetry Streaming WebSocket Client ─────────────────────── */
     let telemetryWs = null;
     let anomalyWs = null;
     const TOTAL_ROWS = 16670;
@@ -1244,13 +1442,13 @@
     const maxAlerts = 40;
 
     function connectTelemetryWebSocket() {
-      const dot = document.getElementById('ws-dot');
-      const status = document.getElementById('ws-status');
+      const wsBarStat = document.getElementById('wsBarStat');
+      const wsBarText = document.getElementById('wsBarText');
       telemetryWs = new WebSocket('ws://localhost:5002/ws/telemetry');
 
       telemetryWs.onopen = () => {
-        dot.classList.add('connected');
-        status.textContent = 'Telemetry: Connected (Port 5002)';
+        if (wsBarStat) wsBarStat.className = 'bar-stat ok';
+        if (wsBarText) wsBarText.textContent = 'PORT 5002 CONNECTED';
       };
 
       telemetryWs.onmessage = (event) => {
@@ -1262,13 +1460,13 @@
       };
 
       telemetryWs.onclose = () => {
-        dot.classList.remove('connected');
-        status.textContent = 'Telemetry: Offline (Port 5002)';
+        if (wsBarStat) wsBarStat.className = 'bar-stat warn';
+        if (wsBarText) wsBarText.textContent = 'PORT 5002 OFFLINE';
         setTimeout(connectTelemetryWebSocket, 3000);
       };
 
       telemetryWs.onerror = () => {
-        dot.classList.remove('connected');
+        if (wsBarStat) wsBarStat.className = 'bar-stat warn';
       };
     }
 
@@ -1280,7 +1478,7 @@
 
       const setVal = (id, val, dec=2) => {
         const el = document.getElementById(id);
-        el.textContent = (val != null && !isNaN(val)) ? Number(val).toFixed(dec) : '—';
+        if (el) el.textContent = (val != null && !isNaN(val)) ? Number(val).toFixed(dec) : '—';
       };
 
       setVal('val-md', data['Measured Depth m'], 1);
@@ -1294,17 +1492,19 @@
       tableRows.unshift({ rowIndex, ...data });
       while (tableRows.length > MAX_TABLE_ROWS) tableRows.pop();
 
-      tableBody.innerHTML = tableRows.map(r => `
-        <tr>
-          <td>${r.rowIndex}</td>
-          <td>${r['Measured Depth m'] != null ? Number(r['Measured Depth m']).toFixed(2) : '—'}</td>
-          <td>${r['Average Rotary Speed rpm'] != null ? Number(r['Average Rotary Speed rpm']).toFixed(1) : '—'}</td>
-          <td>${r['Corrected Total Hookload kkgf'] != null ? Number(r['Corrected Total Hookload kkgf']).toFixed(1) : '—'}</td>
-          <td>${r['Averaged WOB kkgf'] != null ? Number(r['Averaged WOB kkgf']).toFixed(1) : '—'}</td>
-          <td>${r['Mud Density In g/cm3'] != null ? Number(r['Mud Density In g/cm3']).toFixed(3) : '—'}</td>
-          <td>${r['Hole Depth (TVD) m'] != null ? Number(r['Hole Depth (TVD) m']).toFixed(1) : '—'}</td>
-        </tr>
-      `).join('');
+      if (tableBody) {
+        tableBody.innerHTML = tableRows.map(r => `
+          <tr>
+            <td><strong>${r.rowIndex}</strong></td>
+            <td>${r['Measured Depth m'] != null ? Number(r['Measured Depth m']).toFixed(2) : '—'}</td>
+            <td>${r['Average Rotary Speed rpm'] != null ? Number(r['Average Rotary Speed rpm']).toFixed(1) : '—'}</td>
+            <td>${r['Corrected Total Hookload kkgf'] != null ? Number(r['Corrected Total Hookload kkgf']).toFixed(1) : '—'}</td>
+            <td>${r['Averaged WOB kkgf'] != null ? Number(r['Averaged WOB kkgf']).toFixed(1) : '—'}</td>
+            <td>${r['Mud Density In g/cm3'] != null ? Number(r['Mud Density In g/cm3']).toFixed(3) : '—'}</td>
+            <td>${r['Hole Depth (TVD) m'] != null ? Number(r['Hole Depth (TVD) m']).toFixed(1) : '—'}</td>
+          </tr>
+        `).join('');
+      }
     }
 
     function setSpeed(speed, evt) {
@@ -1327,15 +1527,12 @@
       const isPaused = btn.textContent.includes('Resume');
       const action = isPaused ? 'resume' : 'pause';
 
-      // Instant UI toggle
       btn.textContent = isPaused ? '⏸ Pause' : '▶ Resume';
-      btn.style.borderColor = isPaused ? 'var(--accent-blue)' : 'var(--accent-amber)';
+      btn.style.borderColor = isPaused ? 'var(--cyan-bright)' : 'var(--accent-yellow)';
 
-      // Send over WebSocket for lowest latency
       if (telemetryWs && telemetryWs.readyState === WebSocket.OPEN) {
         telemetryWs.send(JSON.stringify({ action }));
       }
-      // Corroborate via HTTP REST
       fetch(`http://localhost:5002/api/telemetry/control`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1344,7 +1541,6 @@
     }
 
     function resetStream() {
-      // Send reset to simulator (port 5002)
       if (telemetryWs && telemetryWs.readyState === WebSocket.OPEN) {
         telemetryWs.send(JSON.stringify({ action: 'reset' }));
       }
@@ -1354,21 +1550,19 @@
         body: JSON.stringify({ action: 'reset' })
       }).catch(() => {});
 
-      // Send reset to anomaly detector (port 5003)
       fetch(`http://localhost:5003/api/anomaly/reset`, {
         method: 'POST'
       }).catch(() => {});
 
-      // Immediately reset UI metrics & DOM state
       tableRows.length = 0;
       alertHistory.length = 0;
-      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Stream reset to Row 0. Waiting for records...</td></tr>';
+      if (tableBody) tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Stream reset to Row 0. Waiting for records...</td></tr>';
       document.getElementById('lbl-row-count').textContent = 'Row: 0 / 16,670';
       document.getElementById('lbl-pct').textContent = '0.0%';
       document.getElementById('progress-fill').style.width = '0%';
       document.getElementById('alert-count-badge').textContent = '0 Alerts Fired';
-      document.getElementById('alert-list').innerHTML = '<div id="alert-empty" style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px;">Stream reset to Row 0. Listening for live telemetry deviations...</div>';
-      document.getElementById('risk-grid').innerHTML = '<div id="risk-empty" style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px;grid-column:1/-1;">Sequence matching evaluates top-10 analog wells once alerts are detected.</div>';
+      document.getElementById('alert-list').innerHTML = '<div id="alert-empty" style="color:var(--text-muted);font-size:11.5px;text-align:center;padding:14px;">Stream reset to Row 0. Listening for live telemetry deviations...</div>';
+      document.getElementById('risk-grid').innerHTML = '<div id="risk-empty" style="color:var(--text-muted);font-size:11.5px;text-align:center;padding:14px;grid-column:1/-1;">Sequence matching evaluates top-10 analog wells once alerts are detected.</div>';
       document.getElementById('seq-update-time').textContent = 'Awaiting Evaluation';
 
       const resetGauge = (id) => { const el = document.getElementById(id); if (el) el.textContent = '—'; };
@@ -1382,20 +1576,13 @@
       const btn = document.getElementById('btn-pause');
       if (btn) {
         btn.textContent = '⏸ Pause';
-        btn.style.borderColor = 'var(--accent-blue)';
+        btn.style.borderColor = 'var(--cyan-bright)';
       }
     }
 
-    // ══ Anomaly & Sequence Matching WebSocket Client ══
+    /* ── Anomaly & Sequence Matching WebSocket Client ─────────────── */
     function connectAnomalyWebSocket() {
-      const dot = document.getElementById('anomaly-dot');
-      const status = document.getElementById('anomaly-status');
       anomalyWs = new WebSocket('ws://localhost:5003/ws/anomaly');
-
-      anomalyWs.onopen = () => {
-        dot.classList.add('connected');
-        status.textContent = 'Anomaly Server: Connected (Port 5003)';
-      };
 
       anomalyWs.onmessage = (event) => {
         try {
@@ -1406,13 +1593,7 @@
       };
 
       anomalyWs.onclose = () => {
-        dot.classList.remove('connected');
-        status.textContent = 'Anomaly Server: Offline (Port 5003)';
         setTimeout(connectAnomalyWebSocket, 4000);
-      };
-
-      anomalyWs.onerror = () => {
-        dot.classList.remove('connected');
       };
     }
 
@@ -1473,14 +1654,35 @@
               <span>100%</span>
             </div>
             <div class="risk-meta">${wi.n_successes}/${wi.n_trials} analogs matched above threshold</div>
-            ${tokens.length > 0 ? `<div class="token-seq" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${tokens.map(t => `<span style="font-size:9px;padding:2px 6px;border-radius:999px;background:rgba(168,85,247,0.15);color:#d8b4fe;font-family:'JetBrains Mono',monospace;">${t.replace('EVT_','')}</span>`).join('')}</div>` : ''}
+            ${tokens.length > 0 ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${tokens.map(t => `<span style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(188,140,255,0.15);color:#d8b4fe;">${t.replace('EVT_','')}</span>`).join('')}</div>` : ''}
           </div>
         `;
       }).join('');
     }
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // NATIVE BROWSER & TOUCHPAD BACK NAVIGATION (STATEFUL TAB RESTORATION)
+    // ─────────────────────────────────────────────────────────────────────────────
+    (function enableNativeBack() {
+      if (window.history && window.history.replaceState) {
+        // Tag initial state with the default tab
+        window.history.replaceState({ tab: 'tab-backtest', initial: true }, '', '#tab-backtest');
+      }
+
+      window.addEventListener('popstate', function(e) {
+        if (e.state && e.state.tab) {
+          // Return to the previous tab!
+          switchTab(e.state.tab, false);
+        } else {
+          // Popped past initial tab -> return to Central Dashboard
+          window.location.href = 'http://localhost:5000';
+        }
+      });
+    })();
+
     connectTelemetryWebSocket();
     connectAnomalyWebSocket();
   </script>
+
 </body>
 </html>

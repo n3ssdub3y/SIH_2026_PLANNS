@@ -22,6 +22,7 @@ MODULE1 = BASE.parent / 'results' / 'module1_outputs'
 OUTPUTS = BASE / 'outputs'
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # ---------------------------------------------------------------------------
 # Load all data at startup (fast in-memory serving)

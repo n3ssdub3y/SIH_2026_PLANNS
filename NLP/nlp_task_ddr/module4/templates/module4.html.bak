@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NWIS-Sentinel | Module 4 — Knowledge Graph & LLM Briefing</title>
+  <meta name="description" content="NWIS-Sentinel Module 4: Knowledge Graph Explorer, GraphRAG Evidence Retrieval, and Gemini LLM Briefing Generator for drilling hazard analysis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="/vis-network.min.js"></script>
+  <script>
+    if (typeof vis === 'undefined') {
+      document.write('<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    /* ── Design Tokens ──────────────────────────────────────────────── */
+    :root {
+      --bg:          #050a14;
+      --bg2:         #0a1220;
+      --bg3:         #0f1a2e;
+      --glass:       rgba(255,255,255,0.04);
+      --glass-hover: rgba(255,255,255,0.08);
+      --border:      rgba(255,255,255,0.08);
+      --border-glow: rgba(100,180,255,0.25);
+      --primary:     #3b9eff;
+      --primary-dim: #1e6eb5;
+      --accent:      #00d9a6;
+      --accent2:     #f59e0b;
+      --danger:      #ef4444;
+      --warn:        #f97316;
+      --success:     #22c55e;
+      --text:        #e2eaf8;
+      --text2:       #8ca0c0;
+      --text3:       #4a6080;
+      --mono:        'JetBrains Mono', monospace;
+      --sans:        'Inter', sans-serif;
+      --radius:      12px;
+      --radius-lg:   20px;
+      --shadow:      0 8px 32px rgba(0,0,0,0.6);
+    }
+
+    /* ── Base ───────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px;
+      background: linear-gradient(90deg, rgba(10,18,32,0.98) 0%, rgba(15,26,46,0.95) 100%);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .logo-box {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+    .logo-sub  { font-size: 11px; color: var(--text2); font-weight: 400; }
+    .module-badge {
+      padding: 4px 12px;
+      background: linear-gradient(135deg, rgba(59,158,255,0.2), rgba(0,217,166,0.1));
+      border: 1px solid rgba(59,158,255,0.3);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+    }
+    .header-spacer { flex: 1; }
+    .header-stat {
+      display: flex; flex-direction: column; align-items: flex-end;
+      font-size: 10px; color: var(--text3);
+    }
+    .header-stat strong { color: var(--accent); font-size: 12px; }
+    .status-dot {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text2);
+    }
+    .status-dot::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Main layout: sidebar + 3 panels ───────────────────────────── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 260px 1.15fr 1fr;
+      flex: 1;
+      height: calc(100vh - 61px);
+      min-height: 0;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* ── Sidebar ────────────────────────────────────────────────────── */
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      padding: 16px;
+      gap: 16px;
+    }
+    .sidebar-section { display: flex; flex-direction: column; gap: 8px; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 600; color: var(--text3);
+      letter-spacing: 1px; text-transform: uppercase;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Well selector */
+    .well-search {
+      width: 100%;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: var(--sans);
+      outline: none;
+    }
+    .well-search:focus { border-color: var(--primary); }
+    .well-select {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: var(--mono);
+      outline: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .well-select option { padding: 4px; }
+
+    /* Hazard pills */
+    .hazard-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .hazard-pill {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--text2);
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .hazard-pill:hover { background: var(--glass-hover); color: var(--text); }
+    .hazard-pill.active {
+      background: linear-gradient(135deg, rgba(59,158,255,0.25), rgba(0,217,166,0.15));
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 10px rgba(59,158,255,0.15);
+    }
+    .hazard-pill.mud_loss.active      { border-color: #60a5fa; color: #60a5fa; }
+    .hazard-pill.stuck_pipe.active    { border-color: #f59e0b; color: #f59e0b; }
+    .hazard-pill.overpressure.active  { border-color: #ef4444; color: #ef4444; }
+    .hazard-pill.torque_spike.active  { border-color: #a855f7; color: #a855f7; }
+    .hazard-pill.cementing.active     { border-color: #22c55e; color: #22c55e; }
+
+    /* Graph stats */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .stat-card .sv { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .stat-card .sk { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* Backtest banner */
+    .backtest-banner {
+      background: linear-gradient(135deg, rgba(0,217,166,0.12), rgba(59,158,255,0.08));
+      border: 1px solid rgba(0,217,166,0.3);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .backtest-banner .bt-title { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .backtest-banner .bt-lead  { font-size: 22px; font-weight: 800; color: var(--accent); line-height: 1; margin: 4px 0 2px; }
+    .backtest-banner .bt-sub   { font-size: 10px; color: var(--text2); }
+
+    /* ── Centre panel: Knowledge Graph ─────────────────────────────── */
+    .panel {
+      display: flex; flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .panel:last-child { border-right: none; }
+
+    .panel-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+    .panel-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .panel-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .panel-sub   { font-size: 10px; color: var(--text3); margin-top: 1px; }
+    .panel-spacer { flex: 1; }
+
+    /* Graph canvas */
+    #graphContainer {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 350px;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 50%, rgba(30,58,138,0.2) 0%, #050a14 75%);
+    }
+    #graphCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .graph-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text3);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .graph-empty .ge-icon { font-size: 48px; opacity: 0.3; }
+    .graph-empty p { font-size: 13px; }
+
+    /* ── Right panel: RAG + Briefing (stacked) ──────────────────────── */
+    .right-panel {
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* RAG section (top half) */
+    .rag-section {
+      flex: 1;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Briefing section (bottom half) */
+    .briefing-section {
+      flex: 1;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Common panel body ──────────────────────────────────────────── */
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* RAG query input */
+    .rag-input-row { display: flex; gap: 8px; }
+    .rag-input {
+      flex: 1;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-family: var(--sans);
+      outline: none;
+    }
+    .rag-input:focus { border-color: var(--primary); }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--sans);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), #009970);
+      color: #000;
+    }
+    .btn-accent:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* RAG result cards */
+    .rag-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      animation: fadeIn 0.3s ease;
+    }
+    .rag-card:hover { background: var(--glass-hover); border-color: rgba(59,158,255,0.2); }
+    .rag-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .rag-rank {
+      width: 22px; height: 22px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700;
+    }
+    .rag-node-id {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      background: rgba(0,217,166,0.08);
+      border: 1px solid rgba(0,217,166,0.2);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+    .rag-score {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .rag-meta { display: flex; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .meta-tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--text3);
+      background: var(--glass);
+    }
+    .rag-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+    /* Briefing UI */
+    .briefing-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .api-key-input {
+      flex: 1;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 7px 10px;
+      font-size: 11px;
+      font-family: var(--mono);
+      outline: none;
+      min-width: 0;
+    }
+    .api-key-input:focus { border-color: var(--primary); }
+
+    /* Risk score widget */
+    .risk-widget {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: linear-gradient(135deg, rgba(59,158,255,0.08), rgba(0,217,166,0.04));
+      border: 1px solid rgba(59,158,255,0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .risk-dial {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      font-size: 16px; font-weight: 800;
+      position: relative;
+    }
+    .risk-dial .rd-val { font-size: 14px; font-weight: 800; line-height: 1; }
+    .risk-dial .rd-label { font-size: 8px; color: var(--text3); }
+    .risk-info .risk-level { font-size: 13px; font-weight: 700; }
+    .risk-info .risk-ci { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    .risk-info .risk-depth { font-size: 10px; color: var(--text2); }
+    .risk-alert-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .risk-alert-badge.alert-yes { background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid var(--danger); }
+    .risk-alert-badge.alert-no  { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid var(--success); }
+
+    /* Briefing sentence cards */
+    .briefing-sentence {
+      border-radius: 8px;
+      padding: 8px 12px;
+      border-left: 3px solid transparent;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      animation: fadeIn 0.4s ease;
+    }
+    .briefing-sentence.pass { border-left-color: var(--success); }
+    .briefing-sentence.fail { border-left-color: var(--danger); }
+    .briefing-sentence.no-cite { border-left-color: var(--warn); }
+    .bs-text { font-size: 12px; line-height: 1.6; color: var(--text); margin-bottom: 6px; }
+    .bs-citations { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+    .bs-cite-tag {
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,217,166,0.3);
+      color: var(--accent);
+      background: rgba(0,217,166,0.06);
+    }
+    .bs-verify-row { display: flex; align-items: center; gap: 6px; }
+    .bs-verify-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+    }
+    .bs-verify-badge.pass { background: rgba(34,197,94,0.15); color: var(--success); }
+    .bs-verify-badge.fail { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .bs-verify-badge.warn { background: rgba(249,115,22,0.15); color: var(--warn); }
+    .bs-verify-reason { font-size: 9px; color: var(--text3); }
+
+    .verify-summary {
+      display: flex; gap: 10px; align-items: center;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .vs-stat { font-size: 11px; }
+    .vs-stat strong { color: var(--success); }
+    .vs-stat.fail strong { color: var(--danger); }
+
+    /* Loading shimmer */
+    .shimmer {
+      background: linear-gradient(90deg, var(--glass) 25%, rgba(255,255,255,0.06) 50%, var(--glass) 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+      height: 48px;
+    }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+    /* Spinner */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Empty state */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; color: var(--text3); padding: 24px;
+      text-align: center;
+    }
+    .empty-state .es-icon { font-size: 32px; opacity: 0.3; }
+    .empty-state p { font-size: 12px; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--text);
+      max-width: 300px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      box-shadow: var(--shadow);
+    }
+    #toast.show { opacity: 1; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo-box">
+    <div class="logo-icon">🌐</div>
+    <div>
+      <div class="logo-text">NWIS-Sentinel</div>
+      <div class="logo-sub">Oil India Limited | SIH26121</div>
+    </div>
+  </div>
+  <div class="module-badge">MODULE 4 — KNOWLEDGE GRAPH · GraphRAG · LLM</div>
+  <div class="header-spacer"></div>
+  <div class="header-stat">
+    <span>Graph Nodes</span>
+    <strong id="hdrNodes">—</strong>
+  </div>
+  <div class="header-stat" style="margin-left:16px;">
+    <span>Graph Edges</span>
+    <strong id="hdrEdges">—</strong>
+  </div>
+  <div class="status-dot" style="margin-left:20px;" id="hdrStatus">Live</div>
+</header>
+
+<!-- ── MAIN LAYOUT ─────────────────────────────────────────────────── -->
+<div class="main-layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <!-- Backtest banner -->
+    <div class="backtest-banner" id="backtestBanner">
+      <div class="bt-title">⏱ Time-Travel Backtest</div>
+      <div class="bt-lead" id="btLead">Loading...</div>
+      <div class="bt-sub" id="btSub">Volvo Field | Stuck Pipe</div>
+    </div>
+
+    <!-- Well selection -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Select Well</div>
+      <input class="well-search" id="wellSearch" type="text" placeholder="Filter wells..." oninput="filterWells(this.value)" />
+      <select class="well-select" id="wellSelect" size="8" onchange="onWellChange(this.value)"></select>
+      <div id="selectedWellInfo" style="font-size:10px;color:var(--text3);padding:2px 4px;"></div>
+    </div>
+
+    <!-- Hazard selection -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Hazard Type</div>
+      <div class="hazard-pills">
+        <div class="hazard-pill mud_loss" onclick="selectHazard('mud_loss')">Mud Loss</div>
+        <div class="hazard-pill stuck_pipe active" onclick="selectHazard('stuck_pipe')">Stuck Pipe</div>
+        <div class="hazard-pill overpressure" onclick="selectHazard('overpressure')">Overpressure</div>
+        <div class="hazard-pill torque_spike" onclick="selectHazard('torque_spike')">Torque Spike</div>
+        <div class="hazard-pill cementing" onclick="selectHazard('cementing')">Cementing</div>
+      </div>
+    </div>
+
+    <!-- Graph stats -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Graph Statistics</div>
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card"><div class="sv" id="statNodes">—</div><div class="sk">Total Nodes</div></div>
+        <div class="stat-card"><div class="sv" id="statEdges">—</div><div class="sk">Total Edges</div></div>
+        <div class="stat-card"><div class="sv" id="statWells">—</div><div class="sk">Wells</div></div>
+        <div class="stat-card"><div class="sv" id="statEvents">—</div><div class="sk">Events</div></div>
+        <div class="stat-card"><div class="sv" id="statForms">—</div><div class="sk">Formations</div></div>
+        <div class="stat-card"><div class="sv" id="statSnips">—</div><div class="sk">Snippets</div></div>
+      </div>
+    </div>
+
+    <!-- Analog wells -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Top Analog Wells</div>
+      <div id="analogList" style="display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--text3);">
+        <div style="color:var(--text3);font-size:11px;">Select a well + hazard to see analogs</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── CENTRE PANEL: Knowledge Graph ──────────────────────────── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-icon" style="background:linear-gradient(135deg,rgba(59,158,255,0.3),rgba(0,217,166,0.2));">🕸</div>
+      <div>
+        <div class="panel-title">Knowledge Graph Explorer</div>
+        <div class="panel-sub">NetworkX — 7 node types · 7 edge types</div>
+      </div>
+      <span id="subgraphBadge" style="font-size:10px;color:var(--accent);background:rgba(0,217,166,0.1);padding:3px 8px;border-radius:12px;border:1px solid rgba(0,217,166,0.25);margin-left:6px;display:none;"></span>
+
+      <!-- Interactive spacing slider -->
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-left:14px;background:rgba(255,255,255,0.03);padding:3px 10px;border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:10px;color:var(--text2);font-weight:500;">Spacing:</span>
+        <input type="range" id="spacingSlider" min="120" max="400" value="220"
+               style="width:85px;cursor:pointer;accent-color:var(--primary);" oninput="updateSpacing(this.value)" title="Drag to adjust distance between nodes" />
+        <span id="spacingVal" style="font-family:var(--mono);font-size:10px;color:var(--primary);min-width:32px;">220px</span>
+      </div>
+
+      <div class="panel-spacer"></div>
+      <button class="btn btn-sm" onclick="zoomGraph(1.3)" title="Zoom In" style="padding:4px 8px;font-size:11px;">➕</button>
+      <button class="btn btn-sm" onclick="zoomGraph(0.7)" title="Zoom Out" style="padding:4px 8px;font-size:11px;">➖</button>
+      <button class="btn btn-sm" onclick="fitGraph()" title="Fit to View" style="padding:4px 8px;font-size:11px;">⊡ Fit</button>
+      <button class="btn btn-sm btn-primary" id="btnLoadGraph" onclick="loadWellGraph()">↻ Load</button>
+    </div>
+
+    <!-- Node type legend -->
+    <div style="display:flex;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--bg2);flex-shrink:0;">
+      <span style="font-size:9px;color:var(--text3);">NODES:</span>
+      <span style="font-size:9px;" id="legend"></span>
+    </div>
+
+    <div id="graphContainer">
+      <div class="graph-empty" id="graphEmpty">
+        <div class="ge-icon">🕸️</div>
+        <p>Select a well and click <strong>Load Graph</strong></p>
+        <p style="font-size:11px;">Shows well's subgraph — events, formations, analogs</p>
+      </div>
+      <div id="graphCanvas"></div>
+    </div>
+
+    <!-- Selected node info bar -->
+    <div id="nodeInfo" style="display:none;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg2);font-size:11px;flex-shrink:0;">
+      <span id="nodeInfoText" style="color:var(--text2);"></span>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL: RAG + Briefing ────────────────────────────── -->
+  <div class="right-panel">
+
+    <!-- RAG section -->
+    <div class="rag-section">
+      <div class="panel-header">
+        <div class="panel-icon" style="background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(239,68,68,0.2));">🔍</div>
+        <div>
+          <div class="panel-title">GraphRAG Evidence Retrieval</div>
+          <div class="panel-sub">Pre-filter by analogs → semantic search within subgraph</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="rag-input-row">
+          <input class="rag-input" id="ragQuery" type="text"
+                 placeholder="e.g. tight hole precursor, mud loss treatment, overpressure warning..."
+                 onkeydown="if(event.key==='Enter') runRAG();" />
+          <button class="btn btn-primary" onclick="runRAG()" id="btnRAG">Search</button>
+        </div>
+        <div id="ragResults">
+          <div class="empty-state">
+            <div class="es-icon">📚</div>
+            <p>Retrieval finds similar historical incidents from offset wells</p>
+            <p>Pre-filtered by Module 2 AHP analog ranking first</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Briefing section -->
+    <div class="briefing-section">
+      <div class="panel-header">
+        <div class="panel-icon" style="background:linear-gradient(135deg,rgba(168,85,247,0.3),rgba(59,158,255,0.2));">🤖</div>
+        <div>
+          <div class="panel-title">LLM Briefing Generator</div>
+          <div class="panel-sub">Gemini · Forced citations · Auto-verification</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="briefing-controls">
+          <input class="api-key-input" id="apiKeyInput" type="password"
+                 placeholder="Gemini API Key (AIza...)" autocomplete="off" />
+          <button class="btn btn-accent" onclick="generateBriefing()" id="btnBriefing">
+            Generate Briefing
+          </button>
+        </div>
+        <div id="riskWidget" style="display:none;"></div>
+        <div id="briefingResults">
+          <div class="empty-state">
+            <div class="es-icon">🤖</div>
+            <p>Enter your Gemini API key and click Generate Briefing</p>
+            <p>Every sentence is auto-verified against graph node citations</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- Legend -->
+<script>
+  const NODE_COLORS = {
+    Well:          { color: '#38bdf8', border: '#0284c7', label: 'Well', icon: '🟦' },
+    Formation:     { color: '#34d399', border: '#059669', label: 'Formation', icon: '🟩' },
+    Event:         { color: '#fbbf24', border: '#d97706', label: 'Event', icon: '🟨' },
+    Hazard:        { color: '#f87171', border: '#dc2626', label: 'Hazard', icon: '🟥' },
+    Intervention:  { color: '#c084fc', border: '#9333ea', label: 'Intervention', icon: '🟪' },
+    Outcome:       { color: '#f472b6', border: '#db2777', label: 'Outcome', icon: '🩷' },
+    ReportSnippet: { color: '#22d3ee', border: '#0891b2', label: 'Snippet', icon: '🩵' },
+  };
+
+  let activeFilters = {
+    Well: true,
+    Formation: true,
+    Event: true,
+    Hazard: true,
+    Intervention: true,
+    Outcome: true,
+    ReportSnippet: true,
+  };
+
+  let currentRawNodes = [];
+  let currentRawEdges = [];
+  let dsNodes = null;
+  let dsEdges = null;
+
+  function renderLegend(counts = {}) {
+    const el = document.getElementById('legend');
+    if (!el) return;
+    el.innerHTML = Object.entries(NODE_COLORS).map(([type, cfg]) => {
+      const active = activeFilters[type];
+      const count = counts[type] || 0;
+      const opacity = active ? '1' : '0.35';
+      const border = active ? `border:1px solid ${cfg.color};` : 'border:1px solid rgba(255,255,255,0.1);';
+      const bg = active ? `background:${cfg.color}18;` : 'background:transparent;';
+      return `<span onclick="toggleNodeType('${type}')"
+                    style="cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:10px;color:${cfg.color};opacity:${opacity};${border}${bg};transition:all 0.2s;"
+                    title="Click to toggle ${type} nodes">
+        ${cfg.icon} ${cfg.label} ${count ? '('+count+')' : ''}
+      </span>`;
+    }).join('');
+  }
+
+  function toggleNodeType(type) {
+    activeFilters[type] = !activeFilters[type];
+    const counts = {};
+    currentRawNodes.forEach(n => {
+      const t = n._data?.type;
+      if (t) counts[t] = (counts[t] || 0) + 1;
+    });
+    renderLegend(counts);
+    if (!dsNodes) return;
+    const updates = currentRawNodes.map(n => ({
+      id: n.id,
+      hidden: !activeFilters[n._data.type]
+    }));
+    dsNodes.update(updates);
+  }
+
+  // Initial render
+  renderLegend();
+</script>
+
+<script>
+  /* ── State ──────────────────────────────────────────────────────── */
+  let selectedWell   = '15/9-F-9A'; // default to Volvo real well
+  let selectedHazard = 'stuck_pipe';
+  let allWells       = [];
+  let graphNetwork   = null;
+  let lastRAGResults = [];
+
+  /* ── Utils ──────────────────────────────────────────────────────── */
+  function toast(msg, ms = 3000) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), ms);
+  }
+
+  function fmt(n) {
+    if (n === null || n === undefined) return '—';
+    if (typeof n === 'number') return n >= 1000 ? (n/1000).toFixed(1)+'k' : n.toString();
+    return n;
+  }
+
+  /* ── Startup ────────────────────────────────────────────────────── */
+  async function init() {
+    await Promise.all([
+      loadStats(),
+      loadWells(),
+      loadBacktest(),
+    ]);
+    // Auto-load graph for default well
+    if (selectedWell) loadWellGraph();
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/api/graph/stats');
+      const data = await res.json();
+      const nc = data.node_counts_by_type || {};
+      document.getElementById('hdrNodes').textContent   = fmt(data.total_nodes);
+      document.getElementById('hdrEdges').textContent   = fmt(data.total_edges);
+      document.getElementById('statNodes').textContent  = fmt(data.total_nodes);
+      document.getElementById('statEdges').textContent  = fmt(data.total_edges);
+      document.getElementById('statWells').textContent  = fmt(nc.Well);
+      document.getElementById('statEvents').textContent = fmt(nc.Event);
+      document.getElementById('statForms').textContent  = fmt(nc.Formation);
+      document.getElementById('statSnips').textContent  = fmt(nc.ReportSnippet);
+    } catch(e) { console.error('stats error:', e); }
+  }
+
+  async function loadWells() {
+    try {
+      const res  = await fetch('/api/wells');
+      const data = await res.json();
+      allWells   = data.wells || [];
+      renderWellSelect(allWells);
+    } catch(e) { console.error('wells error:', e); }
+  }
+
+  function renderWellSelect(wells) {
+    const sel = document.getElementById('wellSelect');
+    sel.innerHTML = wells.map(w => {
+      const src = w.source || '';
+      const icon = w.is_synthetic ? '🔬' : (src.includes('volve') ? '⭐' : '🔵');
+      return `<option value="${w.well_id}" ${w.well_id === selectedWell ? 'selected' : ''}>${icon} ${w.well_id}</option>`;
+    }).join('');
+  }
+
+  function filterWells(q) {
+    const filtered = allWells.filter(w => w.well_id.toLowerCase().includes(q.toLowerCase()));
+    renderWellSelect(filtered);
+  }
+
+  function onWellChange(wellId) {
+    selectedWell = wellId;
+    const w = allWells.find(x => x.well_id === wellId);
+    if (w) {
+      document.getElementById('selectedWellInfo').textContent =
+        `${w.source} | Depth: ${w.total_depth_m ? w.total_depth_m.toFixed(0)+'m' : '—'} | Synthetic: ${w.is_synthetic}`;
+    }
+    loadWellGraph();
+    updateAnalogList();
+  }
+
+  function selectHazard(h) {
+    selectedHazard = h;
+    document.querySelectorAll('.hazard-pill').forEach(p => {
+      p.classList.toggle('active', p.classList.contains(h));
+    });
+    updateAnalogList();
+  }
+
+  async function loadBacktest() {
+    try {
+      const res  = await fetch('/api/backtest');
+      const data = await res.json();
+      const lead = data.summary?.lead_time_metrics?.actionable_lead_distance_metres;
+      const mins = data.summary?.lead_time_metrics?.actionable_lead_time_minutes_telemetry;
+      document.getElementById('btLead').textContent = lead ? `+${lead.toFixed(1)}m` : '—';
+      document.getElementById('btSub').textContent  =
+        `${data.summary?.field || ''} | ${mins ? mins.toFixed(0)+' min lead' : ''}`;
+    } catch(e) {
+      document.getElementById('btLead').textContent = '—';
+    }
+  }
+
+  /* ── Knowledge Graph ────────────────────────────────────────────── */
+  function zoomGraph(factor) {
+    if (!graphNetwork) return;
+    const scale = graphNetwork.getScale() * factor;
+    graphNetwork.moveTo({ scale: scale, animation: { duration: 300 } });
+  }
+
+  function fitGraph() {
+    if (!graphNetwork) return;
+    graphNetwork.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+  }
+
+  function updateSpacing(val) {
+    val = parseInt(val);
+    const valEl = document.getElementById('spacingVal');
+    if (valEl) valEl.textContent = val + 'px';
+    if (!graphNetwork) return;
+    graphNetwork.setOptions({
+      physics: {
+        barnesHut: {
+          springLength: val,
+          gravitationalConstant: -val * 85,
+          avoidOverlap: 1.0
+        }
+      }
+    });
+  }
+
+  async function loadWellGraph() {
+    if (!selectedWell) { toast('Please select a well.'); return; }
+    if (typeof vis === 'undefined') {
+      toast('⚠ Vis-network library is loading... please retry in 2 seconds.');
+      return;
+    }
+    const emptyEl = document.getElementById('graphEmpty');
+    if (emptyEl) emptyEl.style.display = 'none';
+    const canvasEl = document.getElementById('graphCanvas');
+    canvasEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--text3);font-size:13px;"><div class="spinner"></div> Loading Knowledge Graph...</div>';
+
+    try {
+      const enc = encodeURIComponent(selectedWell);
+      const res = await fetch(`/api/graph/well/${enc}?depth=2`);
+      const data = await res.json();
+      if (data.error) {
+        canvasEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--danger);font-size:12px;">⚠ ${data.error}</div>`;
+        toast('⚠ ' + data.error);
+        return;
+      }
+
+      // Update badge
+      const badge = document.getElementById('subgraphBadge');
+      if (badge) {
+        badge.style.display = 'inline-block';
+        badge.textContent = `${data.node_count} nodes · ${data.edge_count} edges`;
+      }
+
+      renderGraph(data);
+      toast(`Graph loaded: ${data.node_count} nodes, ${data.edge_count} edges`);
+      updateAnalogList();
+    } catch(e) {
+      console.error('loadWellGraph error:', e);
+      canvasEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--danger);font-size:12px;">⚠ Failed to load graph: ${e.message}</div>`;
+      if (emptyEl) emptyEl.style.display = 'flex';
+      toast('Graph load failed: ' + e.message);
+    }
+  }
+
+  function renderGraph(data) {
+    if (typeof vis === 'undefined') {
+      console.error('vis is undefined in renderGraph');
+      return;
+    }
+
+    // Count types for dynamic legend
+    const counts = {};
+    (data.nodes || []).forEach(n => {
+      counts[n.type] = (counts[n.type] || 0) + 1;
+    });
+    renderLegend(counts);
+
+    currentRawNodes = (data.nodes || []).map(n => {
+      const cfg = NODE_COLORS[n.type] || { color: '#38bdf8', border: '#0284c7' };
+      const isTargetWell = n.well_id === selectedWell || n.id === `WELL_${selectedWell}`;
+      const isWell = n.type === 'Well';
+
+      let size = 15;
+      let shape = 'dot';
+      let borderWidth = 2;
+
+      if (isTargetWell) {
+        size = 30;
+        shape = 'star';
+        borderWidth = 3;
+      } else if (isWell) {
+        size = 18;
+        shape = 'dot';
+      } else if (n.type === 'Hazard') {
+        size = 22;
+        shape = 'diamond';
+      } else if (n.type === 'Formation') {
+        size = 16;
+        shape = 'square';
+      } else if (n.type === 'Intervention') {
+        size = 16;
+        shape = 'triangle';
+      } else if (n.type === 'Outcome') {
+        size = 16;
+        shape = 'star';
+      } else if (n.type === 'Event') {
+        size = 14;
+        shape = 'dot';
+      } else if (n.type === 'ReportSnippet') {
+        size = 11;
+        shape = 'dot';
+      }
+
+      // Format clean, crisp labels
+      let label = n.label || n.id;
+      if (isTargetWell) {
+        label = `⭐ ${n.label || n.id}`;
+      } else if (isWell) {
+        label = n.label || n.id;
+      } else if (n.type === 'Formation') {
+        label = n.formation_name ? n.formation_name.replace(' Fm.', '').replace(' Mb.', '') : (n.label || '');
+      } else if (n.type === 'Hazard') {
+        label = n.label || n.id;
+      } else if (n.type === 'Event') {
+        label = n.depth_m ? `${n.hazard || 'Event'}\n${n.depth_m.toFixed(0)}m` : (n.hazard || 'Event');
+      } else if (n.type === 'ReportSnippet') {
+        label = n.id.replace('SNIP_', 'S_');
+      }
+
+      return {
+        id: n.id,
+        label: label,
+        hidden: !activeFilters[n.type],
+        title: `[${n.type}] ${n.label || n.id}\n${n.hazard ? 'Hazard: ' + n.hazard + '\n' : ''}${n.depth_m ? 'Depth: ' + n.depth_m + 'm\n' : ''}${n.raw_text ? 'Text: "' + n.raw_text.substring(0, 120) + '..."' : ''}`,
+        color: {
+          background: isTargetWell ? '#f59e0b' : cfg.color,
+          border: isTargetWell ? '#ffffff' : cfg.border,
+          highlight: {
+            background: '#ffffff',
+            border: cfg.color
+          }
+        },
+        font: {
+          color: '#ffffff',
+          size: isTargetWell ? 13 : (isWell ? 11 : 9),
+          face: 'Inter, sans-serif',
+          strokeWidth: 3,
+          strokeColor: '#050a14'
+        },
+        size: size,
+        shape: shape,
+        borderWidth: borderWidth,
+        shadow: {
+          enabled: true,
+          color: isTargetWell ? '#f59e0b' : cfg.color,
+          size: isTargetWell ? 16 : 8,
+          x: 0,
+          y: 0
+        },
+        _data: n,
+      };
+    });
+
+    currentRawEdges = (data.edges || []).map(e => ({
+      from: e.from,
+      to: e.to,
+      label: e.relation ? e.relation.replace(/_/g, ' ').toLowerCase() : '',
+      font: {
+        size: 7.5,
+        color: 'rgba(147, 197, 253, 0.75)',
+        align: 'middle',
+        strokeWidth: 2,
+        strokeColor: '#050a14'
+      },
+      color: {
+        color: 'rgba(96, 165, 250, 0.35)',
+        highlight: '#38bdf8',
+        hover: '#00d9a6'
+      },
+      arrows: {
+        to: { enabled: true, scaleFactor: 0.5 }
+      },
+      smooth: {
+        type: 'continuous',
+        roundness: 0.25
+      },
+      width: 1.2
+    }));
+
+    const container = document.getElementById('graphCanvas');
+    container.innerHTML = '';
+
+    dsNodes = new vis.DataSet(currentRawNodes);
+    dsEdges = new vis.DataSet(currentRawEdges);
+
+    const sliderVal = parseInt(document.getElementById('spacingSlider')?.value || '220');
+
+    const options = {
+      physics: {
+        enabled: true,
+        solver: 'barnesHut',
+        barnesHut: {
+          gravitationalConstant: -sliderVal * 85, // -18,700 for 220
+          centralGravity: 0.02,                   // Very low central pull -> wide breathing room!
+          springLength: sliderVal,                // 220px spacing
+          springConstant: 0.03,
+          damping: 0.15,
+          avoidOverlap: 1.0                       // Max collision avoidance!
+        },
+        stabilization: {
+          enabled: true,
+          iterations: 150,
+          updateInterval: 25
+        }
+      },
+      interaction: {
+        hover: true,
+        tooltipDelay: 120,
+        navigationButtons: false,
+        zoomView: true,
+        dragView: true,
+        dragNodes: true
+      }
+    };
+
+    graphNetwork = new vis.Network(container, { nodes: dsNodes, edges: dsEdges }, options);
+
+    // Auto-fit once stabilized
+    graphNetwork.once('stabilizationIterationsDone', () => {
+      graphNetwork.fit({ animation: { duration: 600, easingFunction: 'easeInOutQuad' } });
+    });
+
+    // Fallback fit after short delay
+    setTimeout(() => {
+      try { graphNetwork.fit(); } catch(e) {}
+    }, 500);
+
+    graphNetwork.on('selectNode', (params) => {
+      if (!params.nodes.length) return;
+      const nodeId = params.nodes[0];
+      const node = (data.nodes || []).find(n => n.id === nodeId);
+      if (!node) return;
+      const bar  = document.getElementById('nodeInfo');
+      const text = document.getElementById('nodeInfoText');
+      bar.style.display = 'block';
+      let info = `[${node.type}] ${node.id}`;
+      if (node.label && node.label !== node.id) info += ` (${node.label})`;
+      if (node.hazard)     info += ` · Hazard: ${node.hazard}`;
+      if (node.depth_m)    info += ` · Depth: ${node.depth_m}m`;
+      if (node.severity)   info += ` · Severity: ${node.severity}`;
+      if (node.formation_name) info += ` · Formation: ${node.formation_name}`;
+      if (node.source)     info += ` · Source: ${node.source}`;
+      if (node.raw_text)   info += ` · Snippet: "${node.raw_text.substring(0, 100)}..."`;
+      text.textContent = info;
+    });
+
+    graphNetwork.on('deselectNode', () => {
+      document.getElementById('nodeInfo').style.display = 'none';
+    });
+  }
+
+  /* ── Analog list ────────────────────────────────────────────────── */
+  async function updateAnalogList() {
+    if (!selectedWell || !selectedHazard) return;
+    const el = document.getElementById('analogList');
+    el.innerHTML = '<div class="spinner" style="width:14px;height:14px;"></div>';
+    try {
+      const enc = encodeURIComponent(selectedWell);
+      const q = `${selectedHazard.replace('_',' ')} similar formation depth`;
+      const res  = await fetch(`/api/rag/query?well_id=${enc}&hazard=${selectedHazard}&q=${encodeURIComponent(q)}&top_k=1`);
+      const data = await res.json();
+      const analogs = (data.analog_wells || []).slice(0, 5);
+      if (!analogs.length) {
+        el.innerHTML = '<div style="font-size:11px;color:var(--text3);">No analogs found</div>';
+        return;
+      }
+      el.innerHTML = analogs.map((a, i) => `
+        <div style="background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+          <div style="font-size:10px;font-weight:600;color:var(--text);">#${i+1} ${a.well_id}</div>
+          <div style="font-size:9px;color:var(--text3);">Score: <span style="color:var(--primary);">${(a.weighted_score||0).toFixed(3)}</span> · ${a.source||''}</div>
+        </div>
+      `).join('');
+    } catch(e) {
+      el.innerHTML = '<div style="font-size:11px;color:var(--text3);">Error loading analogs</div>';
+    }
+  }
+
+  /* ── GraphRAG query ─────────────────────────────────────────────── */
+  async function runRAG() {
+    if (!selectedWell) { toast('Please select a well first.'); return; }
+    const q = document.getElementById('ragQuery').value.trim();
+    if (!q)  { toast('Please enter a search query.'); return; }
+
+    const container = document.getElementById('ragResults');
+    const btn       = document.getElementById('btnRAG');
+    btn.disabled    = true;
+    container.innerHTML = '<div class="shimmer"></div><div class="shimmer" style="height:36px;margin-top:8px;"></div>';
+
+    try {
+      const enc = encodeURIComponent(selectedWell);
+      const res = await fetch(`/api/rag/query?well_id=${enc}&hazard=${selectedHazard}&q=${encodeURIComponent(q)}&top_k=6`);
+      const data = await res.json();
+
+      if (data.error) { toast('⚠ ' + data.error); container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">${data.error}</p></div>`; return; }
+
+      lastRAGResults = data.results || [];
+      const stats = data.retrieval_stats || {};
+
+      let html = `<div style="font-size:10px;color:var(--text3);margin-bottom:6px;">
+        ✅ Searched <strong style="color:var(--primary);">${stats.snippets_indexed||0} snippets</strong>
+        from <strong style="color:var(--accent);">${stats.analog_wells_used||0} analog wells</strong>
+        (pre-filtered for <em>${selectedHazard.replace('_',' ')}</em>)
+        · Returned ${stats.returned||0} results
+      </div>`;
+
+      if (!lastRAGResults.length) {
+        html += '<div class="empty-state"><p>No matching snippets found for this query.</p></div>';
+      } else {
+        html += lastRAGResults.map(r => `
+          <div class="rag-card">
+            <div class="rag-card-header">
+              <div class="rag-rank">${r.rank}</div>
+              <div class="rag-node-id">${r.node_id}</div>
+              <div class="rag-score">sim: ${r.similarity_score}</div>
+            </div>
+            <div class="rag-meta">
+              <span class="meta-tag">Well: ${r.well_id}</span>
+              <span class="meta-tag">${r.event_type_id||''}</span>
+              <span class="meta-tag">Depth: ${r.depth_m||'—'}m</span>
+              <span class="meta-tag" style="color:${r.hazard === selectedHazard ? 'var(--warn)' : 'inherit'};">${r.hazard||''}</span>
+              <span class="meta-tag">Sev: ${r.severity||'—'}</span>
+            </div>
+            <div class="rag-text">${r.raw_text||''}</div>
+          </div>
+        `).join('');
+      }
+
+      container.innerHTML = html;
+    } catch(e) {
+      container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">Error: ${e.message}</p></div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ── LLM Briefing ───────────────────────────────────────────────── */
+  async function generateBriefing() {
+    if (!selectedWell) { toast('Please select a well first.'); return; }
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    if (!apiKey)  { toast('⚠ Please enter your Gemini API key.'); return; }
+
+    const container = document.getElementById('briefingResults');
+    const riskEl    = document.getElementById('riskWidget');
+    const btn       = document.getElementById('btnBriefing');
+    btn.disabled    = true;
+    container.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;color:var(--text2);font-size:12px;padding:8px 0;">
+        <div class="spinner"></div> Retrieving evidence → Calling Gemini → Verifying citations...
+      </div>
+      <div class="shimmer"></div>
+      <div class="shimmer" style="height:36px;margin-top:6px;opacity:0.7;"></div>
+      <div class="shimmer" style="height:36px;margin-top:6px;opacity:0.4;"></div>
+    `;
+
+    try {
+      const query = document.getElementById('ragQuery').value.trim() ||
+                    `${selectedHazard.replace('_', ' ')} risk indicators precursor signs`;
+
+      const res = await fetch('/api/briefing/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          well_id:    selectedWell,
+          hazard:     selectedHazard,
+          api_key:    apiKey,
+          query_text: query,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">❌ ${data.error}</p></div>`;
+        return;
+      }
+
+      // Risk widget
+      const rs    = data.risk_score_from_module3;
+      const rl    = data.risk_level_from_module3 || 'UNKNOWN';
+      const ci    = data.wilson_ci || {};
+      const dep   = data.measured_depth_m;
+      const alert = data.actionable_threshold_crossed;
+
+      const riskColor = rl === 'CRITICAL' ? '#ef4444' : rl === 'HIGH' ? '#f97316' : rl === 'MEDIUM' ? '#f59e0b' : '#22c55e';
+      riskEl.style.display = 'block';
+      riskEl.innerHTML = `
+        <div class="risk-widget">
+          <div class="risk-dial" style="border-color:${riskColor};color:${riskColor};">
+            <div class="rd-val">${rs !== null && rs !== undefined ? (rs*100).toFixed(0)+'%' : '—'}</div>
+            <div class="rd-label">RISK</div>
+          </div>
+          <div class="risk-info">
+            <div class="risk-level" style="color:${riskColor};">${rl} · ${selectedHazard.replace('_',' ').toUpperCase()}</div>
+            <div class="risk-ci">95% CI: [${ci.lower !== undefined ? ci.lower : '—'}, ${ci.upper !== undefined ? ci.upper : '—'}]</div>
+            <div class="risk-depth">Depth: ${dep !== null && dep !== undefined ? dep+'m MD' : '—'} · ⚠ IMMUTABLE — Source: Module 3</div>
+          </div>
+          <div class="risk-alert-badge ${alert ? 'alert-yes' : 'alert-no'}">${alert ? '🚨 ALERT' : '✅ MONITOR'}</div>
+        </div>
+      `;
+
+      // Verification summary
+      const vs = data.verification_summary || {};
+      let html = `
+        <div class="verify-summary">
+          <div class="vs-stat">Sentences: <strong>${vs.total_sentences||0}</strong></div>
+          <div class="vs-stat">✅ <strong>${vs.sentences_passed||0}</strong> verified</div>
+          <div class="vs-stat fail">❌ <strong>${vs.sentences_failed||0}</strong> flagged</div>
+          <div style="margin-left:auto;font-size:10px;color:var(--text3);">
+            BRF ID: <span style="font-family:var(--mono);color:var(--accent);">${data.briefing_id||''}</span>
+          </div>
+        </div>
+      `;
+
+      // Briefing sentences
+      const sentences = data.briefing_sentences || [];
+      html += sentences.map(s => {
+        const cls     = s.verified ? 'pass' : (s.citations?.length ? 'fail' : 'no-cite');
+        const citeHtml = (s.citations||[]).map(c => `<span class="bs-cite-tag">[${c}]</span>`).join('');
+        const details  = s.verification_details || [];
+        const detailHtml = details.map(d => {
+          if (typeof d === 'string') return `<span class="bs-verify-badge warn">⚠</span><span class="bs-verify-reason">${d}</span>`;
+          return `<span class="bs-verify-badge ${d.passed ? 'pass' : 'fail'}">${d.passed ? '✅' : '❌'}</span><span class="bs-verify-reason">${d.reason||''}</span>`;
+        }).join('');
+
+        return `
+          <div class="briefing-sentence ${cls}">
+            <div class="bs-text">${s.text}</div>
+            ${citeHtml ? `<div class="bs-citations">${citeHtml}</div>` : ''}
+            <div class="bs-verify-row">${detailHtml || '<span class="bs-verify-badge warn">⚠ No citation</span>'}</div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html || '<div class="empty-state"><p>No sentences generated.</p></div>';
+      toast(`✅ Briefing generated (${vs.sentences_passed}/${vs.total_sentences} verified)`, 4000);
+    } catch(e) {
+      container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">Error: ${e.message}</p></div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ── Boot ───────────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
