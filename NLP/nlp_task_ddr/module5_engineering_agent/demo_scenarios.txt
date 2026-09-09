@@ -1,0 +1,99 @@
+================================================================================
+DEMO SCENARIOS FOR MODULE 5: RAG + LLM ENGINEERING AGENT
+================================================================================
+Copy these values into the Streamlit sidebar, then copy the question into the chat box.
+
+--------------------------------------------------------------------------------
+SCENARIO 1: SHALLOW STUCK PIPE WARNING
+--------------------------------------------------------------------------------
+[Parameters]
+Well ID: 15/9-F-9A
+Depth (m): 303.50
+Torque (kNm): 22.50
+WOB (kN): 110.00
+ROP (m/hr): 5.50
+Flow (L/min): 420.00
+Pressure (bar): 310.00
+RPM: 90.00
+Formation: Unknown
+Current Hazard Focus: stuck_pipe
+Event Timeline: EVT_ROUTINE_DRILLING, EVT_TIGHT_HOLE, EVT_TIGHT_HOLE, EVT_TIGHT_HOLE
+
+[Question to Agent]
+"We are drilling the top hole section and experiencing repeated tight hole events with erratic torque. Based on historical data for this well and its top analogs, what is the probability this escalates into a stuck pipe event, and what successful interventions were recorded?"
+
+--------------------------------------------------------------------------------
+SCENARIO 2: MUD LOSS IN RESERVOIR SECTION
+--------------------------------------------------------------------------------
+[Parameters]
+Well ID: NO
+Depth (m): 2651.00
+Torque (kNm): 15.00
+WOB (kN): 130.00
+ROP (m/hr): 25.00
+Flow (L/min): 250.00 (Note: dropping)
+Pressure (bar): 180.00
+RPM: 110.00
+Formation: Sandstone
+Current Hazard Focus: mud_loss
+Event Timeline: NORMAL, FLOW ANOMALY, ROP DECREASE, PUMP PRESSURE DROP
+
+[Question to Agent]
+"Flow out has dropped and pump pressure is decreasing while drilling through the Sandstone formation at 2651m. What historical evidence do we have for partial or total mud losses in this area, and how much volume was typically lost before circulation was regained?"
+
+--------------------------------------------------------------------------------
+SCENARIO 3: OVERPRESSURE / KICK DETECTION
+--------------------------------------------------------------------------------
+[Parameters]
+Well ID: 15/9-F-14
+Depth (m): 3420.00
+Torque (kNm): 20.00
+WOB (kN): 150.00
+ROP (m/hr): 35.00 (Note: Drilling break)
+Flow (L/min): 460.00 (Note: Pit gain)
+Pressure (bar): 350.00
+RPM: 120.00
+Formation: Hugin Fm.
+Current Hazard Focus: overpressure
+Event Timeline: EVT_ROUTINE_DRILLING, EVT_DRILLING_BREAK, EVT_FLOW_INCREASE
+
+[Question to Agent]
+"We just hit a sudden drilling break at 3420m and the active pit volume is starting to increase. Do the historical analogs show kick events in this specific formation? If so, what mud weights were required to kill the well?"
+
+--------------------------------------------------------------------------------
+SCENARIO 4: SEVERE TORQUE SPIKES IN SHALE
+--------------------------------------------------------------------------------
+[Parameters]
+Well ID: 15/9-F-11
+Depth (m): 1850.00
+Torque (kNm): 35.00 (Note: Very high)
+WOB (kN): 90.00
+ROP (m/hr): 4.00
+Flow (L/min): 400.00
+Pressure (bar): 280.00
+RPM: 80.00
+Formation: Lista Fm. (Reactive Shale)
+Current Hazard Focus: torque_spike
+Event Timeline: EVT_ROUTINE_DRILLING, EVT_TORQUE_SPIKE, EVT_TORQUE_SPIKE, EVT_PACK_OFF_SYMPTOM
+
+[Question to Agent]
+"We are seeing extreme torque spikes and symptoms of pack-off while drilling reactive shale at 1850m. Looking at the retrieved historical evidence, is this typically resolved by pumping a sweep, reaming, or altering the mud properties?"
+
+--------------------------------------------------------------------------------
+SCENARIO 5: EXPLORATORY QUESTION (NO TIMELINE)
+--------------------------------------------------------------------------------
+[Parameters]
+Well ID: 15/9-F-9A
+Depth (m): 3150.00
+Torque (kNm): 18.00
+WOB (kN): 120.00
+ROP (m/hr): 8.00
+Flow (L/min): 420.00
+Pressure (bar): 310.00
+RPM: 90.00
+Formation: Limestone
+Current Hazard Focus: none
+Event Timeline: [Leave Blank]
+
+[Question to Agent]
+"We are planning the next 300 meters of this well. Based on the top analog wells, what is the most common hazard encountered in this depth range, and what is the typical Non-Productive Time (NPT) associated with it?"
