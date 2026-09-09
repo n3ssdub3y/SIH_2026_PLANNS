@@ -26,6 +26,7 @@ from pathlib import Path
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
 PYTHON_EXE = sys.executable
+LOGS_DIR = BASE_DIR / "logs"
 
 # ANSI colors for nice terminal output
 RESET  = "\033[0m"
@@ -38,6 +39,7 @@ RED    = "\033[91m"
 
 MODULES = [
     {
+        "id": "module2",
         "name": "Module 2: Geospatial & Offset Similarity Engine",
         "cmd": [PYTHON_EXE, str(BASE_DIR / "module2" / "app.py")],
         "port": 5001,
@@ -45,6 +47,7 @@ MODULES = [
         "description": "Interactive Leaflet map showing 159 wells, formation correlation, and AHP analog scores."
     },
     {
+        "id": "module3_sim",
         "name": "Module 3: Live Telemetry Simulator",
         "cmd": [PYTHON_EXE, str(BASE_DIR / "module3" / "simulator_server.py"), "--port", "5002", "--speed", "5.0"],
         "port": 5002,
@@ -52,6 +55,7 @@ MODULES = [
         "description": "Replays 16,670 rows of Volve 15/9-F-9A WITSML telemetry over WebSocket."
     },
     {
+        "id": "module3_anomaly",
         "name": "Module 3: Anomaly & Risk Prediction Server",
         "cmd": [
             PYTHON_EXE, str(BASE_DIR / "module3" / "anomaly_server.py"),
@@ -63,6 +67,7 @@ MODULES = [
         "description": "CUSUM/Z-Score anomaly detection, Smith-Waterman sequence matching & live dashboard."
     },
     {
+        "id": "module4",
         "name": "Module 4: Knowledge Graph, GraphRAG & LLM Briefing",
         "cmd": [PYTHON_EXE, str(BASE_DIR / "module4" / "app.py")],
         "port": 5004,
@@ -86,6 +91,8 @@ def main():
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically open web browser tabs")
     args = parser.parse_args()
 
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
     # Update simulator speed if specified
     MODULES[1]["cmd"][5] = str(args.speed)
 
@@ -93,7 +100,8 @@ def main():
     print(f"{BOLD}{CYAN}     NWIS-Sentinel | SIH 2026 | PS SIH26121 | System Orchestrator{RESET}")
     print(f"{BOLD}{CYAN}{'=' * 75}{RESET}\n")
     print(f"Python interpreter : {PYTHON_EXE}")
-    print(f"Working directory  : {BASE_DIR}\n")
+    print(f"Working directory  : {BASE_DIR}")
+    print(f"Logs directory     : {LOGS_DIR}\n")
 
     # Check for existing processes on required ports
     conflicts = []
@@ -109,6 +117,7 @@ def main():
 
     # Launch processes
     processes = []
+    log_files = []
     try:
         for m in MODULES:
             if check_port(m["port"]):
@@ -116,12 +125,16 @@ def main():
                 continue
 
             print(f"  {BLUE}[STARTING]{RESET} {m['name']} on port {m['port']} ...")
+            log_path = LOGS_DIR / f"{m['id']}.log"
+            log_file = open(log_path, "w", encoding="utf-8")
+            log_files.append(log_file)
+
             # In Windows, create independent process group
             proc = subprocess.Popen(
                 m["cmd"],
                 cwd=str(BASE_DIR),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
             )
             processes.append((m, proc))
@@ -161,9 +174,7 @@ def main():
             for m, proc in processes:
                 poll = proc.poll()
                 if poll is not None:
-                    _, err = proc.communicate()
-                    err_msg = err.decode("utf-8", errors="ignore") if err else ""
-                    print(f"{RED}[WARNING] {m['name']} exited unexpectedly with code {poll}:{RESET}\n{err_msg}")
+                    print(f"{RED}[WARNING] {m['name']} exited unexpectedly with code {poll}! Check logs/{m['id']}.log{RESET}")
                     break
 
     except KeyboardInterrupt:
@@ -180,6 +191,11 @@ def main():
                     proc.kill()
                 except Exception:
                     pass
+        for lf in log_files:
+            try:
+                lf.close()
+            except Exception:
+                pass
         print(f"{GREEN}[SHUTDOWN] All services stopped cleanly. Goodbye!{RESET}\n")
 
 
