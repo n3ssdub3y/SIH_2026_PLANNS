@@ -198,17 +198,13 @@ def api_generate_briefing():
     data       = request.get_json(force=True)
     well_id    = (data.get("well_id") or "").strip()
     hazard     = (data.get("hazard") or "").strip()
-    api_key    = (data.get("api_key") or os.environ.get("GOOGLE_API_KEY") or "").strip()
+    api_key    = (data.get("api_key") or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
     query_text = (data.get("query_text") or f"{hazard.replace('_', ' ')} risk indicators").strip()
 
     if not well_id:
         return jsonify({"error": "Missing required field: well_id"}), 400
     if not hazard:
         return jsonify({"error": "Missing required field: hazard"}), 400
-    if not api_key:
-        return jsonify({
-            "error": "Gemini API key required. Send {'api_key': 'AIza...'} in the request body, or set GOOGLE_API_KEY env var."
-        }), 400
 
     # Step 1: Get latest risk data from Module 3 (immutable source)
     risk_data = get_latest_risk_data(well_id, hazard)

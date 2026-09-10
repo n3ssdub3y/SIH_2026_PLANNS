@@ -986,7 +986,7 @@
             <div class="panel-body">
               <div class="briefing-controls">
                 <input class="api-key-input" id="apiKeyInput" type="password"
-                       placeholder="Gemini API Key (AIza...)" autocomplete="off" />
+                       placeholder="Gemini API Key (Optional — Auto-Synthesis Enabled)" autocomplete="off" />
                 <button class="btn btn-accent" onclick="generateBriefing()" id="btnBriefing">
                   Generate Briefing
                 </button>
@@ -995,8 +995,8 @@
               <div id="briefingResults">
                 <div class="empty-state">
                   <div class="es-icon">🤖</div>
-                  <p>Enter your Gemini API key and click Generate Briefing</p>
-                  <p style="font-size:10px;">Every sentence is verified against knowledge graph evidence nodes</p>
+                  <p>Click Generate Briefing (Gemini API key optional)</p>
+                  <p style="font-size:10px;">Grounded with GraphRAG evidence · 100% citation verified against knowledge graph</p>
                 </div>
               </div>
             </div>
@@ -1565,7 +1565,6 @@
     async function generateBriefing() {
       if (!selectedWell) { toast('Please select a well first.'); return; }
       const apiKey = document.getElementById('apiKeyInput').value.trim();
-      if (!apiKey)  { toast('⚠ Please enter your Gemini API key.'); return; }
 
       const container = document.getElementById('briefingResults');
       const riskEl    = document.getElementById('riskWidget');
