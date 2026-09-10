@@ -2,7 +2,7 @@
 TITLE NWIS-Sentinel | System Launcher
 echo =========================================================================
 echo    NWIS-Sentinel -- Oil India Limited -- SIH 2026 (PS SIH26121)
-echo    Starting all 4 Modules Simultaneously (Ports 5001, 5002, 5003, 5004)
+echo    Starting Central Dashboard & all 5 Modules (Ports 5000-5005)
 echo =========================================================================
 echo.
 
