@@ -1,0 +1,98 @@
+{
+  "briefing_id": "BRF_20260910T001148_EF3F44",
+  "timestamp": "2026-09-10T00:11:48.200321+00:00",
+  "well_id": "15/9-F-9A",
+  "hazard": "stuck_pipe",
+  "risk_score_from_module3": 0.842,
+  "risk_level_from_module3": "CRITICAL",
+  "measured_depth_m": 619.0,
+  "wilson_ci": {
+    "lower": 0.68,
+    "upper": 0.94,
+    "n_successes": 5,
+    "n_trials": 6
+  },
+  "actionable_threshold_crossed": true,
+  "llm_model": "gemini-2.5-flash (local-synthesis fallback)",
+  "raw_llm_output": "Target well 15/9-F-9A exhibits CRITICAL STUCK PIPE risk (84%) at 619.0m MD with indicators of inch recorded in offset logs [SNIP_TEST_01]. Offset telemetry indicates notable excessive prior to incident onset in regional analog formations [SNIP_TEST_01]. Prior field reports note critical backreaming requiring close monitoring of surface drag parameters [SNIP_TEST_01]. Wilson 95% confidence interval spans [0.68, 0.94], demonstrating analog variance where 5 of 6 offsets suffered similar inch [SNIP_TEST_01]. The rig crew must escalate to cautionary protocol and verify circulation to counter documented inch hazards before progressing further [SNIP_TEST_01].",
+  "briefing_sentences": [
+    {
+      "text": "Target well 15/9-F-9A exhibits CRITICAL STUCK PIPE risk (84%) at 619.0m MD with indicators of inch recorded in offset logs.",
+      "citations": [
+        "SNIP_TEST_01"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIP_TEST_01",
+          "passed": false,
+          "reason": "Node 'SNIP_TEST_01' not found in knowledge graph."
+        }
+      ]
+    },
+    {
+      "text": "Offset telemetry indicates notable excessive prior to incident onset in regional analog formations.",
+      "citations": [
+        "SNIP_TEST_01"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIP_TEST_01",
+          "passed": false,
+          "reason": "Node 'SNIP_TEST_01' not found in knowledge graph."
+        }
+      ]
+    },
+    {
+      "text": "Prior field reports note critical backreaming requiring close monitoring of surface drag parameters.",
+      "citations": [
+        "SNIP_TEST_01"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIP_TEST_01",
+          "passed": false,
+          "reason": "Node 'SNIP_TEST_01' not found in knowledge graph."
+        }
+      ]
+    },
+    {
+      "text": "Wilson 95% confidence interval spans [0.68, 0.94], demonstrating analog variance where 5 of 6 offsets suffered similar inch.",
+      "citations": [
+        "SNIP_TEST_01"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIP_TEST_01",
+          "passed": false,
+          "reason": "Node 'SNIP_TEST_01' not found in knowledge graph."
+        }
+      ]
+    },
+    {
+      "text": "The rig crew must escalate to cautionary protocol and verify circulation to counter documented inch hazards before progressing further.",
+      "citations": [
+        "SNIP_TEST_01"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIP_TEST_01",
+          "passed": false,
+          "reason": "Node 'SNIP_TEST_01' not found in knowledge graph."
+        }
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 0,
+    "sentences_failed": 5,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 1,
+  "analog_wells_used": 1
+}

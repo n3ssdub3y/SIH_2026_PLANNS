@@ -1,0 +1,63 @@
+{
+  "briefing_id": "BRF_20260910T003036_F2AC78",
+  "timestamp": "2026-09-10T00:30:36.000237+00:00",
+  "well_id": "15/9-15",
+  "hazard": "stuck_pipe",
+  "risk_score_from_module3": null,
+  "risk_level_from_module3": "UNKNOWN",
+  "measured_depth_m": null,
+  "wilson_ci": {},
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-2.5-flash (local-synthesis fallback)",
+  "raw_llm_output": "Target well 15/9-15 exhibits UNKNOWN STUCK PIPE risk (undetermined) at Nonem MD requiring continuous real-time parameter tracking. Geospatial analog wells (16/7-4, 7/1-1, 16/7-5) confirm correlated stratigraphy in the target formation. Drilling engineers must cross-reference real-time MSE trends against regional baseline profiles. Statistical analog modeling yields confidence bounds of [N/A, N/A] across regional wells. The rig crew must maintain standard monitoring and verify mud properties to counter documented drilling hazards before progressing further.",
+  "briefing_sentences": [
+    {
+      "text": "Target well 15/9-15 exhibits UNKNOWN STUCK PIPE risk (undetermined) at Nonem MD requiring continuous real-time parameter tracking.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Geospatial analog wells (16/7-4, 7/1-1, 16/7-5) confirm correlated stratigraphy in the target formation.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Drilling engineers must cross-reference real-time MSE trends against regional baseline profiles.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "Statistical analog modeling yields confidence bounds of [N/A, N/A] across regional wells.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    },
+    {
+      "text": "The rig crew must maintain standard monitoring and verify mud properties to counter documented drilling hazards before progressing further.",
+      "citations": [],
+      "verified": false,
+      "verification_details": [
+        "WARNING: No [NODE_ID] citation found. Every factual sentence must cite evidence."
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 0,
+    "sentences_failed": 5,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 0,
+  "analog_wells_used": 5
+}

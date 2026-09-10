@@ -1,0 +1,101 @@
+{
+  "briefing_id": "BRF_20260910T003128_FD21E7",
+  "timestamp": "2026-09-10T00:31:28.444274+00:00",
+  "well_id": "15/9-F-9A",
+  "hazard": "torque_spike",
+  "risk_score_from_module3": 0.2,
+  "risk_level_from_module3": "LOW",
+  "measured_depth_m": null,
+  "wilson_ci": {
+    "lower": 0.0567,
+    "center": 0.2,
+    "upper": 0.5098,
+    "n_trials": 10,
+    "n_successes": 2,
+    "method": "wilson",
+    "alpha": 0.05
+  },
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-2.5-flash (local-synthesis fallback)",
+  "raw_llm_output": "Target well 15/9-F-9A exhibits LOW TORQUE SPIKE risk (20%) at N/Am MD with indicators of skagerrak recorded in offset logs [SNIPPET_SYNTH-W10_2011-05-23_TORQUE_SPIKE]. Historical logs from analog well SYNTH-W31 demonstrate reamed and lista across depth-correlated stratigraphy [SNIPPET_SYNTH-W31_2011-03-27_TORQUE_SPIKE]. GraphRAG event logs capture reamed requiring immediate rig-floor monitoring of torque and differential pressure [SNIPPET_SYNTH-W31_2010-07-30_TORQUE_SPIKE]. Wilson 95% confidence interval spans [0.0567, 0.5098], demonstrating analog variance where 2 of 10 offsets suffered similar reamed [SNIPPET_SYNTH-W35_2010-04-13_TORQUE_SPIKE]. The rig crew must maintain standard monitoring and verify mud properties to counter documented skagerrak hazards before progressing further [SNIPPET_SYNTH-W10_2011-05-23_TORQUE_SPIKE].",
+  "briefing_sentences": [
+    {
+      "text": "Target well 15/9-F-9A exhibits LOW TORQUE SPIKE risk (20%) at N/Am MD with indicators of skagerrak recorded in offset logs.",
+      "citations": [
+        "SNIPPET_SYNTH-W10_2011-05-23_TORQUE_SPIKE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W10_2011-05-23_TORQUE_SPIKE",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (skagerrak, torque)."
+        }
+      ]
+    },
+    {
+      "text": "Historical logs from analog well SYNTH-W31 demonstrate reamed and lista across depth-correlated stratigraphy.",
+      "citations": [
+        "SNIPPET_SYNTH-W31_2011-03-27_TORQUE_SPIKE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W31_2011-03-27_TORQUE_SPIKE",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (reamed, lista)."
+        }
+      ]
+    },
+    {
+      "text": "GraphRAG event logs capture reamed requiring immediate rig-floor monitoring of torque and differential pressure.",
+      "citations": [
+        "SNIPPET_SYNTH-W31_2010-07-30_TORQUE_SPIKE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W31_2010-07-30_TORQUE_SPIKE",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (reamed, torque)."
+        }
+      ]
+    },
+    {
+      "text": "Wilson 95% confidence interval spans [0.0567, 0.5098], demonstrating analog variance where 2 of 10 offsets suffered similar reamed.",
+      "citations": [
+        "SNIPPET_SYNTH-W35_2010-04-13_TORQUE_SPIKE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W35_2010-04-13_TORQUE_SPIKE",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (reamed)."
+        }
+      ]
+    },
+    {
+      "text": "The rig crew must maintain standard monitoring and verify mud properties to counter documented skagerrak hazards before progressing further.",
+      "citations": [
+        "SNIPPET_SYNTH-W10_2011-05-23_TORQUE_SPIKE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W10_2011-05-23_TORQUE_SPIKE",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (skagerrak)."
+        }
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 5,
+    "sentences_failed": 0,
+    "all_citations_verified": true
+  },
+  "rag_snippets_used": 8,
+  "analog_wells_used": 5
+}

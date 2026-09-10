@@ -1,0 +1,93 @@
+{
+  "briefing_id": "BRF_20260910T003120_90ACFD",
+  "timestamp": "2026-09-10T00:31:20.013176+00:00",
+  "well_id": "15/9-F-9A",
+  "hazard": "cementing",
+  "risk_score_from_module3": null,
+  "risk_level_from_module3": "UNKNOWN",
+  "measured_depth_m": null,
+  "wilson_ci": {},
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-2.5-flash (local-synthesis fallback)",
+  "raw_llm_output": "Target well 15/9-F-9A exhibits UNKNOWN CEMENTING risk (undetermined) at Nonem MD with indicators of bbls recorded in offset logs [SNIPPET_SYNTH-W35_2010-12-09_CEMENTING]. Historical logs from analog well SYNTH-W35 demonstrate bbls and during across depth-correlated stratigraphy [SNIPPET_SYNTH-W35_2010-08-11_CEMENTING]. GraphRAG event logs capture bbls requiring immediate rig-floor monitoring of torque and differential pressure [SNIPPET_SYNTH-W10_2010-09-25_CEMENTING]. Statistical analog modeling yields confidence bounds of [N/A, N/A] across regional wells [SNIPPET_SYNTH-W12_2010-02-03_CEMENTING]. The rig crew must maintain standard monitoring and verify mud properties to counter documented bbls hazards before progressing further [SNIPPET_SYNTH-W35_2010-12-09_CEMENTING].",
+  "briefing_sentences": [
+    {
+      "text": "Target well 15/9-F-9A exhibits UNKNOWN CEMENTING risk (undetermined) at Nonem MD with indicators of bbls recorded in offset logs.",
+      "citations": [
+        "SNIPPET_SYNTH-W35_2010-12-09_CEMENTING"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W35_2010-12-09_CEMENTING",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (bbls)."
+        }
+      ]
+    },
+    {
+      "text": "Historical logs from analog well SYNTH-W35 demonstrate bbls and during across depth-correlated stratigraphy.",
+      "citations": [
+        "SNIPPET_SYNTH-W35_2010-08-11_CEMENTING"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W35_2010-08-11_CEMENTING",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (bbls, during)."
+        }
+      ]
+    },
+    {
+      "text": "GraphRAG event logs capture bbls requiring immediate rig-floor monitoring of torque and differential pressure.",
+      "citations": [
+        "SNIPPET_SYNTH-W10_2010-09-25_CEMENTING"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W10_2010-09-25_CEMENTING",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (bbls)."
+        }
+      ]
+    },
+    {
+      "text": "Statistical analog modeling yields confidence bounds of [N/A, N/A] across regional wells.",
+      "citations": [
+        "SNIPPET_SYNTH-W12_2010-02-03_CEMENTING"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W12_2010-02-03_CEMENTING",
+          "passed": false,
+          "reason": "Citation failed: no keyword overlap between sentence and node 'SNIPPET_SYNTH-W12_2010-02-03_CEMENTING'."
+        }
+      ]
+    },
+    {
+      "text": "The rig crew must maintain standard monitoring and verify mud properties to counter documented bbls hazards before progressing further.",
+      "citations": [
+        "SNIPPET_SYNTH-W35_2010-12-09_CEMENTING"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W35_2010-12-09_CEMENTING",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (bbls)."
+        }
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 4,
+    "sentences_failed": 1,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 8,
+  "analog_wells_used": 5
+}

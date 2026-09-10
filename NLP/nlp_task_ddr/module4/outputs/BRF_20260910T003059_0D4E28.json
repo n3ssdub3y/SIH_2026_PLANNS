@@ -1,0 +1,93 @@
+{
+  "briefing_id": "BRF_20260910T003059_0D4E28",
+  "timestamp": "2026-09-10T00:30:59.027281+00:00",
+  "well_id": "SYNTH-W27",
+  "hazard": "stuck_pipe",
+  "risk_score_from_module3": null,
+  "risk_level_from_module3": "UNKNOWN",
+  "measured_depth_m": null,
+  "wilson_ci": {},
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-2.5-flash (local-synthesis fallback)",
+  "raw_llm_output": "Target well SYNTH-W27 exhibits UNKNOWN STUCK PIPE risk (undetermined) at Nonem MD with indicators of mins recorded in offset logs [SNIPPET_SYNTH-W13_2011-02-01_STUCK_PIPE]. Historical logs from analog well SYNTH-W08 demonstrate mins and spotted across depth-correlated stratigraphy [SNIPPET_SYNTH-W08_2011-01-17_STUCK_PIPE]. GraphRAG event logs capture mins requiring immediate rig-floor monitoring of torque and differential pressure [SNIPPET_SYNTH-W36_2010-04-16_STUCK_PIPE]. Statistical analog modeling yields confidence bounds of [N/A, N/A] across regional wells [SNIPPET_SYNTH-W12_2011-05-29_STUCK_PIPE]. The rig crew must maintain standard monitoring and verify mud properties to counter documented mins hazards before progressing further [SNIPPET_SYNTH-W13_2011-02-01_STUCK_PIPE].",
+  "briefing_sentences": [
+    {
+      "text": "Target well SYNTH-W27 exhibits UNKNOWN STUCK PIPE risk (undetermined) at Nonem MD with indicators of mins recorded in offset logs.",
+      "citations": [
+        "SNIPPET_SYNTH-W13_2011-02-01_STUCK_PIPE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W13_2011-02-01_STUCK_PIPE",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (pipe, mins)."
+        }
+      ]
+    },
+    {
+      "text": "Historical logs from analog well SYNTH-W08 demonstrate mins and spotted across depth-correlated stratigraphy.",
+      "citations": [
+        "SNIPPET_SYNTH-W08_2011-01-17_STUCK_PIPE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W08_2011-01-17_STUCK_PIPE",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (mins, spotted)."
+        }
+      ]
+    },
+    {
+      "text": "GraphRAG event logs capture mins requiring immediate rig-floor monitoring of torque and differential pressure.",
+      "citations": [
+        "SNIPPET_SYNTH-W36_2010-04-16_STUCK_PIPE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W36_2010-04-16_STUCK_PIPE",
+          "passed": true,
+          "reason": "Citation verified: 3 matching keywords (torque, differential, mins)."
+        }
+      ]
+    },
+    {
+      "text": "Statistical analog modeling yields confidence bounds of [N/A, N/A] across regional wells.",
+      "citations": [
+        "SNIPPET_SYNTH-W12_2011-05-29_STUCK_PIPE"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W12_2011-05-29_STUCK_PIPE",
+          "passed": false,
+          "reason": "Citation failed: no keyword overlap between sentence and node 'SNIPPET_SYNTH-W12_2011-05-29_STUCK_PIPE'."
+        }
+      ]
+    },
+    {
+      "text": "The rig crew must maintain standard monitoring and verify mud properties to counter documented mins hazards before progressing further.",
+      "citations": [
+        "SNIPPET_SYNTH-W13_2011-02-01_STUCK_PIPE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W13_2011-02-01_STUCK_PIPE",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (mins)."
+        }
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 4,
+    "sentences_failed": 1,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 8,
+  "analog_wells_used": 5
+}
