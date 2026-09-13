@@ -372,7 +372,10 @@ def main():
     global _sim_speed
 
     parser = argparse.ArgumentParser(description="NWIS-Sentinel Single-Port Gateway")
-    parser.add_argument("--port",       type=int,   default=5000)
+    # Render.com (and other PaaS) inject $PORT — fall back to 5000 for local dev
+    import os
+    default_port = int(os.environ.get("PORT", 5000))
+    parser.add_argument("--port",       type=int,   default=default_port)
     parser.add_argument("--speed",      type=float, default=5.0)
     parser.add_argument("--no-browser", action="store_true")
     args = parser.parse_args()
