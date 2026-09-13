@@ -644,11 +644,11 @@
   <!-- ── BSPWM Top Bar ───────────────────────────────────────────── -->
   <div class="bar">
     <div class="bar-workspaces">
-      <a class="ws" href="http://localhost:5000" title="Central Dashboard">1:dash</a>
+      <a class="ws" href="/" title="Central Dashboard">1:dash</a>
       <a class="ws active" href="#" title="Module 2 Geospatial (Active)">2:geo</a>
-      <a class="ws" href="http://localhost:5003/monitor" title="Module 3 Telemetry">3:stream</a>
-      <a class="ws" href="http://localhost:5004" title="Module 4 Graph Studio">4:graph</a>
-      <a class="ws" href="http://localhost:5005" title="Module 5 Engineering Agent">5:agent</a>
+      <a class="ws" href="/module3/monitor" title="Module 3 Telemetry">3:stream</a>
+      <a class="ws" href="/module4/" title="Module 4 Graph Studio">4:graph</a>
+      <a class="ws" href="/module5/" title="Module 5 Engineering Agent">5:agent</a>
     </div>
 
     <span class="bar-tag">bspwm</span>
@@ -676,13 +676,13 @@
 
       <!-- Titlebar -->
       <div class="titlebar">
-        <div class="dot close"  title="Exit to Portal" onclick="window.location.href='http://localhost:5000'"></div>
+        <div class="dot close"  title="Exit to Portal" onclick="window.location.href='/'"></div>
         <div class="dot min"    title="Minimize"></div>
         <div class="dot max"    title="Maximize"></div>
         <div class="titlebar-text">alacritty — <span>nwis@sentinel:~/modules/module2-geospatial-engine</span></div>
 
         <div class="titlebar-right">
-          <a class="btn-return" href="http://localhost:5000">⎋ RETURN TO DASHBOARD</a>
+          <a class="btn-return" href="/">⎋ RETURN TO DASHBOARD</a>
         </div>
       </div>
 
@@ -848,7 +848,7 @@
     // LOAD WELLS
     // ─────────────────────────────────────────────────────────────────────────────
     async function loadWells() {
-      const res  = await fetch('/api/wells');
+      const res  = await fetch('/module2/api/wells');
       const data = await res.json();
       allWells   = data.wells;
 
@@ -977,8 +977,8 @@
 
       try {
         const [aRes, wRes] = await Promise.all([
-          fetch(`/api/analogs?well_id=${encodeURIComponent(wellId)}&hazard=${hazard}&top=8`),
-          fetch(`/api/well?well_id=${encodeURIComponent(wellId)}`),
+          fetch(`/module2/api/analogs?well_id=${encodeURIComponent(wellId)}&hazard=${hazard}&top=8`),
+          fetch(`/module2/api/well?well_id=${encodeURIComponent(wellId)}`),
         ]);
         const aData = await aRes.json();
         const wData = await wRes.json();
@@ -1171,7 +1171,7 @@
           selectWell(e.state.wellId, false);
         } else {
           // Reached root initial state -> return to Central Dashboard
-          window.location.href = 'http://localhost:5000';
+          window.location.href = '/';
         }
       });
     })();

@@ -1,4 +1,4 @@
-# NWIS-Sentinel | SIH 2026 | Full Project Dependencies (Modules 1 - 4)
+# NWIS-Sentinel | SIH 2026 | Full Project Dependencies (Modules 1 - 5 + Gateway)
 
 # Core & Data Processing
 pandas>=2.0.0
@@ -17,6 +17,7 @@ Jinja2>=3.1.0
 fastapi>=0.100.0
 uvicorn>=0.22.0
 websockets>=11.0
+httpx>=0.24.0
 fastdtw>=0.3.4
 matplotlib>=3.7.0
 

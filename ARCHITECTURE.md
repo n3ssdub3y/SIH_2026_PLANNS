@@ -36,14 +36,15 @@ eRTMAC-NWIS is a **multi-module AI platform** for real-time drilling hazard pred
 
 ### Service Map
 
-| Module | Port | Protocol | Role |
-|--------|------|----------|------|
-| Module 1 | _(offline)_ | — | Data foundation, NLP extraction |
-| Module 2 | 5001 | HTTP (Flask) | Geospatial map + AHP analog ranking |
-| Module 3 Simulator | 5002 | HTTP + WebSocket (FastAPI) | Live telemetry replay stream |
-| Module 3 Anomaly | 5003 | HTTP + WebSocket (FastAPI) | Real-time risk detection + monitor UI |
-| Module 4 | 5004 | HTTP (Flask) | Knowledge graph + GraphRAG + AI briefings |
-| Module 5 | 5005 | HTTP (Flask) | Engineering decision support agent |
+| Module | Unified Route / Port | Internal Port | Protocol | Role |
+|--------|----------------------|---------------|----------|------|
+| **Unified Gateway** | **`:5000 /`** | — | HTTP + WebSockets | Central entry point, reverse-proxy & dashboard |
+| Module 1 | _(offline)_ | — | — | Data foundation, NLP extraction |
+| Module 2 | `/module2/` | 15001 | HTTP (Flask proxied) | Geospatial map + AHP analog ranking |
+| Module 3 Simulator | `/ws/telemetry` | 15002 | HTTP + WebSocket (FastAPI proxied) | Live telemetry replay stream |
+| Module 3 Anomaly | `/module3/monitor` | 15003 | HTTP + WebSocket (FastAPI proxied) | Real-time risk detection + monitor UI |
+| Module 4 | `/module4/` | 15004 | HTTP (Flask proxied) | Knowledge graph + GraphRAG + AI briefings |
+| Module 5 | `/module5/` | 15005 | HTTP (Flask proxied) | Engineering decision support agent |
 
 ---
 
@@ -63,38 +64,38 @@ graph TD
         M1_OUT["Module 1 Outputs\nwells_metadata.json\nevents.jsonl\ntelemetry/15_9-F-9A.csv\nflagged_real_incidents.json\nevent_type_vocabulary.json"]
     end
 
-    subgraph "MODULE 2 — Geospatial & AHP :5001"
+    subgraph "MODULE 2 — Geospatial & AHP (:15001 -> /module2/)"
         M2_SIM["Similarity Engine\ncompute_similarity.py"]
         M2_APP["Flask Web Server\napp.py"]
         M2_OUT["Module 2 Outputs\nanalog_wells.json\nahp_weights.json\nformation_correlation.json"]
         M2_UI["Leaflet Map UI\nmap.html"]
     end
 
-    subgraph "MODULE 3 — Real-Time Telemetry :5002/:5003"
-        M3_SIM["Telemetry Simulator\nsimulator_server.py :5002"]
+    subgraph "MODULE 3 — Real-Time Telemetry (:15002/:15003 -> /module3/)"
+        M3_SIM["Telemetry Simulator\nsimulator_server.py"]
         M3_DET["Anomaly Detector\nanomaly_detector.py\nZ-Score + CUSUM"]
         M3_SEQ["Sequence Matcher\nsequence_matcher.py\nSmith-Waterman + Wilson CI"]
-        M3_ANO["Anomaly Server\nanomaly_server.py :5003"]
+        M3_ANO["Anomaly Server\nanomaly_server.py"]
         M3_BT["Backtest Runner\nbacktest_runner.py"]
         M3_UI["Live Monitor UI\nmonitor.html"]
         M3_OUT["Module 3 Outputs\nrisk_predictions.jsonl\nbacktest_result.json\nsequence_matches.json"]
     end
 
-    subgraph "MODULE 4 — Knowledge Graph & AI :5004"
+    subgraph "MODULE 4 — Knowledge Graph & AI (:15004 -> /module4/)"
         M4_KG["Knowledge Graph Builder\nknowledge_graph.py\nNetworkX DiGraph"]
         M4_RAG["GraphRAG Engine\ngraph_rag.py\nsentence-transformers"]
         M4_LLM["LLM Briefing Engine\nllm_briefing.py\nGemini AI"]
-        M4_APP["Flask App\napp.py :5004"]
+        M4_APP["Flask App\napp.py"]
         M4_UI["Vis.js Graph UI\nmodule4.html"]
         M4_OUT["Module 4 Outputs\nknowledge_graph.gpickle\nBRF_*.json briefings"]
     end
 
-    subgraph "MODULE 5 — Engineering Agent :5005"
+    subgraph "MODULE 5 — Engineering Agent (:15005 -> /module5/)"
         M5_DA["Data Adapter\ndata_adapter.py"]
         M5_VS["ChromaDB Vector Store\nvector_store.py"]
         M5_RET["Retriever\nretriever.py"]
         M5_AGT["Engineering Agent\nagent.py\nGemini 2.5 Flash"]
-        M5_APP["Flask App\napp.py :5005"]
+        M5_APP["Flask App\napp.py"]
         M5_UI["Dark Console UI\nmodule5.html"]
     end
 
@@ -110,7 +111,7 @@ graph TD
     M2_APP --> M2_UI
 
     M1_OUT --> M3_SIM
-    M3_SIM -->|"ws://localhost:5002/ws/telemetry"| M3_ANO
+    M3_SIM -->|"WebSocket telemetry stream"| M3_ANO
     M3_ANO --> M3_DET
     M3_ANO --> M3_SEQ
     M2_OUT --> M3_SEQ
@@ -266,7 +267,7 @@ graph TD
     CS --> AHW["ahp_weights.json"]
     CS --> FC["formation_correlation.json"]
 
-    AW & AHW & FC --> APP["Flask app.py :5001"]
+    AW & AHW & FC --> APP["Flask app.py"]
 
     APP --> R1["GET / → map.html"]
     APP --> R2["GET /api/wells"]
@@ -347,8 +348,8 @@ graph LR
 ### 5.1 Responsibility
 
 Module 3 is the **real-time predictive intelligence layer**. It is split into two independently running servers:
-- **Port 5002 (Simulator Server):** Replays the 16,670-row Volve WITSML telemetry CSV row-by-row over WebSocket, simulating a live eRTMAC/WITSML feed.
-- **Port 5003 (Anomaly Server):** Subscribes to the simulator, runs dual-algorithm anomaly detection (Z-score + CUSUM), performs Smith-Waterman sequence alignment against historical analog patterns, computes Wilson Score Confidence Intervals for hazard probabilities, and serves a live browser dashboard.
+- **Simulator Server (internal :15002, gateway /ws/telemetry):** Replays the 16,670-row Volve WITSML telemetry CSV row-by-row over WebSocket, simulating a live eRTMAC/WITSML feed.
+- **Anomaly Server (internal :15003, gateway /module3/monitor):** Subscribes to the simulator, runs dual-algorithm anomaly detection (Z-score + CUSUM), performs Smith-Waterman sequence alignment against historical analog patterns, computes Wilson Score Confidence Intervals for hazard probabilities, and serves a live browser dashboard.
 
 **Key result:** **+106.48 m early warning** lead time before the confirmed `EVT_STUCK_PIPE` incident at 619 m on well 15/9-F-9A (2014-02-05).
 
@@ -358,9 +359,9 @@ Module 3 is the **real-time predictive intelligence layer**. It is split into tw
 graph TD
     CSV["15_9-F-9A.csv\n16,670 rows real WITSML"] --> TS["TelemetrySimulator\ntelemetry_simulator.py"]
 
-    subgraph "Port 5002 — Simulator Server"
+    subgraph "Simulator Server (:15002)"
         TS --> BL["Broadcast Loop\nasyncio background task"]
-        BL -->|"ws://5002/ws/telemetry\nJSON row envelope"| WS_SIM["WebSocket Endpoint\n/ws/telemetry"]
+        BL -->|"ws://15002/ws/telemetry\nJSON row envelope"| WS_SIM["WebSocket Endpoint\n/ws/telemetry"]
         BL --> LATEST["_latest_emitted\ncache"]
         CM["ConnectionManager\nactive client set"] --> BL
         REST_SIM["REST API\n/api/telemetry/status\n/api/telemetry/current\nPOST /config /reset /pause"] --> TS
@@ -368,7 +369,7 @@ graph TD
 
     WS_SIM -->|"WebSocket subscribe"| CONSUMER["consume_simulator_websocket\nasyncio background task"]
 
-    subgraph "Port 5003 — Anomaly Server"
+    subgraph "Anomaly Server (:15003)"
         CONSUMER --> BUFF["Rolling Buffer\ndeque maxlen=300 rows"]
         BUFF --> AD["AnomalyDetector\nanomaly_detector.py"]
 
@@ -605,7 +606,7 @@ graph TD
         VERIFY --> BRF["Briefing JSON\nBRF_*.json\nper-sentence pass/fail"]
     end
 
-    subgraph "app.py — Flask :5004"
+    subgraph "app.py — Flask (:15004 -> /module4/)"
         GPK --> APP["Flask Server"]
         TOPK --> APP
         BRF --> APP
@@ -764,7 +765,7 @@ graph TD
         ANS & FALLBACK --> RESP["Final AskResponse"]
     end
 
-    subgraph "app.py — Flask :5005"
+    subgraph "app.py — Flask (:15005 -> /module5/)"
         RESP --> API["POST /api/ask"]
         API --> UI["module5.html\nDark console\n5 preset scenarios"]
         SCEN["GET /api/scenarios"] --> UI
@@ -777,7 +778,7 @@ graph TD
 ```mermaid
 sequenceDiagram
     participant ENG as "Engineer (browser)"
-    participant APP as "Flask :5005"
+    participant APP as "Flask (:15005)"
     participant AGT as "EngineeringAgent"
     participant RET as "Retriever"
     participant DA as "DataAdapter"
@@ -862,7 +863,7 @@ graph TD
     M2 -->|"analog_wells.json"| M4["Module 4\nKnowledge Graph"]
     M2 -->|"analog_wells.json"| M5["Module 5\nAgent"]
 
-    M3_SIM["M3 Simulator\n:5002"] -->|"WebSocket telemetry rows"| M3_ANO["M3 Anomaly Server\n:5003"]
+    M3_SIM["M3 Simulator\n:15002"] -->|"WebSocket telemetry rows"| M3_ANO["M3 Anomaly Server\n:15003"]
     M3_ANO -->|"risk_predictions.jsonl"| M4
     M3_ANO -->|"backtest_result.json"| M4
 
@@ -873,29 +874,29 @@ graph TD
 
 ### 8.2 Module Startup Order
 
-Module 3's Anomaly Server **must** start after the Simulator Server since it actively connects to port 5002's WebSocket:
+The Gateway starts all internal microservices and establishes inter-service connections:
 
 ```mermaid
 sequenceDiagram
-    participant ORC as "run_all_modules.py"
-    participant M2 as "Module 2 :5001"
-    participant SIM as "M3 Simulator :5002"
-    participant ANO as "M3 Anomaly :5003"
-    participant M4 as "Module 4 :5004"
-    participant M5 as "Module 5 :5005"
+    participant GW as "gateway.py (:5000)"
+    participant M2 as "Module 2 (:15001)"
+    participant SIM as "M3 Simulator (:15002)"
+    participant ANO as "M3 Anomaly (:15003)"
+    participant M4 as "Module 4 (:15004)"
+    participant M5 as "Module 5 (:15005)"
 
-    ORC->>M2: subprocess.Popen + 1.2s wait
-    ORC->>SIM: subprocess.Popen + 1.2s wait
+    GW->>M2: subprocess.Popen + health probe
+    GW->>SIM: subprocess.Popen + health probe
     Note over SIM: Loads 16,670 CSV rows into memory
-    ORC->>ANO: subprocess.Popen + 1.2s wait
-    Note over ANO: Connects to ws://5002/ws/telemetry
+    GW->>ANO: subprocess.Popen + health probe
+    Note over ANO: Connects to ws://localhost:15002/ws/telemetry
     SIM-->>ANO: WebSocket accepted
-    ORC->>M4: subprocess.Popen + 1.2s wait
+    GW->>M4: subprocess.Popen + health probe
     Note over M4: Loads .gpickle graph into memory
-    ORC->>M5: subprocess.Popen + 1.2s wait
+    GW->>M5: subprocess.Popen + health probe
     Note over M5: Populates ChromaDB if empty
-    ORC->>ORC: supervisor loop (1s poll)
-    ORC->>ORC: webbrowser.open (4 browser tabs)
+    GW->>GW: Gateway ready on http://localhost:5000
+    GW->>GW: webbrowser.open("http://localhost:5000")
 ```
 
 ### 8.3 Key Shared Data Contract — `analog_wells.json`
@@ -934,14 +935,14 @@ The `analog_wells.json` file is the **single most shared artifact**, consumed by
 
 ## 9. System Orchestration & Deployment
 
-### 9.1 Master Orchestrator (`run_all_modules.py`)
+### 9.1 Master Orchestrator & Gateway (`gateway.py`)
 
-The orchestrator is a **Python supervisor process** that:
-1. Checks for port conflicts before launching
-2. Starts each module as an independent `subprocess.Popen` with its own log file
-3. Staggers starts by 1.2 seconds to allow socket binding
-4. Monitors for unexpected exits with a 1-second poll loop
-5. On `Ctrl+C`: gracefully terminates all child processes (`CTRL_BREAK_EVENT` on Windows)
+The system uses a unified **FastAPI reverse-proxy gateway** (`gateway.py`):
+1. Runs on **Port 5000**, exposing the unified UI dashboard, all REST APIs, and live WebSockets
+2. Starts each module as an independent subprocess on isolated internal loopback ports (`15001–15005`)
+3. Proxies all HTTP requests (`/module2/*`, `/module3/*`, `/module4/*`, `/module5/*`) and WebSocket streams (`/ws/telemetry`, `/ws/anomaly`) seamlessly
+4. Manages graceful shutdown on `Ctrl+C`, cleanly terminating all child processes
+5. Legacy multi-port orchestrator `run_all_modules.py` remains available for standalone subsystem debugging
 
 ```
 Logs:
@@ -971,7 +972,7 @@ Logs:
 
 ### 9.4 Production Context
 
-> In production (eRTMAC deployment at Oil India Limited), the Telemetry Simulator (port 5002) would be **replaced** by a direct WITSML/eRTMAC API subscriber. All downstream modules (Anomaly Server, Knowledge Graph, Agent) are designed to connect to any WebSocket that emits the same row envelope format.
+> In production (eRTMAC deployment at Oil India Limited), the Telemetry Simulator would be **replaced** by a direct WITSML/eRTMAC API subscriber. All downstream modules (Anomaly Server, Knowledge Graph, Agent) are designed to connect to any WebSocket that emits the same row envelope format.
 
 ---
 
@@ -1087,9 +1088,14 @@ SIH_2026_PLANNS/
 │
 └── NLP/nlp_task_ddr/                       ← ALL code lives here
     ├── requirements.txt
-    ├── run_all_modules.py                  ← Master orchestrator (5 processes)
+    ├── gateway.py                          ← Master single-port gateway & orchestrator (:5000)
+    ├── run_all_modules.py                  ← Legacy multi-port orchestrator
     ├── p1_full_pipeline.py                 ← Module 1 offline pipeline
     ├── check_setup.py                      ← Data integrity verifier
+    │
+    ├── dashboard/                          ← Central Operations Portal (port 5000 root)
+    │   ├── app.py
+    │   └── templates/dashboard.html
     │
     ├── results/module1_outputs/            ← Module 1 artifacts (shared by all)
     │   ├── wells_metadata.json             ← 159 wells
@@ -1098,7 +1104,7 @@ SIH_2026_PLANNS/
     │   ├── flagged_real_incidents.json     ← Real hazard events
     │   └── telemetry/15_9-F-9A.csv        ← 16,670 WITSML rows
     │
-    ├── module2/                            ← Port 5001 (Flask)
+    ├── module2/                            ← Geospatial & AHP (internal :15001 -> /module2/)
     │   ├── app.py                          ← REST API + map server
     │   ├── compute_similarity.py           ← AHP + similarity engine (offline)
     │   ├── templates/map.html              ← Leaflet.js map UI
@@ -1107,12 +1113,12 @@ SIH_2026_PLANNS/
     │       ├── ahp_weights.json            ← AHP matrices + eigenvectors
     │       └── formation_correlation.json  ← 59 formations cross-referenced
     │
-    ├── module3/                            ← Ports 5002 + 5003 (FastAPI)
+    ├── module3/                            ← Real-Time Telemetry & Anomaly (:15002/:15003 -> /module3/ & /ws/*)
     │   ├── telemetry_simulator.py          ← TelemetrySimulator class
-    │   ├── simulator_server.py             ← FastAPI app :5002
+    │   ├── simulator_server.py             ← FastAPI app :15002
     │   ├── anomaly_detector.py             ← AnomalyDetector (Z-score + CUSUM)
     │   ├── sequence_matcher.py             ← Smith-Waterman + Wilson CI
-    │   ├── anomaly_server.py               ← FastAPI app :5003
+    │   ├── anomaly_server.py               ← FastAPI app :15003
     │   ├── backtest_runner.py              ← Time-travel backtest engine
     │   ├── monitor.html                    ← Live dashboard UI
     │   └── outputs/
@@ -1121,7 +1127,7 @@ SIH_2026_PLANNS/
     │       ├── risk_predictions.jsonl      ← Live per-row risk scores
     │       └── sequence_matches.json       ← Historical alignment records
     │
-    ├── module4/                            ← Port 5004 (Flask)
+    ├── module4/                            ← Knowledge Graph & AI (internal :15004 -> /module4/)
     │   ├── knowledge_graph.py              ← NetworkX graph builder
     │   ├── graph_rag.py                    ← GraphRAG two-stage retrieval
     │   ├── llm_briefing.py                 ← Gemini citation-forced briefing
@@ -1134,7 +1140,7 @@ SIH_2026_PLANNS/
     │       ├── graph_stats.json            ← Node/edge counts
     │       └── BRF_*.json                  ← Generated AI briefings
     │
-    └── module5_engineering_agent/          ← Port 5005 (Flask)
+    └── module5_engineering_agent/          ← Engineering Agent (internal :15005 -> /module5/)
         ├── app.py                          ← Flask app + 5 demo scenarios
         ├── config.py                       ← Paths + Gemini + ChromaDB config
         ├── agent/

@@ -1106,11 +1106,11 @@
   <!-- ── BSPWM Top Bar ───────────────────────────────────────────── -->
   <div class="bar">
     <div class="bar-workspaces">
-      <a class="ws" href="http://localhost:5000" title="Central Dashboard">1:dash</a>
-      <a class="ws" href="http://localhost:5001" title="Module 2 Geospatial">2:geo</a>
-      <a class="ws" href="http://localhost:5003/monitor" title="Module 3 Telemetry">3:stream</a>
+      <a class="ws" href="/" title="Central Dashboard">1:dash</a>
+      <a class="ws" href="/module2/" title="Module 2 Geospatial">2:geo</a>
+      <a class="ws" href="/module3/monitor" title="Module 3 Telemetry">3:stream</a>
       <a class="ws active" href="#" title="Module 4 Graph Studio (Active)">4:graph</a>
-      <a class="ws" href="http://localhost:5005" title="Module 5 Engineering Agent">5:agent</a>
+      <a class="ws" href="/module5/" title="Module 5 Engineering Agent">5:agent</a>
     </div>
 
     <span class="bar-tag">bspwm</span>
@@ -1138,13 +1138,13 @@
 
       <!-- Titlebar -->
       <div class="titlebar">
-        <div class="dot close" title="Exit to Portal" onclick="window.location.href='http://localhost:5000'"></div>
+        <div class="dot close" title="Exit to Portal" onclick="window.location.href='/'"></div>
         <div class="dot min" title="Minimize"></div>
         <div class="dot max" title="Maximize"></div>
         <div class="titlebar-text">alacritty — <span>nwis@sentinel:~/modules/module4-graphrag-studio</span></div>
 
         <div class="titlebar-right">
-          <a class="btn-return" href="http://localhost:5000">⎋ RETURN TO DASHBOARD</a>
+          <a class="btn-return" href="/">⎋ RETURN TO DASHBOARD</a>
         </div>
       </div>
 
@@ -1478,7 +1478,7 @@
 
     async function loadStats() {
       try {
-        const res = await fetch('/api/graph/stats');
+        const res = await fetch('/module4/api/graph/stats');
         const data = await res.json();
         const nc = data.node_counts_by_type || {};
         document.getElementById('hdrNodes').textContent = fmt(data.total_nodes) + ' Nodes';
@@ -1495,7 +1495,7 @@
 
     async function loadWells() {
       try {
-        const res = await fetch('/api/wells');
+        const res = await fetch('/module4/api/wells');
         const data = await res.json();
         allWells = data.wells || [];
         renderWellSelect(allWells);
@@ -1547,7 +1547,7 @@
 
     async function loadBacktest() {
       try {
-        const res = await fetch('/api/backtest');
+        const res = await fetch('/module4/api/backtest');
         const data = await res.json();
         const lead = data.summary?.lead_time_metrics?.actionable_lead_distance_metres;
         const mins = data.summary?.lead_time_metrics?.actionable_lead_time_minutes_telemetry;
@@ -1600,7 +1600,7 @@
 
       try {
         const enc = encodeURIComponent(selectedWell);
-        const res = await fetch(`/api/graph/well/${enc}?depth=2`);
+        const res = await fetch(`/module4/api/graph/well/${enc}?depth=2`);
         const data = await res.json();
         if (data.error) {
           canvasEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--accent-red);font-size:12px;">⚠ ${data.error}</div>`;
@@ -1827,7 +1827,7 @@
       try {
         const enc = encodeURIComponent(selectedWell);
         const q = `${selectedHazard.replace('_', ' ')} similar formation depth`;
-        const res = await fetch(`/api/rag/query?well_id=${enc}&hazard=${selectedHazard}&q=${encodeURIComponent(q)}&top_k=1`);
+        const res = await fetch(`/module4/api/rag/query?well_id=${enc}&hazard=${selectedHazard}&q=${encodeURIComponent(q)}&top_k=1`);
         const data = await res.json();
         const analogs = (data.analog_wells || []).slice(0, 5);
         if (!analogs.length) {
@@ -1858,7 +1858,7 @@
 
       try {
         const enc = encodeURIComponent(selectedWell);
-        const res = await fetch(`/api/rag/query?well_id=${enc}&hazard=${selectedHazard}&q=${encodeURIComponent(q)}&top_k=6`);
+        const res = await fetch(`/module4/api/rag/query?well_id=${enc}&hazard=${selectedHazard}&q=${encodeURIComponent(q)}&top_k=6`);
         const data = await res.json();
 
         if (data.error) { toast('⚠ ' + data.error); container.innerHTML = `<div class="empty-state"><p style="color:var(--accent-red);">${data.error}</p></div>`; return; }
@@ -1922,7 +1922,7 @@
         const query = document.getElementById('ragQuery').value.trim() ||
           `${selectedHazard.replace('_', ' ')} risk indicators precursor signs`;
 
-        const res = await fetch('/api/briefing/generate', {
+        const res = await fetch('/module4/api/briefing/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2019,7 +2019,7 @@
           }
         } else {
           // Reached root initial state -> return to Central Dashboard
-          window.location.href = 'http://localhost:5000';
+          window.location.href = '/';
         }
       });
     })();

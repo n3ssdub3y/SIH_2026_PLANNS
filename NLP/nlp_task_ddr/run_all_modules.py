@@ -118,6 +118,7 @@ def main():
 
     print(f"\n{BOLD}{CYAN}{'=' * 75}{RESET}")
     print(f"{BOLD}{CYAN}     NWIS-Sentinel | SIH 2026 | PS SIH26121 | System Orchestrator{RESET}")
+    print(f"{YELLOW}  [TIP] For unified single-port mode (Port 5000 only), use: python gateway.py{RESET}")
     print(f"{BOLD}{CYAN}{'=' * 75}{RESET}\n")
     print(f"Python interpreter : {PYTHON_EXE}")
     print(f"Working directory  : {BASE_DIR}")

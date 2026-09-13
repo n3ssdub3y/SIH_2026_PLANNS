@@ -778,11 +778,11 @@
   <!-- ── BSPWM Top Bar ───────────────────────────────────────────── -->
   <div class="bar">
     <div class="bar-workspaces">
-      <a class="ws" href="http://localhost:5000" title="Central Dashboard">1:dash</a>
-      <a class="ws" href="http://localhost:5001" title="Module 2 Geospatial">2:geo</a>
+      <a class="ws" href="/" title="Central Dashboard">1:dash</a>
+      <a class="ws" href="/module2/" title="Module 2 Geospatial">2:geo</a>
       <a class="ws active" href="#" title="Module 3 Telemetry (Active)">3:stream</a>
-      <a class="ws" href="http://localhost:5004" title="Module 4 Graph Studio">4:graph</a>
-      <a class="ws" href="http://localhost:5005" title="Module 5 Engineering Agent">5:agent</a>
+      <a class="ws" href="/module4/" title="Module 4 Graph Studio">4:graph</a>
+      <a class="ws" href="/module5/" title="Module 5 Engineering Agent">5:agent</a>
     </div>
 
     <span class="bar-tag">bspwm</span>
@@ -810,13 +810,13 @@
 
       <!-- Titlebar -->
       <div class="titlebar">
-        <div class="dot close"  title="Exit to Portal" onclick="window.location.href='http://localhost:5000'"></div>
+        <div class="dot close"  title="Exit to Portal" onclick="window.location.href='/'"></div>
         <div class="dot min"    title="Minimize"></div>
         <div class="dot max"    title="Maximize"></div>
         <div class="titlebar-text">alacritty — <span>nwis@sentinel:~/modules/module3-telemetry-monitor</span></div>
 
         <div class="titlebar-right">
-          <a class="btn-return" href="http://localhost:5000">⎋ RETURN TO DASHBOARD</a>
+          <a class="btn-return" href="/">⎋ RETURN TO DASHBOARD</a>
         </div>
       </div>
 
@@ -1161,7 +1161,7 @@
         <!-- Terminal Footer Status Line -->
         <div class="status-line">
           <div class="status-dot"></div>
-          <span>Module 3 Active · Telemetry Port 5002 · Risk Server Port 5003 · CUSUM/Z-Score Supervised</span>
+          <span>Module 3 Active · Unified Gateway Port 5000 · CUSUM/Z-Score Supervised Anomaly Engine</span>
         </div>
 
       </div><!-- /term-body -->
@@ -1444,11 +1444,11 @@
     function connectTelemetryWebSocket() {
       const wsBarStat = document.getElementById('wsBarStat');
       const wsBarText = document.getElementById('wsBarText');
-      telemetryWs = new WebSocket('ws://localhost:5002/ws/telemetry');
+      telemetryWs = new WebSocket(((location.protocol === 'https:') ? 'wss://' : 'ws://') + location.host + '/ws/telemetry');
 
       telemetryWs.onopen = () => {
         if (wsBarStat) wsBarStat.className = 'bar-stat ok';
-        if (wsBarText) wsBarText.textContent = 'PORT 5002 CONNECTED';
+        if (wsBarText) wsBarText.textContent = 'TELEMETRY CONNECTED';
       };
 
       telemetryWs.onmessage = (event) => {
@@ -1461,7 +1461,7 @@
 
       telemetryWs.onclose = () => {
         if (wsBarStat) wsBarStat.className = 'bar-stat warn';
-        if (wsBarText) wsBarText.textContent = 'PORT 5002 OFFLINE';
+        if (wsBarText) wsBarText.textContent = 'TELEMETRY OFFLINE';
         setTimeout(connectTelemetryWebSocket, 3000);
       };
 
@@ -1511,7 +1511,7 @@
       if (telemetryWs && telemetryWs.readyState === WebSocket.OPEN) {
         telemetryWs.send(JSON.stringify({ action: 'set_speed', speed: speed }));
       }
-      fetch(`http://localhost:5002/api/telemetry/control`, {
+      fetch(`/module3/sim/api/telemetry/control`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'set_speed', speed_multiplier: speed })
@@ -1533,7 +1533,7 @@
       if (telemetryWs && telemetryWs.readyState === WebSocket.OPEN) {
         telemetryWs.send(JSON.stringify({ action }));
       }
-      fetch(`http://localhost:5002/api/telemetry/control`, {
+      fetch(`/module3/sim/api/telemetry/control`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action })
@@ -1544,13 +1544,13 @@
       if (telemetryWs && telemetryWs.readyState === WebSocket.OPEN) {
         telemetryWs.send(JSON.stringify({ action: 'reset' }));
       }
-      fetch(`http://localhost:5002/api/telemetry/control`, {
+      fetch(`/module3/sim/api/telemetry/control`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reset' })
       }).catch(() => {});
 
-      fetch(`http://localhost:5003/api/anomaly/reset`, {
+      fetch(`/module3/anomaly/api/anomaly/reset`, {
         method: 'POST'
       }).catch(() => {});
 
@@ -1582,7 +1582,7 @@
 
     /* ── Anomaly & Sequence Matching WebSocket Client ─────────────── */
     function connectAnomalyWebSocket() {
-      anomalyWs = new WebSocket('ws://localhost:5003/ws/anomaly');
+      anomalyWs = new WebSocket(((location.protocol === 'https:') ? 'wss://' : 'ws://') + location.host + '/ws/anomaly');
 
       anomalyWs.onmessage = (event) => {
         try {
@@ -1675,7 +1675,7 @@
           switchTab(e.state.tab, false);
         } else {
           // Popped past initial tab -> return to Central Dashboard
-          window.location.href = 'http://localhost:5000';
+          window.location.href = '/';
         }
       });
     })();

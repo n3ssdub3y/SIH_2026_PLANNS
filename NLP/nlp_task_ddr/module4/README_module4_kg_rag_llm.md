@@ -24,7 +24,7 @@ Three things this module builds:
 | Knowledge Graph | `networkx==3.6.1` | Standard, fast, in-memory property graph; pickle serialization for fast reload |
 | Semantic Embeddings | `sentence-transformers==6.0.1` + `all-MiniLM-L6-v2` | 82MB, runs fully offline after first download, fastest model for semantic similarity |
 | LLM Briefing | `google-generativeai` + `gemini-1.5-flash` | Gemini AI Studio API, fast + affordable, supports long context for evidence injection |
-| Web Server | `Flask` + `flask-cors`, port 5004 | Consistent with Module 2 (5001/5002) and Module 3 (5003) architecture |
+| Web Server | `Flask` + `flask-cors` | Microservice proxied via port 5000 gateway (internal 15004, standalone 5004) |
 | UI | Vanilla HTML/CSS/JS + `vis-network` (CDN) | No build step, dark glassmorphism, interactive graph drag-and-drop |
 
 ---
@@ -88,16 +88,17 @@ Three things this module builds:
 pip install networkx sentence-transformers google-generativeai flask flask-cors
 ```
 
-### Step 2 — Start the server
+### Step 2 — Start the platform
 ```bash
 cd NLP/nlp_task_ddr
-python module4/app.py
+python gateway.py
 ```
 
 ### Step 3 — Open the UI
 ```
-http://localhost:5004
+http://localhost:5000/module4/
 ```
+*(For standalone debugging: `python module4/app.py --port 5004` → `http://localhost:5004`)*
 
 > **Note**: The knowledge graph is built automatically on first run from the existing module outputs. The `sentence-transformers` model (`all-MiniLM-L6-v2`, ~82MB) is downloaded from Hugging Face on first RAG query and cached locally.
 

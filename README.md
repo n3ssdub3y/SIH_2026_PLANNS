@@ -4,11 +4,11 @@
 
 ---
 
-## ⚡ Quick Start (One Command, All Modules + Dashboard)
+## ⚡ Quick Start (Single-Port Unified Gateway)
 
 > **Working directory for ALL commands: `NLP/nlp_task_ddr/`**
 >
-> Clone the repo, install dependencies once, then launch everything together.
+> All 5 modules, real-time WebSocket feeds, and the central command center are served through **a single entry point: port 5000**.
 
 ```bash
 # Step 1 — go to the working directory
@@ -17,19 +17,21 @@ cd NLP/nlp_task_ddr
 # Step 2 — install all dependencies (do this once)
 pip install -r requirements.txt
 
-# Step 3 — launch central dashboard and all modules simultaneously
-python run_all_modules.py
+# Step 3 — launch unified gateway (starts all modules + opens dashboard)
+python gateway.py
 ```
 
-That's it. Five interactive browser tabs will open automatically.
+That's it. The gateway starts all internal microservices and automatically opens the central dashboard at **`http://localhost:5000`**.
 
-| Service / Module | URL | What You See |
+| Service / View | Unified Gateway URL | Description |
 |---|---|---|
-| **Central Operations Dashboard** | [http://localhost:5000](http://localhost:5000) | BSPWM/terminal unified portal, system specs, live port monitor & 1-click launchers |
-| **Module 2** — Geospatial Map | [http://localhost:5001](http://localhost:5001) | Leaflet interactive map, 159 wells, AHP hazard rankings |
-| **Module 3** — Live Risk Monitor | [http://localhost:5003/monitor](http://localhost:5003/monitor) | Real-time CUSUM/Z-score alerts, +106.5 m early warning dashboard |
-| **Module 4** — Knowledge Graph & AI Studio | [http://localhost:5004](http://localhost:5004) | 4,037-node Vis.js graph, GraphRAG search, Gemini AI briefings |
-| **Module 5** — Engineering Decision Support | [http://localhost:5005](http://localhost:5005) | Dark console, 1-click scenarios, Gemini RAG, ChromaDB vector store |
+| **Central Operations Dashboard** | [http://localhost:5000](http://localhost:5000) | BSPWM/terminal unified portal, system specs, live module health & navigation |
+| **Module 2** — Geospatial Map | [http://localhost:5000/module2/](http://localhost:5000/module2/) | Leaflet interactive map, 159 wells, AHP hazard rankings |
+| **Module 3** — Live Risk Monitor | [http://localhost:5000/module3/monitor](http://localhost:5000/module3/monitor) | Real-time CUSUM/Z-score alerts, +106.5 m early warning dashboard |
+| **Module 4** — Knowledge Graph & AI Studio | [http://localhost:5000/module4/](http://localhost:5000/module4/) | 4,037-node Vis.js graph, GraphRAG search, Gemini AI briefings |
+| **Module 5** — Engineering Decision Support | [http://localhost:5000/module5/](http://localhost:5000/module5/) | Dark console, 1-click scenarios, Gemini RAG, ChromaDB vector store |
+| **Live Telemetry WebSocket** | `ws://localhost:5000/ws/telemetry` | WITSML-style real-time drilling data stream |
+| **Live Risk WebSocket** | `ws://localhost:5000/ws/anomaly` | Real-time CUSUM anomaly & early warning alert stream |
 
 > Press **Ctrl+C** in the terminal to stop all services cleanly.
 
@@ -37,7 +39,7 @@ That's it. Five interactive browser tabs will open automatically.
 
 ## 🖥️ Windows — 1-Click Launcher
 
-If you don't want to type anything, just double-click:
+If you don't want to type commands, just double-click:
 
 ```
 start_all.bat          ← in the root SIH_2026_PLANNS/ folder
@@ -48,49 +50,7 @@ or from PowerShell:
 .\start_all.ps1
 ```
 
----
-
-## 🛠️ Manual Launch (Separate Terminals)
-
-If you want full control — open separate terminals, all inside `NLP/nlp_task_ddr/`.
-
-**Terminal 0 — Central Operations Dashboard (BSPWM Portal)**
-```bash
-python dashboard/app.py --port 5000
-# → http://localhost:5000
-```
-
-**Terminal 1 — Module 2 (Geospatial & AHP Similarity Map)**
-```bash
-python module2/app.py
-# → http://localhost:5001
-```
-
-**Terminal 2 — Module 3 Simulator (Live Telemetry Stream)**
-```bash
-python module3/simulator_server.py --port 5002 --speed 5.0
-# WebSocket: ws://localhost:5002/ws/telemetry
-# --speed controls replay speed (5.0 = 5× real time; 1.0 = real time)
-```
-
-**Terminal 3 — Module 3 Anomaly Server (Risk Detection & Monitor)**
-> ⚠️ Start Terminal 2 FIRST — this server connects to Terminal 2's WebSocket.
-```bash
-python module3/anomaly_server.py --port 5003 --simulator-url ws://localhost:5002/ws/telemetry
-# → http://localhost:5003/monitor
-```
-
-**Terminal 4 — Module 4 (Knowledge Graph, GraphRAG & AI Briefing)**
-```bash
-python module4/app.py
-# → http://localhost:5004
-```
-
-**Terminal 5 — Module 5 (Engineering RAG + LLM Agent)**
-```bash
-python module5_engineering_agent/app.py --port 5005
-# → http://localhost:5005
-```
+Both launch `gateway.py` automatically and open your browser to `http://localhost:5000`.
 
 ---
 
@@ -116,27 +76,27 @@ Expected result: **64 passed**.
 
 ---
 
-## 🔌 API Health Check (Quick Sanity Test While Servers Are Running)
+## 🔌 API Health Check (Quick Sanity Test on Port 5000)
 
 ```bash
 # Dashboard — central portal UI
-curl -I "http://localhost:5000"
+curl -I "http://localhost:5000/"
 
 # Module 2 — analog wells for a given well + hazard
-curl "http://localhost:5001/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=3"
+curl "http://localhost:5000/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=3"
 
 # Module 3 — anomaly server status (buffer size, detector config)
-curl "http://localhost:5003/api/anomaly/status"
+curl "http://localhost:5000/api/anomaly/status"
 
 # Module 4 — graph stats (node + edge counts)
-curl "http://localhost:5004/api/graph/stats"
+curl "http://localhost:5000/api/graph/stats"
 
 # Module 4 — status summary
-curl "http://localhost:5004/api/status"
+curl "http://localhost:5000/api/status"
 
 # Module 5 — engineering agent UI (returns HTTP 200) & health check
-curl -I "http://localhost:5005"
-curl "http://localhost:5005/api/health"
+curl -I "http://localhost:5000/module5/"
+curl "http://localhost:5000/module5/api/health"
 ```
 
 ---
@@ -149,11 +109,11 @@ Key libraries used:
 
 | Library | Used In |
 |---|---|
-| `Flask`, `flask-cors` | Dashboard, Module 2, 4 & 5 web servers |
-| `fastapi`, `uvicorn`, `websockets` | Module 3 real-time servers |
+| `fastapi`, `uvicorn`, `httpx`, `websockets` | Port 5000 Gateway, WebSocket proxying & Module 3 real-time servers |
+| `Flask`, `flask-cors` | Module 2, 4 & 5 web engines and Dashboard |
 | `networkx` | Module 4 knowledge graph |
 | `sentence-transformers` | Module 4 GraphRAG semantic search |
-| `chromadb` | Module 5 vector store (2,022 offset records) |
+| `chromadb` | Module 5 vector store (2,022 indexed offset records) |
 | `google-generativeai`, `google-genai` | Module 4 & 5 Gemini AI briefings & agent |
 | `scikit-learn`, `scipy`, `numpy`, `pandas` | Anomaly detection & AHP calculations |
 | `statsmodels` | Wilson Score confidence intervals (Module 3) |
@@ -162,16 +122,18 @@ Key libraries used:
 
 ---
 
-## 🌐 Port Reference
+## 🌐 Unified Port Architecture
 
-| Port | Service | Protocol |
-|---|---|---|
-| **5000** | Central Operations Dashboard (BSPWM Portal) | HTTP |
-| **5001** | Module 2 Flask Map Server | HTTP |
-| **5002** | Module 3 Telemetry Simulator | HTTP + WebSocket (`ws://localhost:5002/ws/telemetry`) |
-| **5003** | Module 3 Anomaly & Risk Server | HTTP + WebSocket (`ws://localhost:5003/ws/anomaly`) + Monitor UI |
-| **5004** | Module 4 Knowledge Graph & Briefing Studio | HTTP |
-| **5005** | Module 5 Engineering Decision Support Console | HTTP |
+| Port | Exposure | Role | Protocol |
+|---|---|---|---|
+| **5000** | **Public Entry Point** | **Unified Gateway & Operations Portal** | **HTTP + WebSockets** |
+| `15001` | Internal Loopback | Module 2 — Geospatial & AHP Flask App | HTTP (Proxied) |
+| `15002` | Internal Loopback | Module 3 — Telemetry Replay Server | HTTP + WS (Proxied) |
+| `15003` | Internal Loopback | Module 3 — Anomaly & Risk Engine | HTTP + WS (Proxied) |
+| `15004` | Internal Loopback | Module 4 — Knowledge Graph & Briefing Studio | HTTP (Proxied) |
+| `15005` | Internal Loopback | Module 5 — Engineering Decision Support Console | HTTP (Proxied) |
+
+> 💡 **Why Single-Port?** In enterprise drilling operations, IT security firewalls strictly limit open ports. A single gateway on port 5000 cleanly satisfies single-origin CORS policies, avoids browser mixed-port warnings, and guarantees zero port collision issues.
 
 ---
 
@@ -180,7 +142,7 @@ Key libraries used:
 Modules 4 and 5 generate AI briefings and decision support using Google Gemini. Both modules also feature an automated **Local Evidence Synthesis Engine** as an offline fallback if no API key is provided. To use live Gemini generation:
 
 **Option A — Enter in the browser UI:**  
-Open [http://localhost:5004](http://localhost:5004) or [http://localhost:5005](http://localhost:5005) → paste your key in the *API Key* field.
+Open [http://localhost:5000/module4/](http://localhost:5000/module4/) or [http://localhost:5000/module5/](http://localhost:5000/module5/) → paste your key in the *API Key* field.
 
 **Option B — Set as environment variable (auto-loads):**
 ```bash
@@ -190,8 +152,8 @@ $env:GOOGLE_API_KEY = "AIza..."
 # Windows (CMD)
 set GOOGLE_API_KEY=AIza...
 
-# Then launch as normal
-python run_all_modules.py
+# Then launch gateway
+python gateway.py
 ```
 
 > ✅ All Knowledge Graph, GraphRAG, and map features work completely **without** an API key.
@@ -203,8 +165,8 @@ python run_all_modules.py
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                CENTRAL OPERATIONS DASHBOARD (Port 5000)                  ║
-║      BSPWM / Terminal Command Center · Health Monitor · 1-Click Launch    ║
+║             UNIFIED SENTINEL GATEWAY & DASHBOARD (Port 5000)             ║
+║    Reverse-Proxy · WebSockets · Single-Port Access · Command Center      ║
 ╚═════════════════════════════╦════════════════════════════════════════════╝
                               │
 ╔═════════════════════════════╩════════════════════════════════════════════╗
@@ -215,7 +177,7 @@ python run_all_modules.py
             ┌─────────────────┼──────────────────┐
             ▼                 ▼                  ▼
 ╔═════════════════════╗ ╔═════════════════════╗ ╔══════════════════════════╗
-║ MODULE 2 (Port 5001)║ ║ MODULE 3 (5002/5003)║ ║ MODULE 4 (Port 5004)     ║
+║ MODULE 2 (/module2) ║ ║ MODULE 3 (/module3) ║ ║ MODULE 4 (/module4)     ║
 ║ Geospatial & AHP    ║ ║ Real-Time Telemetry ║ ║ Knowledge Graph,         ║
 ║ • 5-hazard AHP      ║ ║ • WITSML simulator  ║ ║   GraphRAG & Gemini      ║
 ║ • 59 formations     ║ ║ • CUSUM / Z-score   ║ ║ • 4,037 nodes            ║
@@ -225,7 +187,7 @@ python run_all_modules.py
             └──────────────────────┼─────────────────────────┘
                                    ▼
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                      MODULE 5 (Port 5005)                               ║
+║                     MODULE 5 (/module5)                                 ║
 ║           Engineering RAG + LLM Decision Support Agent                   ║
 ║  • ChromaDB vector store (2,022 indexed offset event records)            ║
 ║  • Multi-turn rig-floor engineering advisor with citations               ║
@@ -239,18 +201,19 @@ python run_all_modules.py
 
 ```
 SIH_2026_PLANNS/
-├── start_all.bat                      ← Windows double-click launcher
-├── start_all.ps1                      ← PowerShell launcher
+├── start_all.bat                      ← Windows 1-click launcher (runs gateway.py)
+├── start_all.ps1                      ← PowerShell 1-click launcher (runs gateway.py)
 ├── README.md                          ← This file
+├── ARCHITECTURE.md                    ← System architecture specification
 │
 └── NLP/nlp_task_ddr/                  ← ALL project code lives here
+    ├── gateway.py                     ← Unified Gateway (port 5000 reverse-proxy orchestrator)
     ├── requirements.txt               ← pip install -r requirements.txt
-    ├── run_all_modules.py             ← Master launcher (start dashboard + all 4 modules)
-    ├── start_all.bat / start_all.ps1  ← Local launcher scripts
+    ├── start_all.bat / start_all.ps1  ← Subdirectory 1-click launchers
     ├── check_setup.py                 ← Module 1 data integrity check
     ├── final_verify_m2.py             ← Module 2 AHP & outputs check
     │
-    ├── dashboard/                     ← Port 5000 (Central Operations Portal)
+    ├── dashboard/                     ← Central Operations Portal (port 5000 root)
     │   ├── app.py
     │   ├── README.md
     │   └── templates/dashboard.html
@@ -262,7 +225,7 @@ SIH_2026_PLANNS/
     │       ├── flagged_real_incidents.json
     │       └── telemetry/15_9-F-9A.csv  ← 16,670 rows real Volve MWD
     │
-    ├── module2/                       ← Port 5001
+    ├── module2/                       ← Geospatial & AHP Similarity Engine
     │   ├── app.py
     │   ├── compute_similarity.py
     │   ├── templates/map.html
@@ -271,9 +234,9 @@ SIH_2026_PLANNS/
     │       ├── ahp_weights.json
     │       └── formation_correlation.json
     │
-    ├── module3/                       ← Ports 5002 & 5003
-    │   ├── simulator_server.py        ← Port 5002
-    │   ├── anomaly_server.py          ← Port 5003
+    ├── module3/                       ← Real-Time Telemetry & Anomaly Detection
+    │   ├── simulator_server.py        ← WITSML replay server
+    │   ├── anomaly_server.py          ← Real-time risk detection server
     │   ├── anomaly_detector.py
     │   ├── sequence_matcher.py
     │   ├── monitor.html               ← Live dashboard UI
@@ -284,7 +247,7 @@ SIH_2026_PLANNS/
     │       ├── risk_predictions.jsonl ← Live risk scores (grows at runtime)
     │       └── sequence_matches.json
     │
-    ├── module4/                       ← Port 5004
+    ├── module4/                       ← Knowledge Graph & AI Studio
     │   ├── app.py
     │   ├── knowledge_graph.py
     │   ├── graph_rag.py
@@ -298,7 +261,7 @@ SIH_2026_PLANNS/
     │       ├── graph_stats.json
     │       └── BRF_*.json               ← Generated briefings (runtime output)
     │
-    └── module5_engineering_agent/     ← Port 5005
+    └── module5_engineering_agent/     ← Engineering Decision Support Console
         ├── app.py                     ← Flask server
         ├── README.md                  ← Module 5 documentation
         ├── templates/module5.html     ← Bespoke engineering console
@@ -314,12 +277,12 @@ SIH_2026_PLANNS/
 
 ## ❓ Troubleshooting
 
-**Port already in use?**
-```bash
-# Windows — find what is using a port, e.g. 5004
-netstat -ano | findstr :5004
-# Kill by PID
-taskkill /PID <pid> /F
+**Port 5000 already in use?**
+```powershell
+# PowerShell — find what is using port 5000
+Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | Select-Object OwningProcess
+# Stop python processes
+Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force
 ```
 
 **`ModuleNotFoundError` on startup?**
@@ -330,21 +293,20 @@ pip install -r requirements.txt
 **Module 4 loads but graph is empty / 0 nodes?**
 Make sure `module4/outputs/knowledge_graph.gpickle` exists and is not 0 bytes. It is ~1.6 MB and pre-built — no need to regenerate it.
 
-**Module 3 anomaly server shows "not connected"?**
-Start Module 3 Simulator (port 5002) **before** starting the anomaly server (port 5003). The anomaly server connects to the simulator's WebSocket on startup.
-
 **Gemini AI briefing button does nothing / errors?**
-Enter your Google AI Studio API key (`AIza...`) in the key field on the Module 4 UI page. All other features (graph, search, RAG) work without a key.
+Enter your Google AI Studio API key (`AIza...`) in the key field on the Module 4 or Module 5 UI page. All core features (graph, search, RAG, scenarios) work offline without a key.
 
 ---
 
 ## 🤖 For Antigravity / AI Coding Agents
 
 1. Working directory is always `NLP/nlp_task_ddr/`.
-2. Start all services: `python run_all_modules.py --no-browser` (daemon mode).
+2. Start all services: `python gateway.py --no-browser` (daemon mode on port 5000).
 3. Each module logs to `NLP/nlp_task_ddr/logs/<module_id>.log`.
 4. Health checks:
-   - `GET http://localhost:5001/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=1`
-   - `GET http://localhost:5003/api/anomaly/status`
-   - `GET http://localhost:5004/api/graph/stats`
+   - `GET http://localhost:5000/`
+   - `GET http://localhost:5000/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=1`
+   - `GET http://localhost:5000/api/anomaly/status`
+   - `GET http://localhost:5000/api/graph/stats`
+   - `GET http://localhost:5000/module5/api/health`
 5. Run tests: `python -m pytest module3/ module4/ -v` — expect **64 passed**.

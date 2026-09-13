@@ -19,16 +19,18 @@ pip install -r requirements.txt
 ```
 *(Dependencies: `flask`, `flask-cors`, `pydantic`, `chromadb`, `google-genai`, `google-generativeai`, `python-dotenv`, `requests`).*
 
-### 3. Launch the Web Application (Port 5005)
+### 3. Launch via Unified Gateway (Port 5000)
+From `NLP/nlp_task_ddr/`:
 ```bash
-python app.py
+python gateway.py
 ```
-Open **[http://localhost:5005](http://localhost:5005)** in your browser.
+Open **[http://localhost:5000/module5/](http://localhost:5000/module5/)** in your browser.
 
-> To run on a custom port:
+> For standalone debugging:
 > ```bash
 > python app.py --port 5005
 > ```
+> Open **[http://localhost:5005](http://localhost:5005)**.
 
 ---
 
@@ -81,11 +83,11 @@ You can click any scenario from the `⚡ Select Scenario Panel` to auto-fill the
 
 ## 🔌 REST API Endpoints
 
-The Flask server also exposes REST endpoints for programmatic access:
+Accessible via the unified gateway on port 5000 (or on port 5005 when running standalone):
 
 ### 1. Health & Vector Store Check
 ```bash
-curl http://localhost:5005/api/health
+curl http://localhost:5000/module5/api/health
 ```
 **Response:**
 ```json
@@ -99,12 +101,12 @@ curl http://localhost:5005/api/health
 
 ### 2. List Demo Scenarios
 ```bash
-curl http://localhost:5005/api/scenarios
+curl http://localhost:5000/module5/api/scenarios
 ```
 
 ### 3. Consult Agent
 ```bash
-curl -X POST http://localhost:5005/api/ask \
+curl -X POST http://localhost:5000/module5/api/ask \
   -H "Content-Type: application/json" \
   -d '{
     "question": "What happened during mud loss in offset wells?",
@@ -150,12 +152,12 @@ If an external Gemini API key is missing or expires, the agent automatically fal
 
 ## 🛠️ Troubleshooting
 
-- **Port 5005 already in use**:
-  ```bash
-  python app.py --port 5006
+- **Port in use**:
+  ```powershell
+  Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force
   ```
 - **Verify vector database count**:
-  Run `curl http://localhost:5005/api/health` and verify `"events_in_store": 2022`.
+  Run `curl http://localhost:5000/module5/api/health` and verify `"events_in_store": 2022`.
 - **API Key Configuration**:
   To supply a custom Gemini key:
   ```bash

@@ -1002,11 +1002,11 @@
   <!-- ── BSPWM Top Desktop Bar ──────────────────────────────────────── -->
   <div class="bar">
     <div class="bar-workspaces">
-      <a href="http://localhost:5000" class="ws">1:dash</a>
-      <a href="http://localhost:5001" class="ws">2:geo</a>
-      <a href="http://localhost:5003/monitor" class="ws">3:stream</a>
-      <a href="http://localhost:5004" class="ws">4:graph</a>
-      <a href="http://localhost:5005" class="ws active">5:agent</a>
+      <a href="/" class="ws">1:dash</a>
+      <a href="/module2/" class="ws">2:geo</a>
+      <a href="/module3/monitor" class="ws">3:stream</a>
+      <a href="/module4/" class="ws">4:graph</a>
+      <a href="/module5/" class="ws active">5:agent</a>
     </div>
     <div class="bar-tag live">● RAG AGENT</div>
     <div class="bar-center">
@@ -1025,7 +1025,7 @@
     <div class="terminal">
       <!-- Titlebar -->
       <div class="titlebar">
-        <span class="dot close" onclick="window.location.href='http://localhost:5000'" title="Close window"></span>
+        <span class="dot close" onclick="window.location.href='/'" title="Close window"></span>
         <span class="dot min"></span>
         <span class="dot max"></span>
         <div class="titlebar-text">nwis@sentinel: ~/module5 <span>(engineering_agent)</span></div>
@@ -1033,7 +1033,7 @@
           <button id="openScenarioModalBtn" class="scenario-toggle-btn">
             <span>⚡ PRESETS (5)</span>
           </button>
-          <a href="http://localhost:5000" class="btn-return">[ &#x238b; RETURN TO DASHBOARD ]</a>
+          <a href="/" class="btn-return">[ &#x238b; RETURN TO DASHBOARD ]</a>
         </div>
       </div>
 
@@ -1625,7 +1625,7 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
       };
 
       try {
-        const res = await fetch("/api/ask", {
+        const res = await fetch("/module5/api/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -1836,7 +1836,7 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
           selectScenario(e.state.scenarioId, false);
         } else {
           // Reached root initial state -> return to Central Dashboard
-          window.location.href = 'http://localhost:5000';
+          window.location.href = '/';
         }
       });
     })();

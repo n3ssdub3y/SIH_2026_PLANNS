@@ -48,7 +48,7 @@ NLP/nlp_task_ddr/
 ├── module2/                                 ← MODULE 2 CODE + OUTPUTS
 │   ├── README_module2_geospatial_and_similarity.md
 │   ├── compute_similarity.py               ← (Already run, outputs exist — do NOT re-run)
-│   ├── app.py                              ← Flask map server (port 5001)
+│   ├── app.py                              ← Flask map server (internal :15001, unified /module2/)
 │   ├── templates/map.html                  ← Leaflet.js interactive map
 │   └── outputs/
 │       ├── analog_wells.json               ← 75 MB — ALL hazard rankings for ALL 159 wells
@@ -57,8 +57,8 @@ NLP/nlp_task_ddr/
 │
 └── module3/                                 ← MODULE 3 CODE + OUTPUTS
     ├── README_module3_prediction_and_backtest.md
-    ├── simulator_server.py                  ← Live telemetry replay (port 5002)
-    ├── anomaly_server.py                    ← Anomaly detection + sequence matching (port 5003)
+    ├── simulator_server.py                  ← Live telemetry replay (internal :15002, unified /ws/telemetry)
+    ├── anomaly_server.py                    ← Anomaly detection + sequence matching (internal :15003, unified /module3/monitor)
     ├── anomaly_detector.py                  ← Z-score + CUSUM engine
     ├── sequence_matcher.py                  ← Smith-Waterman + Wilson CI engine
     ├── telemetry_simulator.py               ← Core telemetry replay state machine
@@ -191,7 +191,7 @@ Fully auditable AHP matrices per hazard. Example:
 }
 ```
 
-### Module 2 Flask API (when `python module2/app.py` is running on port 5001)
+### Module 2 Flask API (accessible via unified gateway on port 5000 at `/api/...`)
 | Endpoint | Returns |
 |---|---|
 | `GET /api/wells` | All 159 wells with lat/lon |
@@ -262,24 +262,17 @@ Per-hazard Smith-Waterman alignment results against 41 offset wells:
 }
 ```
 
-### Module 3 Live Server APIs (when servers are running)
-**Start Telemetry Simulator (Port 5002):**
+### Module 3 Live Server APIs (accessible via unified gateway on port 5000)
+**Start Unified Platform:**
 ```powershell
-python module3/simulator_server.py --port 5002 --speed 5.0
+python gateway.py
 ```
 | Endpoint | What it does |
 |---|---|
-| `WS ws://localhost:5002/ws/telemetry` | Live row-by-row telemetry broadcast |
+| `WS ws://localhost:5000/ws/telemetry` | Live row-by-row telemetry broadcast |
 | `GET /api/telemetry/status` | Current depth, row, speed, connection count |
 | `POST /api/telemetry/control` | `{"action": "pause/resume/reset/set_speed", "speed_multiplier": N}` |
-
-**Start Anomaly & Sequence Server (Port 5003):**
-```powershell
-python module3/anomaly_server.py --port 5003 --simulator-url ws://localhost:5002/ws/telemetry
-```
-| Endpoint | What it does |
-|---|---|
-| `WS ws://localhost:5003/ws/anomaly` | Live anomaly alerts + sequence match results |
+| `WS ws://localhost:5000/ws/anomaly` | Live anomaly alerts + sequence match results |
 | `GET /api/anomaly/status` | Detector config, buffer size, alert count |
 | `GET /api/anomaly/alerts` | Last N alerts with full Z-score, CUSUM breakdown |
 | `GET /api/sequence/match/latest` | Current Wilson CI risk across all hazards |
@@ -327,9 +320,9 @@ And these edges:
 
 ### Step 4 — Final Unified Dashboard
 Build one dashboard (React or Streamlit) with these panels:
-- **Panel A**: Module 2 geospatial map (embed `module2/app.py` as iframe at `localhost:5001`, or migrate `module2/templates/map.html` directly)
+- **Panel A**: Module 2 geospatial map (embed `module2/app.py` as iframe at `/module2/`, or migrate `module2/templates/map.html` directly)
 - **Panel B**: Searchable knowledge repository (query `events.jsonl` via graph)
-- **Panel C**: Live telemetry stream from Module 3 (`ws://localhost:5003/ws/anomaly`), showing real-time risk alerts with full feature/weight breakdown and LLM briefing as they generate
+- **Panel C**: Live telemetry stream from Module 3 (`ws://localhost:5000/ws/anomaly`), showing real-time risk alerts with full feature/weight breakdown and LLM briefing as they generate
 - **Panel D**: **THE FLAGSHIP** — Historical Backtest Panel. Embed `results/module3_outputs/backtest_plot.png`. Show the **+106.48 m / +44.07 min** lead time headline. This must be the visual centrepiece.
 - **Panel E**: Depth-synchronized multi-well playback comparing current well against matched analogs
 
@@ -342,27 +335,17 @@ Build one dashboard (React or Streamlit) with these panels:
 
 ---
 
-## 🚀 To Start All Backend Services At Once
+## 🚀 To Start Unified Platform (All Services)
 
-Open **3 PowerShell terminals**, all from `NLP/nlp_task_ddr/`:
+From `NLP/nlp_task_ddr/`:
 
-**Terminal 1 — Module 2 Map Server:**
 ```powershell
-python module2/app.py
-# → http://localhost:5001
-```
-
-**Terminal 2 — Module 3 Telemetry Simulator:**
-```powershell
-python module3/simulator_server.py --port 5002 --speed 5.0
-# → ws://localhost:5002/ws/telemetry
-```
-
-**Terminal 3 — Module 3 Anomaly & Intelligence Server:**
-```powershell
-python module3/anomaly_server.py --port 5003 --simulator-url ws://localhost:5002/ws/telemetry
-# → ws://localhost:5003/ws/anomaly
-# → http://localhost:5003/monitor (Module 3 live dashboard — open to verify it works)
+python gateway.py
+# → Central Operations Dashboard: http://localhost:5000
+# → Module 2 Map: http://localhost:5000/module2/
+# → Module 3 Live Monitor: http://localhost:5000/module3/monitor
+# → Module 4 AI Studio: http://localhost:5000/module4/
+# → Module 5 Engineering Agent: http://localhost:5000/module5/
 ```
 
 ---

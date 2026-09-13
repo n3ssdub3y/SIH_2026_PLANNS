@@ -88,7 +88,7 @@ def startup():
         _wells_list = json.load(f)
     logger.info("  %d wells available.", len(_wells_list))
 
-    logger.info("Module 4 ready -> http://localhost:5004")
+    logger.info("Module 4 ready.")
     logger.info("=" * 70)
 
 
@@ -287,7 +287,11 @@ def api_graph_search():
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    import argparse as _ap
+    _parser = _ap.ArgumentParser()
+    _parser.add_argument("--port", type=int, default=5004)
+    _pargs = _parser.parse_args()
     startup()
     print("\nStarting NWIS-Sentinel Module 4 ...")
-    print("Open: http://localhost:5004\n")
-    app.run(host="0.0.0.0", port=5004, debug=False)
+    print(f"Open: http://localhost:{_pargs.port}\n")
+    app.run(host="0.0.0.0", port=_pargs.port, debug=False)

@@ -158,19 +158,29 @@ python -m unittest module3/test_leakage.py -v
 ```
 
 ### C. Run the Live Telemetry Simulator & Anomaly Server (Real-Time Mode)
-1. **Start Step 1 Simulator Server (Port 5002)**:
+
+**Option 1 — Unified Gateway (Recommended):**
+```powershell
+python gateway.py
+```
+- Real-Time Monitor Web UI: `http://localhost:5000/module3/monitor`
+- Live Telemetry WebSocket: `ws://localhost:5000/ws/telemetry`
+- Live Anomaly WebSocket: `ws://localhost:5000/ws/anomaly`
+
+**Option 2 — Standalone Mode (Debugging):**
+1. **Start Step 1 Simulator Server**:
    ```powershell
    python module3/simulator_server.py --port 5002 --speed 5.0
    ```
    - WebSocket Feed: `ws://localhost:5002/ws/telemetry`
    - REST Status: `http://localhost:5002/api/telemetry/status`
 
-2. **Start Step 2+3 Anomaly & Prediction Server (Port 5003)**:
+2. **Start Step 2+3 Anomaly & Prediction Server**:
    ```powershell
    python module3/anomaly_server.py --port 5003 --simulator-url ws://localhost:5002/ws/telemetry
    ```
    - Live Anomaly Feed: `ws://localhost:5003/ws/anomaly`
-   - Real-Time Monitor Web UI: Open `module3/monitor.html` directly in any web browser.
+   - Real-Time Monitor Web UI: Open `module3/monitor.html` in your browser.
 
 ---
 

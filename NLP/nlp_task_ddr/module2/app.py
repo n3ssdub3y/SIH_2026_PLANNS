@@ -181,7 +181,11 @@ def api_well_detail(well_id=None):
 
 
 if __name__ == '__main__':
-    print("\nStarting NWIS-Sentinel Module 2 Map Server...")
-    print("Open:  http://localhost:5001")
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=5001)
+    pargs = parser.parse_args()
+    print(f"\nStarting NWIS-Sentinel Module 2 Map Server...")
+    print(f"Open:  http://localhost:{pargs.port}")
     print("Press Ctrl+C to stop\n")
-    app.run(host='0.0.0.0', port=5001, debug=False)
+    app.run(host='0.0.0.0', port=pargs.port, debug=False)

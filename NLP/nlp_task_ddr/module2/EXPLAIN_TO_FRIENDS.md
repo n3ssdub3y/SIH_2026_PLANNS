@@ -1,4 +1,4 @@
-﻿# NWIS-Sentinel — Module 2: What We Built & How It Works
+# NWIS-Sentinel — Module 2: What We Built & How It Works
 ### A plain-English guide for presenting to teammates
 
 ---
@@ -55,8 +55,9 @@ within 100 km of mine."
 
 ### How to open it
 ```
-Run:   python module2/app.py
-Open:  http://localhost:5001
+Run:   python gateway.py
+Open:  http://localhost:5000/module2/
+(or standalone: python module2/app.py -> http://localhost:5001)
 ```
 
 ### What you see when you open it
@@ -91,7 +92,7 @@ Has 5 sections:
    - Top 8 most similar "analog" wells with score breakdown bars
 
 ### How the map actually works (technical)
-- Flask (Python web server) runs on port 5001
+- Served through the unified gateway on port 5000 (`/module2/`) or standalone via Flask on port 5001
 - When the browser opens, it calls `GET /api/wells` → gets all 159 wells as JSON
 - Leaflet.js (a free mapping library) plots each well as a circle marker
 - When you select a well, the browser calls `GET /api/analogs?well_id=X&hazard=Y`
@@ -309,10 +310,10 @@ NLP/nlp_task_ddr/
 **Step 1 — Start the server:**
 ```
 cd D:\XYZ\SIH_2026_PLANNS\NLP\nlp_task_ddr
-python module2\app.py
+python gateway.py
 ```
 
-**Step 2 — Open the browser:** http://localhost:5001
+**Step 2 — Open the browser:** http://localhost:5000/module2/
 
 **Step 3 — Show the map:**
 - Point out the 3 colors: Blue (real FORCE 2020), Orange (real Volve), Red (synthetic)
@@ -342,7 +343,7 @@ python module2\app.py
   are mathematically consistent."
 
 **Step 6 — Show transparency:**
-- Open http://localhost:5001/api/ahp_weights in browser
+- Open http://localhost:5000/api/ahp_weights in browser
 - Say: "Every single weight, every single matrix, every single individual
   feature score is openly available via API. Nothing is hidden."
 

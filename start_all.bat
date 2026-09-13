@@ -1,5 +1,5 @@
 @echo off
-TITLE NWIS-Sentinel | System Launcher
-cd /d "%~dp0\NLP\nlp_task_ddr"
-python run_all_modules.py %*
+TITLE NWIS-Sentinel | Single-Port Gateway Launcher
+cd /d "%~dp0NLP\nlp_task_ddr"
+python gateway.py %*
 pause

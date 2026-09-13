@@ -150,11 +150,12 @@ python module2/compute_similarity.py
 ```
 Produces the 3 JSON files in `module2/outputs/`.
 
-### Step 2 — Start the map server
+### Step 2 — Start the platform (or standalone map server)
 ```bash
-python module2/app.py
+python gateway.py
 ```
-Open: http://localhost:5001
+Open: http://localhost:5000/module2/
+(Standalone: `python module2/app.py` → `http://localhost:5001`)
 
 ### Step 3 — Use the map
 - Select any well from the dropdown or click a pin
@@ -175,7 +176,7 @@ Open: http://localhost:5001
 | `/api/search/formation` | GET | `q` (string) | Formation name search |
 | `/api/well/<well_id>` | GET | — | Full well metadata record |
 
-**P4 Integration note:** The map runs at `localhost:5001`. Embed it as an iframe or migrate the templates/map.html directly into the P4 dashboard. All APIs are stateless JSON REST — no auth needed.
+**P4 Integration note:** The map is served at `/module2/` via unified gateway on port 5000 (or `localhost:5001` standalone). All APIs are stateless JSON REST — no auth needed.
 
 ---
 

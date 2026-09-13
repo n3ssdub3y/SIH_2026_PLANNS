@@ -484,7 +484,7 @@ SENTINEL</div>
           <div class="sysinfo-row"><span class="si-key">Partner</span> <span class="si-val">Oil India Limited</span></div>
           <div class="sysinfo-row"><span class="si-key">Stack</span>   <span class="si-val">Flask · FastAPI · Gemini · ChromaDB</span></div>
           <div class="sysinfo-row"><span class="si-key">Wells</span>   <span class="si-val">159 wells · Volve + Synthetic</span></div>
-          <div class="sysinfo-row"><span class="si-key">Modules</span><span class="si-val">4 active (5001 – 5005)</span></div>
+          <div class="sysinfo-row"><span class="si-key">Modules</span><span class="si-val">4 active · single port :5000</span></div>
           <div class="sysinfo-row"><span class="si-key">Status</span> <span class="si-val" id="statusVal">● All systems operational</span></div>
 
           <div class="color-blocks">
@@ -513,8 +513,8 @@ SENTINEL</div>
       <div class="modules-grid">
 
         <!-- Module 2 -->
-        <a class="module-card mc-m2" href="http://localhost:5001" id="card-m2">
-          <div class="card-port">:5001</div>
+        <a class="module-card mc-m2" href="/module2/" id="card-m2">
+          <div class="card-port">/module2</div>
           <div class="card-header">
             <span class="card-icon dir">📁</span>
             <div class="card-name"><span>module2</span>/</div>
@@ -524,8 +524,8 @@ SENTINEL</div>
         </a>
 
         <!-- Module 3 -->
-        <a class="module-card mc-m3" href="http://localhost:5003/monitor" id="card-m3">
-          <div class="card-port">:5003</div>
+        <a class="module-card mc-m3" href="/module3/monitor" id="card-m3">
+          <div class="card-port">/module3</div>
           <div class="card-header">
             <span class="card-icon file">📡</span>
             <div class="card-name"><span>module3</span>.live</div>
@@ -535,8 +535,8 @@ SENTINEL</div>
         </a>
 
         <!-- Module 4 -->
-        <a class="module-card mc-m4" href="http://localhost:5004" id="card-m4">
-          <div class="card-port">:5004</div>
+        <a class="module-card mc-m4" href="/module4/" id="card-m4">
+          <div class="card-port">/module4</div>
           <div class="card-header">
             <span class="card-icon exec">🕸</span>
             <div class="card-name"><span>module4</span>.graph</div>
@@ -546,8 +546,8 @@ SENTINEL</div>
         </a>
 
         <!-- Module 5 -->
-        <a class="module-card mc-m5" href="http://localhost:5005" id="card-m5">
-          <div class="card-port">:5005</div>
+        <a class="module-card mc-m5" href="/module5/" id="card-m5">
+          <div class="card-port">/module5</div>
           <div class="card-header">
             <span class="card-icon sock">🤖</span>
             <div class="card-name"><span>module5</span>.agent</div>
@@ -561,7 +561,7 @@ SENTINEL</div>
       <!-- Status line -->
       <div class="status-line">
         <div class="status-dot"></div>
-        <span>4 modules indexed · Use Ctrl+C in orchestrator to shut down · Port range 5001–5005</span>
+        <span>4 modules indexed · Single-port gateway on :5000 · python gateway.py to launch</span>
       </div>
 
     </div><!-- /term-body -->
@@ -599,22 +599,22 @@ SENTINEL</div>
   }
   setInterval(updateStats, 3000);
 
-  /* ── Health check – ping each module port ────────────────────────── */
+  /* ── Health check – ping each module endpoint ────────────────────────── */
   async function checkHealth() {
     const modules = [
-      { id: 'card-m2', url: 'http://localhost:5001', port: 5001 },
-      { id: 'card-m3', url: 'http://localhost:5003/monitor', port: 5003 },
-      { id: 'card-m4', url: 'http://localhost:5004', port: 5004 },
-      { id: 'card-m5', url: 'http://localhost:5005', port: 5005 },
+      { id: 'card-m2', url: '/module2/' },
+      { id: 'card-m3', url: '/module3/monitor' },
+      { id: 'card-m4', url: '/module4/' },
+      { id: 'card-m5', url: '/module5/' },
     ];
     let allUp = true;
     for (const mod of modules) {
       try {
         const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 800);
+        const t = setTimeout(() => ctrl.abort(), 1200);
         const r = await fetch(mod.url, { signal: ctrl.signal, mode: 'no-cors' });
         clearTimeout(t);
-        // no-cors succeeds = port is alive
+        // no-cors succeeds = endpoint is alive
         const card = document.getElementById(mod.id);
         if (card) card.style.opacity = '1';
       } catch (e) {
@@ -630,7 +630,7 @@ SENTINEL</div>
     if (sv) {
       sv.textContent = allUp
         ? '● All systems operational'
-        : '⚠ Some modules offline — run run_all_modules.py';
+        : '⚠ Some modules offline — run gateway.py';
       sv.style.color = allUp ? '#3fb950' : '#ffa657';
     }
   }
