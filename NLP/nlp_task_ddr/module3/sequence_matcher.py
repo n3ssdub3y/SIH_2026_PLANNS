@@ -224,14 +224,20 @@ class DataStore:
         """Load all data files. Call once at server startup."""
         self._load_vocabulary()
         self._load_events()
-        self._load_analog_wells()
-        self._loaded = True
-        logger.info(
-            "DataStore loaded: %d vocabulary tokens, %d wells, %d analog-well keys",
-            len(self._vocabulary),
-            len(self._well_sequences),
-            len(self._analog_wells),
-        )
+        # analog_wells.json is 78MB — load in background thread to avoid blocking startup
+        import threading
+        def _bg_load():
+            self._load_analog_wells()
+            logger.info(
+                "DataStore loaded: %d vocabulary tokens, %d wells, %d analog-well keys",
+                len(self._vocabulary),
+                len(self._well_sequences),
+                len(self._analog_wells),
+            )
+            self._loaded = True
+        threading.Thread(target=_bg_load, daemon=True, name="datastore-bg-load").start()
+        logger.info("DataStore: vocabulary + events loaded. analog_wells loading in background...")
+
 
     def _load_vocabulary(self) -> None:
         with open(VOCABULARY_PATH, "r", encoding="utf-8") as f:

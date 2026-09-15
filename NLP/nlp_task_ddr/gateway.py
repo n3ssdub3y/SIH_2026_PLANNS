@@ -140,7 +140,9 @@ def start_all_modules():
 
     logger.info("Waiting for all modules to come online...")
     for m in modules:
-        ok = _wait_for_port(m["port"], timeout=90)
+        # module3_anomaly loads a 78MB JSON file at startup — give it extra time
+        timeout = 240 if m["name"] == "module3_anomaly" else 90
+        ok = _wait_for_port(m["port"], timeout=timeout)
         logger.info("  %s  port:%d  %s", m["name"], m["port"], "UP" if ok else "TIMEOUT")
 
     logger.info("All modules started. Gateway ready -> http://localhost:5000")
