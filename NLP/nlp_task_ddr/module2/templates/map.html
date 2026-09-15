@@ -579,10 +579,63 @@
       height: 100%;
     }
 
-    #map-stats {
+    #map-top-bar {
       position: absolute;
-      top: 12px; right: 12px;
+      top: 12px;
+      right: 12px;
       z-index: 500;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    #layer-bar {
+      background: rgba(8, 14, 26, 0.88);
+      border: 1px solid var(--border-neon);
+      border-radius: 6px;
+      padding: 9px 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+    #layer-bar h4 {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cyan-bright);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .layer-pills {
+      display: flex;
+      gap: 5px;
+    }
+    .lpill {
+      background: #0d1527;
+      border: 1px solid var(--border-muted);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .lpill:hover {
+      border-color: var(--cyan-bright);
+      color: var(--text-main);
+      background: #142240;
+    }
+    .lpill.active {
+      background: rgba(0, 229, 255, 0.14);
+      border-color: var(--cyan-bright);
+      color: var(--cyan-bright);
+      font-weight: 600;
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.25);
+    }
+
+    #map-stats {
       background: rgba(8, 14, 26, 0.88);
       border: 1px solid var(--border-neon);
       border-radius: 6px;
@@ -605,7 +658,7 @@
 
     /* Leaflet customization */
     .leaflet-container { background: #070c18 !important; }
-    .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.9) saturate(0.5); }
+    .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.9) saturate(0.5); }
     .leaflet-popup-content-wrapper {
       background: #0d1527;
       border: 1px solid var(--cyan-bright);
@@ -773,10 +826,20 @@
         <!-- ── MAP CONTAINER ───────────────────────────────────────── -->
         <div id="map-container">
           <div id="map"></div>
-          <div id="map-stats">
-            <h4>DATASET OVERVIEW</h4>
-            <div id="stats-body">
-              <div class="sb"><span class="label">Loading...</span></div>
+          <div id="map-top-bar">
+            <div id="layer-bar">
+              <h4>MAP MODE</h4>
+              <div class="layer-pills">
+                <button type="button" class="lpill active" id="btn-layer-dark" data-l="dark">🌑 Dark Tactical</button>
+                <button type="button" class="lpill" id="btn-layer-sat" data-l="sat">🛰️ Satellite</button>
+                <button type="button" class="lpill" id="btn-layer-street" data-l="street">🗺️ Street</button>
+              </div>
+            </div>
+            <div id="map-stats">
+              <h4>DATASET OVERVIEW</h4>
+              <div id="stats-body">
+                <div class="sb"><span class="label">Loading...</span></div>
+              </div>
             </div>
           </div>
         </div>
@@ -823,11 +886,48 @@
     // ─────────────────────────────────────────────────────────────────────────────
     const map = L.map('map', { zoomControl:true }).setView([58.5, 2.5], 6);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+    // Layer 1: Dark Tactical / Radar (the original dark inverted mode)
+    const darkRadar = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      className: 'dark-tiles',
       maxZoom: 19,
-    }).addTo(map);
+    });
+
+    // Layer 2: True High-Resolution Satellite Imagery (Esri World Imagery, no API key needed)
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP',
+      maxZoom: 18,
+    });
+
+    // Layer 3: Standard Street Map
+    const street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    });
+
+    // Set default layer to the dark mode
+    darkRadar.addTo(map);
+
+    // Layer switcher logic
+    const layerMap = {
+      dark: darkRadar,
+      sat: satellite,
+      street: street
+    };
+
+    document.querySelectorAll('.lpill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lpill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.l;
+        map.removeLayer(darkRadar);
+        map.removeLayer(satellite);
+        map.removeLayer(street);
+        if (layerMap[mode]) {
+          layerMap[mode].addTo(map);
+        }
+      });
+    });
 
     // ─────────────────────────────────────────────────────────────────────────────
     // STATE
