@@ -15,14 +15,10 @@ echo "     NWIS-Sentinel | SIH 2026 | PS SIH26121"
 echo "======================================================================"
 echo ""
 
-# Install deps if needed
-if ! python -c "import fastapi" 2>/dev/null; then
-  echo "📦 Installing dependencies (first time, ~3-5 min)..."
-  pip install --quiet -r requirements.txt
-  echo "✅ Dependencies installed!"
-else
-  echo "✅ Dependencies already installed."
-fi
+# Always ensure all deps are installed (catches newly added packages)
+echo "📦 Checking/installing dependencies..."
+pip install --quiet -r requirements.txt
+echo "✅ Dependencies ready!"
 
 echo ""
 echo "🚀 Starting all modules via Gateway on port 5000..."
