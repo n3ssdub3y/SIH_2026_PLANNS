@@ -5,20 +5,28 @@ Central configuration. All settings from env vars / .env only.
 from __future__ import annotations
 import os
 from pathlib import Path
+_THIS_DIR  = Path(__file__).resolve().parent        # module5_engineering_agent/
+_REPO_ROOT = _THIS_DIR.parent                        # nlp_task_ddr/
 
 try:
     from dotenv import load_dotenv
     load_dotenv()
+    if (_THIS_DIR / ".env").exists():
+        load_dotenv(_THIS_DIR / ".env")
+    if (_THIS_DIR / ".config").exists():
+        load_dotenv(_THIS_DIR / ".config")
 except ImportError:
     pass
 
-# ── Gemini ────────────────────────────────────────────────────────────────────
-GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "AIzaSyBgrQRH_AQXwhJrf8195OfcpN6T0OWsNe4")
+# ── Hugging Face / Qwen ───────────────────────────────────────────────────────
+HF_TOKEN: str   = os.environ.get("HF_TOKEN", "")
+QWEN_MODEL: str = os.environ.get("QWEN_MODEL", "Qwen/Qwen2.5-72B-Instruct")
+
+# ── Gemini (Optional / Fallback) ──────────────────────────────────────────────
+GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL: str   = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-_THIS_DIR  = Path(__file__).resolve().parent        # module5_engineering_agent/
-_REPO_ROOT = _THIS_DIR.parent                        # nlp_task_ddr/
 
 NWIS_DATA_ROOT: Path = Path(os.environ.get("NWIS_DATA_ROOT", str(_REPO_ROOT)))
 
