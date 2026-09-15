@@ -1014,7 +1014,7 @@
     </div>
     <div class="bar-right">
       <div class="bar-stat">VECTORS: <span>2,022</span></div>
-      <div class="bar-stat">LLM: <span style="color:var(--cyan-bright)">GEMINI-2.5-FLASH</span></div>
+      <div class="bar-stat">LLM: <span style="color:var(--cyan-bright)">QWEN-2.5-72B</span></div>
       <div class="bar-stat ok">SYS: <span>ONLINE</span></div>
       <div class="bar-stat cyan" id="liveClock">--:--:--</div>
     </div>
@@ -1041,12 +1041,12 @@
       <div class="prompt-deck">
         <div class="prompt-line">
           <span class="prompt-user">nwis@sentinel</span><span class="prompt-sym">:</span><span class="prompt-path">~/module5</span><span class="prompt-sym">#</span>
-          <span class="prompt-cmd">./engineering_agent --rag chroma --llm gemini --top_k 5</span>
+          <span class="prompt-cmd">./engineering_agent --rag chroma --llm qwen2.5 --top_k 5</span>
           <span class="cursor"></span>
         </div>
         <div class="prompt-badges">
           <span class="p-badge cyan">● CHROMADB: READY (2,022 EVTS)</span>
-          <span class="p-badge green">● GEMINI FLASH: ONLINE</span>
+          <span class="p-badge green">● QWEN 2.5 (HF): ONLINE</span>
           <span class="p-badge">AHP ANALOGS: ENABLED</span>
         </div>
       </div>
@@ -1286,7 +1286,7 @@
               <div class="agent-card">
                 <div class="agent-meta">
                   <div class="agent-meta-left">
-                    <span>Model: <strong>Gemini 2.5 Flash</strong></span>
+                    <span>Model: <strong>Qwen 2.5 72B (Hugging Face)</strong></span>
                     <span>&bull;</span>
                     <span>Retrieval: <strong>ChromaDB Top-5 Analogs</strong></span>
                   </div>
@@ -1725,7 +1725,7 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
         <div class="agent-card">
           <div class="agent-meta">
             <div class="agent-meta-left">
-              <span>Model: <strong>Gemini 2.5 Flash</strong></span>
+              <span>Model: <strong>Qwen 2.5 72B (Hugging Face)</strong></span>
               <span>&bull;</span>
               <span>Analogs: <strong>${data.historical_wells ? data.historical_wells.length : 0} Wells</strong></span>
             </div>

@@ -10,6 +10,9 @@ __pycache__/
 
 # Environment variables
 .env
+.env*
+*.env
+.config
 
 # IDE and OS
 .vscode/
