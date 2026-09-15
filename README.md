@@ -39,13 +39,8 @@ That's it. The gateway starts all internal microservices and automatically opens
 
 ## 🖥️ Windows — 1-Click Launcher
 
-If you don't want to type commands, just double-click:
+If you don't want to type commands, just double-click `start_all.bat` from the repo root, or from PowerShell:
 
-```
-start_all.bat          ← in the root SIH_2026_PLANNS/ folder
-```
-
-or from PowerShell:
 ```powershell
 .\start_all.ps1
 ```
@@ -295,18 +290,3 @@ Make sure `module4/outputs/knowledge_graph.gpickle` exists and is not 0 bytes. I
 
 **Gemini AI briefing button does nothing / errors?**
 Enter your Google AI Studio API key (`AIza...`) in the key field on the Module 4 or Module 5 UI page. All core features (graph, search, RAG, scenarios) work offline without a key.
-
----
-
-## 🤖 For Antigravity / AI Coding Agents
-
-1. Working directory is always `NLP/nlp_task_ddr/`.
-2. Start all services: `python gateway.py --no-browser` (daemon mode on port 5000).
-3. Each module logs to `NLP/nlp_task_ddr/logs/<module_id>.log`.
-4. Health checks:
-   - `GET http://localhost:5000/`
-   - `GET http://localhost:5000/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=1`
-   - `GET http://localhost:5000/api/anomaly/status`
-   - `GET http://localhost:5000/api/graph/stats`
-   - `GET http://localhost:5000/module5/api/health`
-5. Run tests: `python -m pytest module3/ module4/ -v` — expect **64 passed**.

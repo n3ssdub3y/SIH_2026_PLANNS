@@ -1,0 +1,101 @@
+{
+  "briefing_id": "BRF_20260915T113314_D500D9",
+  "timestamp": "2026-09-15T11:33:14.512607+00:00",
+  "well_id": "15/9-F-9A",
+  "hazard": "overpressure",
+  "risk_score_from_module3": 0.0,
+  "risk_level_from_module3": "LOW",
+  "measured_depth_m": null,
+  "wilson_ci": {
+    "lower": 0.0,
+    "center": 0.0,
+    "upper": 0.2775,
+    "n_trials": 10,
+    "n_successes": 0,
+    "method": "wilson",
+    "alpha": 0.05
+  },
+  "actionable_threshold_crossed": false,
+  "llm_model": "gemini-2.5-flash (local-synthesis fallback)",
+  "raw_llm_output": "Target well 15/9-F-9A exhibits LOW OVERPRESSURE risk (0%) at current drilling depth with indicators of anomalies recorded in offset logs [SNIPPET_SYNTH-W04_2010-01-10_NONE]. Historical logs from analog well SYNTH-W09 demonstrate gain and method across depth-correlated stratigraphy [SNIPPET_SYNTH-W09_2010-09-22_KICK]. GraphRAG event logs capture gain requiring immediate rig-floor monitoring of torque and differential pressure [SNIPPET_SYNTH-W26_2011-07-10_KICK]. Wilson 95% confidence interval spans [0.0, 0.2775], exhibiting strong consensus across offsets [SNIPPET_SYNTH-W28_2010-03-23_KICK]. The rig crew must maintain standard monitoring and verify mud properties to counter documented anomalies hazards before progressing further [SNIPPET_SYNTH-W04_2010-01-10_NONE].",
+  "briefing_sentences": [
+    {
+      "text": "Target well 15/9-F-9A exhibits LOW OVERPRESSURE risk (0%) at current drilling depth with indicators of anomalies recorded in offset logs.",
+      "citations": [
+        "SNIPPET_SYNTH-W04_2010-01-10_NONE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W04_2010-01-10_NONE",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (anomalies)."
+        }
+      ]
+    },
+    {
+      "text": "Historical logs from analog well SYNTH-W09 demonstrate gain and method across depth-correlated stratigraphy.",
+      "citations": [
+        "SNIPPET_SYNTH-W09_2010-09-22_KICK"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W09_2010-09-22_KICK",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (gain, method)."
+        }
+      ]
+    },
+    {
+      "text": "GraphRAG event logs capture gain requiring immediate rig-floor monitoring of torque and differential pressure.",
+      "citations": [
+        "SNIPPET_SYNTH-W26_2011-07-10_KICK"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W26_2011-07-10_KICK",
+          "passed": true,
+          "reason": "Citation verified: 1 matching keywords (gain)."
+        }
+      ]
+    },
+    {
+      "text": "Wilson 95% confidence interval spans [0.0, 0.2775], exhibiting strong consensus across offsets.",
+      "citations": [
+        "SNIPPET_SYNTH-W28_2010-03-23_KICK"
+      ],
+      "verified": false,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W28_2010-03-23_KICK",
+          "passed": false,
+          "reason": "Citation failed: no keyword overlap between sentence and node 'SNIPPET_SYNTH-W28_2010-03-23_KICK'."
+        }
+      ]
+    },
+    {
+      "text": "The rig crew must maintain standard monitoring and verify mud properties to counter documented anomalies hazards before progressing further.",
+      "citations": [
+        "SNIPPET_SYNTH-W04_2010-01-10_NONE"
+      ],
+      "verified": true,
+      "verification_details": [
+        {
+          "node_id": "SNIPPET_SYNTH-W04_2010-01-10_NONE",
+          "passed": true,
+          "reason": "Citation verified: 2 matching keywords (anomalies, mud)."
+        }
+      ]
+    }
+  ],
+  "verification_summary": {
+    "total_sentences": 5,
+    "sentences_passed": 4,
+    "sentences_failed": 1,
+    "all_citations_verified": false
+  },
+  "rag_snippets_used": 8,
+  "analog_wells_used": 5
+}

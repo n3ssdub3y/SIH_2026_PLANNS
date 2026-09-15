@@ -53,19 +53,7 @@ python gateway.py --port 8080            # Run on a different port
 
 ---
 
-## 🤖 Instructions for AI Agents
 
-1. **Working Directory:** `NLP/nlp_task_ddr/`
-2. **Install Dependencies:** `pip install -r requirements.txt`
-3. **Launch:** `python gateway.py --no-browser`
-4. **Verify Setup:**
-   - `python check_setup.py` — Module 1 data integrity
-   - `python final_verify_m2.py` — Module 2 AHP consistency
-   - `python -m pytest module3/ -v` — Module 3 tests (50 passing)
-   - `python -m pytest module4/ -v` — Module 4 tests (14 passing)
-   - `GET http://localhost:5000/gateway/health` — All modules online check
-
----
 
 ## 📋 Module Deliverables & Outputs
 

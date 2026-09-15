@@ -1,5 +1,5 @@
 # NWIS-Sentinel — Full Technical Deep-Dive & Team Working Guide
-### For explaining the plan to your team: architecture, tech stack, datasets, NLP→numeric pipeline, similarity math, data format, and how to work in Antigravity
+### For explaining the plan to your team: architecture, tech stack, datasets, NLP→numeric pipeline, similarity math, data format, and team workflow
 
 ---
 
@@ -266,44 +266,44 @@ Your entire team's parallel work depends on agreeing on this on Day 1, before an
 
 ---
 
-# PART I — WORKING TOGETHER IN ANTIGRAVITY
+# PART I — WORKING TOGETHER IN A MULTI-DEVELOPER ENVIRONMENT
 
-Antigravity (Google's agentic development platform) has two modes, and understanding both changes how you should split work:
+Working across multiple modules benefits from dividing work clearly across team members or parallel IDE workspaces:
 
-- **Editor View** — a normal AI-assisted code editor (like a VS Code with an agent alongside you) for synchronous, hands-on work.
-- **Manager Surface / Agent Manager** — the actual differentiator: a "mission control" where you can **spawn multiple agents into separate workspaces, and they work asynchronously and in parallel**, each producing reviewable "Artifacts" (task lists, implementation plans, diffs, screenshots) that you approve or redirect, rather than one continuous chat.
+- **Editor View** — a standard code editor (like VS Code) for synchronous, hands-on work.
+- **Workspace / Parallel Development View** — a setup where you can **divide tasks across separate workspaces or branches**, each working independently and producing reviewable code, task lists, and implementation plans that your team coordinates and reviews, rather than one continuous shared file.
 
-### I.1 Should you give one giant prompt, or split into modules? — **Split into modules. Definitively.**
+### I.1 Should you give one giant prompt/instruction set, or split into modules? — **Split into modules. Definitively.**
 
 Reasons, specific to your project:
-1. **Your four/five modules (NLP extraction, similarity engine, sequence matching, KG/RAG/LLM/backend, frontend) have genuinely different concerns, different libraries, and different failure modes.** One agent trying to hold all of that context at once will do a worse job on each part than four agents each focused tightly on one part with a clear contract.
-2. **Antigravity is explicitly built for this** — the Manager Surface's whole purpose is running several scoped agents in parallel across workspaces, exactly matching your 4–6 person module split. Using one mega-prompt for the whole system wastes the tool's actual advantage.
-3. **The Part H data contracts are what make parallel work safe.** As long as every agent is told the exact JSON schema its module must produce/consume, four agents can build in parallel without stepping on each other, and integration becomes "does the JSON match the schema," not "does the code architecturally make sense together."
+1. **Your four/five modules (NLP extraction, similarity engine, sequence matching, KG/RAG/LLM/backend, frontend) have genuinely different concerns, different libraries, and different failure modes.** One developer or monolithic script trying to hold all of that context at once will do a worse job on each part than four tracks each focused tightly on one part with a clear contract.
+2. **Parallel development is explicitly built for this** — running several scoped tracks in parallel across workspaces exactly matches your 4–6 person module split. Using one mega-prompt or monolithic file for the whole system wastes the approach's actual advantage.
+3. **The Part H data contracts are what make parallel work safe.** As long as every module is built to the exact JSON schema its module must produce/consume, four developers can build in parallel without stepping on each other, and integration becomes "does the JSON match the schema," not "does the code architecturally make sense together."
 
-### I.2 Recommended Antigravity setup for your team
+### I.2 Recommended setup for your team
 
-**Create one workspace per module**, each with its own scoped agent and its own tightly-written prompt:
+**Create one workspace per module**, each with its own scoped instructions and its own tightly-written requirements:
 
-- **Workspace 1 — NLP Extraction (P1's agent):** Prompt should specify: input (raw text reports), output (exact JSON schema from Part H.1), the event-type vocabulary file, and explicitly which technique to start with (rule-based + LLM few-shot extraction first, per Part E recommendation) — plus a small labelled example set to test against.
-- **Workspace 2 — Similarity Engine (P2's agent):** Prompt should specify: input (well-metadata JSON from H.2), output (a ranked analog list with per-feature weighted scores, per hazard type), and explicitly the weighted-formula and AHP-weight approach from Part F.2–F.3, so the agent doesn't default to a generic single blended score.
-- **Workspace 3 — Sequence Matching + Live Simulator (P3's agent):** Prompt should specify: input (live telemetry ticks per H.3 + historical event sequences per H.1), output (a match score + aligned sequence visualization data), and explicitly name DTW/Needleman-Wunsch as the required approach (Part F.5) rather than letting the agent default to a generic ML classifier.
-- **Workspace 4 — Knowledge Graph + GraphRAG + LLM Briefing + Backend Orchestration (P4's agent — this is you):** Prompt should specify: the graph schema (Part 4.3 from your earlier deep-dive doc), the GraphRAG pre-filter-then-retrieve design (not plain vector RAG), the forced-citation LLM prompt template, and the uncertainty/Wilson-interval calculation from Part F.6.
+- **Workspace 1 — NLP Extraction (P1):** Instructions should specify: input (raw text reports), output (exact JSON schema from Part H.1), the event-type vocabulary file, and explicitly which technique to start with (rule-based + LLM few-shot extraction first, per Part E recommendation) — plus a small labelled example set to test against.
+- **Workspace 2 — Similarity Engine (P2):** Instructions should specify: input (well-metadata JSON from H.2), output (a ranked analog list with per-feature weighted scores, per hazard type), and explicitly the weighted-formula and AHP-weight approach from Part F.2–F.3, so the module doesn't default to a generic single blended score.
+- **Workspace 3 — Sequence Matching + Live Simulator (P3):** Instructions should specify: input (live telemetry ticks per H.3 + historical event sequences per H.1), output (a match score + aligned sequence visualization data), and explicitly name DTW/Needleman-Wunsch as the required approach (Part F.5) rather than letting the code default to a generic ML classifier.
+- **Workspace 4 — Knowledge Graph + GraphRAG + LLM Briefing + Backend Orchestration (P4):** Instructions should specify: the graph schema (Part 4.3 from your earlier deep-dive doc), the GraphRAG pre-filter-then-retrieve design (not plain vector RAG), the forced-citation LLM prompt template, and the uncertainty/Wilson-interval calculation from Part F.6.
 - **Workspace 5 (optional, later) — Frontend/Dashboard:** kept separate and started once Workspace 4's API shape is stable, since it consumes everyone else's output.
-- **A final "Integration" workspace/session** — once all four modules produce output matching the agreed schemas, use one session (can even be a human-led session in the Editor View, not a fully autonomous agent) to wire the real modules together end-to-end, replacing the mocked data each module used during parallel development.
+- **A final "Integration" session** — once all four modules produce output matching the agreed schemas, use one session to wire the real modules together end-to-end, replacing the mocked data each module used during parallel development.
 
-### I.3 How to actually write each module's prompt (a template)
-For every workspace, structure the prompt as:
+### I.3 How to actually write each module's specification (a template)
+For every workspace, structure the instructions as:
 1. **Role & scope** — "You are building ONLY the [X] module. Do not modify other modules' code."
 2. **Exact input format** — paste the JSON schema from Part H.
-3. **Exact output format** — paste the expected JSON schema it must produce.
-4. **Required technique** — name the specific algorithm/library from Parts E/F/G (don't leave this open-ended, or the agent may default to a generic, less-defensible approach like plain cosine-similarity-on-everything).
+3. **Exact output format** — paste the exact JSON schema it must produce.
+4. **Required technique** — name the specific algorithm/library from Parts E/F/G (don't leave this open-ended, or the implementation may default to a generic, less-defensible approach like plain cosine-similarity-on-everything).
 5. **Test data** — point it at your synthetic/Volve-derived sample files so it can self-test against real-shaped data, not toy examples.
 6. **Definition of done** — a concrete, checkable output (e.g., "given this sample input file, produce this sample output file matching the schema").
 
-### I.4 Sync discipline across parallel agents
+### I.4 Sync discipline across parallel development
 - Use a **shared Git repository** with one branch per module workspace; merge into a shared `integration` branch daily, not just once at the end.
-- Treat the **event-type vocabulary file and the JSON schemas in Part H as the actual contract** — any agent that wants to change them must flag it to the whole team first, since a silent schema change in one workspace will silently break another module's agent.
-- Each morning, quickly run each module's agent's latest output against the *other* modules' expected input format (even a simple `python -c "import json; json.load(open('sample_output.json'))"` plus a schema-shape check) before continuing — catching drift early is much cheaper than discovering it on Day 4.
+- Treat the **event-type vocabulary file and the JSON schemas in Part H as the actual contract** — any developer that wants to change them must flag it to the whole team first, since a silent schema change in one workspace will silently break another module.
+- Each morning, quickly run each module's latest output against the *other* modules' expected input format (even a simple `python -c "import json; json.load(open('sample_output.json'))"` plus a schema-shape check) before continuing — catching drift early is much cheaper than discovering it on Day 4.
 
 ---
 
@@ -311,15 +311,15 @@ For every workspace, structure the prompt as:
 
 Use this as your actual spoken walkthrough:
 
-> "We turn both old drilling reports and today's live sensor numbers into the same 'language' of events — using NLP to pull structured events out of messy text, and simple statistics to spot changes in live numbers. Once both sides speak the same language, we ask two questions: first, which historical wells are actually comparable to this one **for this specific risk** — not just nearby wells, but wells that share the right formation, trajectory, or equipment characteristics depending on whether we're worried about mud loss or a stuck pipe — using a weighted similarity formula we can defend with real drilling-engineering literature. Second, does the sequence of events happening right now match a sequence that's played out before in one of those wells — using the same kind of sequence-alignment math used in DNA analysis, applied to drilling events instead. Finally, an LLM turns all of that evidence into a plain-English briefing for the engineer — but the LLM is never allowed to make up the risk number or hide disagreement between historical wells; it can only explain evidence we've already computed, with a citation back to the exact report sentence or graph fact behind every claim. We validated this whole pipeline on a real public oil-field dataset (Volve, released by Equinor), so our numbers are grounded in real drilling physics, not invented — we're upfront that OIL's own field data would replace it in a real deployment. And we're building this in four parallel tracks in Antigravity, one agent per module, each with a locked-down data format so we can work independently and integrate without surprises."
+> "We turn both old drilling reports and today's live sensor numbers into the same 'language' of events — using NLP to pull structured events out of messy text, and simple statistics to spot changes in live numbers. Once both sides speak the same language, we ask two questions: first, which historical wells are actually comparable to this one **for this specific risk** — not just nearby wells, but wells that share the right formation, trajectory, or equipment characteristics depending on whether we're worried about mud loss or a stuck pipe — using a weighted similarity formula we can defend with real drilling-engineering literature. Second, does the sequence of events happening right now match a sequence that's played out before in one of those wells — using the same kind of sequence-alignment math used in DNA analysis, applied to drilling events instead. Finally, an LLM turns all of that evidence into a plain-English briefing for the engineer — but the LLM is never allowed to make up the risk number or hide disagreement between historical wells; it can only explain evidence we've already computed, with a citation back to the exact report sentence or graph fact behind every claim. We validated this whole pipeline on a real public oil-field dataset (Volve, released by Equinor), so our numbers are grounded in real drilling physics, not invented — we're upfront that OIL's own field data would replace it in a real deployment. And we're building this in four parallel tracks, one module per track, each with a locked-down data format so we can work independently and integrate without surprises."
 
 ---
 
 # PART K — QUICK-START CHECKLIST FOR YOUR NEXT TEAM MEETING
 
 1. Walk through the Part A diagram together, out loud, once.
-2. Assign the 4 (or 5) Antigravity workspaces to the 4–6 team members per your existing role split.
-3. Agree on the Part H.1–H.3 JSON schemas and the event-type vocabulary list — write it down in a shared doc before anyone opens Antigravity.
+2. Assign the 4 (or 5) module tracks to the 4–6 team members per your existing role split.
+3. Agree on the Part H.1–H.3 JSON schemas and the event-type vocabulary list — write it down in a shared doc before anyone starts coding.
 4. Download a small slice of the Volve real-time drilling CSVs (via the University of Stavanger's parsed files) and the FORCE 2020 well-log dataset as your grounding data.
-5. Write each module's Antigravity prompt using the Part I.3 template and launch all workspaces in parallel.
+5. Write each module's specification using the Part I.3 template and begin parallel development.
 6. Set a daily 10-minute sync to check schema compatibility across modules (Part I.4).
