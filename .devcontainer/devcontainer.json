@@ -1,0 +1,34 @@
+{
+  "name": "NWIS-Sentinel | SIH 2026",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "workspaceFolder": "/workspaces/SIH_2026_PLANNS",
+
+  "forwardPorts": [5000],
+  "portsAttributes": {
+    "5000": {
+      "label": "NWIS-Sentinel Gateway",
+      "onAutoForward": "openBrowserOnce",
+      "visibility": "public"
+    }
+  },
+
+  "postCreateCommand": "cd NLP/nlp_task_ddr && pip install --quiet -r requirements.txt && echo '✅ Dependencies installed. Run: bash start.sh'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.cwd": "/workspaces/SIH_2026_PLANNS/NLP/nlp_task_ddr"
+      }
+    }
+  },
+
+  "remoteEnv": {
+    "GOOGLE_API_KEY": "",
+    "GEMINI_API_KEY": ""
+  }
+}
