@@ -138,14 +138,23 @@ def start_all_modules():
         p = _start_module(m["name"], m["cmd"], m["log"])
         _processes.append(p)
 
-    logger.info("Waiting for all modules to come online...")
-    for m in modules:
-        # module3_anomaly loads a 78MB JSON file at startup — give it extra time
-        timeout = 240 if m["name"] == "module3_anomaly" else 90
+    logger.info("Waiting for all modules to come online (parallel check)...")
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    def check_module(m):
+        # module3_anomaly loads a 78MB JSON — give it more time, others 90s
+        timeout = 180 if m["name"] == "module3_anomaly" else 90
         ok = _wait_for_port(m["port"], timeout=timeout)
-        logger.info("  %s  port:%d  %s", m["name"], m["port"], "UP" if ok else "TIMEOUT")
+        return m["name"], m["port"], ok
+
+    with ThreadPoolExecutor(max_workers=len(modules)) as pool:
+        futures = {pool.submit(check_module, m): m for m in modules}
+        for fut in as_completed(futures):
+            name, port, ok = fut.result()
+            logger.info("  %-20s port:%d  %s", name, port, "UP" if ok else "TIMEOUT")
 
     logger.info("All modules started. Gateway ready -> http://localhost:5000")
+
 
 
 def stop_all_modules():
