@@ -27,6 +27,7 @@ import logging
 import subprocess
 import sys
 import time
+import threading
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -138,10 +139,20 @@ def start_all_modules():
         p = _start_module(m["name"], m["cmd"], m["log"])
         _processes.append(p)
 
-    logger.info("Waiting for all modules to come online...")
-    for m in modules:
-        ok = _wait_for_port(m["port"], timeout=90)
-        logger.info("  %s  port:%d  %s", m["name"], m["port"], "UP" if ok else "TIMEOUT")
+    logger.info("Waiting for all modules to come online (parallel)...")
+
+    results = {}
+
+    def _check(m):
+        ok = _wait_for_port(m["port"], timeout=120)
+        results[m["name"]] = ok
+        logger.info("  %-22s port:%d  %s", m["name"], m["port"], "UP" if ok else "TIMEOUT")
+
+    threads = [threading.Thread(target=_check, args=(m,), daemon=True) for m in modules]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=125)
 
     logger.info("All modules started. Gateway ready -> http://localhost:5000")
 
