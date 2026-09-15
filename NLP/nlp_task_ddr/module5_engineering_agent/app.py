@@ -27,7 +27,7 @@ sys.path.insert(0, str(_THIS_DIR))
 
 from agent.agent import EngineeringAgent
 from schemas.models import AskRequest, CurrentSituation
-from config import API_PORT
+from config import API_PORT, QWEN_MODEL
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,7 +40,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 CORS(app)
 
 # Initialize Agent and Retriever once at startup
-logger.info("Initializing EngineeringAgent (ChromaDB + Gemini)...")
+logger.info(f"Initializing EngineeringAgent (ChromaDB + {QWEN_MODEL})...")
 agent = EngineeringAgent()
 logger.info("EngineeringAgent initialized successfully.")
 
@@ -130,10 +130,13 @@ SCENARIOS = {
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────
 @app.route("/")
+@app.route("/module5")
+@app.route("/module5/")
 def index():
     return render_template("module5.html")
 
 @app.route("/api/health", methods=["GET"])
+@app.route("/module5/api/health", methods=["GET"])
 def health():
     try:
         count = agent.retriever.vector_store.collection.count()
@@ -142,15 +145,17 @@ def health():
     return jsonify({
         "status": "healthy",
         "service": "module5_engineering_agent",
-        "model": "gemini-2.5-flash",
+        "model": QWEN_MODEL,
         "events_in_store": count
     })
 
 @app.route("/api/scenarios", methods=["GET"])
+@app.route("/module5/api/scenarios", methods=["GET"])
 def get_scenarios():
     return jsonify(SCENARIOS)
 
 @app.route("/api/ask", methods=["POST"])
+@app.route("/module5/api/ask", methods=["POST"])
 def ask():
     body = request.get_json(force=True) or {}
     question = body.get("question")

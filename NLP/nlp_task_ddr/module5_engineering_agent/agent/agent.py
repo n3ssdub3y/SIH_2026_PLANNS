@@ -1,14 +1,29 @@
-import google.genai as genai
+import os
 from typing import List, Dict, Any, Optional
+from huggingface_hub import InferenceClient
 
-from config import GEMINI_API_KEY, GEMINI_MODEL
+from config import HF_TOKEN, QWEN_MODEL, GEMINI_API_KEY, GEMINI_MODEL
 from schemas.models import AskRequest, AskResponse, CurrentSituation, EvidenceItem
 from retrieval.retriever import Retriever
 from .prompts import ENGINEERING_AGENT_SYSTEM_PROMPT, build_context_prompt
 
 class EngineeringAgent:
     def __init__(self):
-        self.client = genai.Client(api_key=GEMINI_API_KEY)
+        self.hf_client = None
+        if HF_TOKEN:
+            try:
+                self.hf_client = InferenceClient(api_key=HF_TOKEN)
+            except Exception as e:
+                print(f"Warning: Failed to initialize HuggingFace InferenceClient: {e}")
+        
+        self.gemini_client = None
+        if GEMINI_API_KEY:
+            try:
+                import google.genai as genai
+                self.gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+            except Exception:
+                pass
+
         self.retriever = Retriever()
 
     def _format_situation(self, sit: Optional[CurrentSituation]) -> str:
@@ -69,16 +84,32 @@ class EngineeringAgent:
             evidence_str=evidence_str
         )
         
-        # Call LLM
+        # Call LLM (Qwen via Hugging Face or Gemini fallback)
         try:
-            response = self.client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=prompt,
-                config=genai.types.GenerateContentConfig(
-                    system_instruction=ENGINEERING_AGENT_SYSTEM_PROMPT
+            if self.hf_client:
+                messages = [
+                    {"role": "system", "content": ENGINEERING_AGENT_SYSTEM_PROMPT},
+                    {"role": "user", "content": prompt}
+                ]
+                chat_resp = self.hf_client.chat.completions.create(
+                    model=QWEN_MODEL,
+                    messages=messages,
+                    max_tokens=1500,
+                    temperature=0.3
                 )
-            )
-            answer = response.text
+                answer = chat_resp.choices[0].message.content
+            elif self.gemini_client:
+                import google.genai as genai
+                response = self.gemini_client.models.generate_content(
+                    model=GEMINI_MODEL,
+                    contents=prompt,
+                    config=genai.types.GenerateContentConfig(
+                        system_instruction=ENGINEERING_AGENT_SYSTEM_PROMPT
+                    )
+                )
+                answer = response.text
+            else:
+                raise RuntimeError("No LLM client configured (HF_TOKEN or GEMINI_API_KEY).")
             
             # Simple heuristic for uncertainty if no evidence
             if not evidence:
@@ -114,8 +145,8 @@ class EngineeringAgent:
                 lines.append("No matching offset well events retrieved for the current filter criteria.")
                 uncertainty = "High. Insufficient historical analog data."
 
-            if "leaked" in err_msg.lower() or "permission_denied" in err_msg.lower():
-                lines.append(f"\n> *[System Notice]* Gemini API key requires renewal (`{err_msg[:65]}...`). Synthesized via local evidence engine.")
+            if "leaked" in err_msg.lower() or "permission_denied" in err_msg.lower() or "401" in err_msg or "unauthorized" in err_msg.lower():
+                lines.append(f"\n> *[System Notice]* LLM API token requires renewal/authorization (`{err_msg[:65]}...`). Synthesized via local evidence engine.")
             elif err_msg:
                 lines.append(f"\n> *[System Notice]* LLM offline: {err_msg[:65]}... Synthesized via local evidence engine.")
 
