@@ -157,6 +157,14 @@ broadcast_manager = AlertBroadcastManager()
 def ensure_outputs_dir():
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
     logger.info("Outputs directory: %s", OUTPUTS_DIR)
+    
+    # Clear the risk predictions log on startup to prevent infinite bloat
+    if RISK_PREDICTIONS_PATH.exists():
+        try:
+            RISK_PREDICTIONS_PATH.unlink()
+            logger.info("Cleared old risk_predictions.jsonl")
+        except Exception as e:
+            logger.warning("Could not clear risk_predictions.jsonl: %s", e)
 
 
 def append_risk_prediction(result: Dict[str, Any]):

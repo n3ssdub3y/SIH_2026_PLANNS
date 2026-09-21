@@ -36,6 +36,7 @@ import httpx
 import uvicorn
 import websockets
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -189,6 +190,8 @@ async def lifespan(app):
 # -- FastAPI App -------------------------------------------------------------
 
 app = FastAPI(lifespan=lifespan, title="NWIS-Sentinel Gateway")
+
+app.mount("/assets", StaticFiles(directory=str(BASE_DIR.parent.parent / "assets")), name="assets")
 
 app.add_middleware(
     CORSMiddleware,
