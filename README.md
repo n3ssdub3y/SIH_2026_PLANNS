@@ -25,11 +25,11 @@ That's it. The gateway starts all internal microservices and automatically opens
 
 | Service / View | Unified Gateway URL | Description |
 |---|---|---|
-| **Central Operations Dashboard** | [http://localhost:5000](http://localhost:5000) | BSPWM/terminal unified portal, system specs, live module health & navigation |
+| **Central Operations Dashboard** | [http://localhost:5000](http://localhost:5000) | Unified portal — system overview, live module health & navigation |
 | **Module 2** — Geospatial Map | [http://localhost:5000/module2/](http://localhost:5000/module2/) | Leaflet interactive map, 159 wells, AHP hazard rankings |
 | **Module 3** — Live Risk Monitor | [http://localhost:5000/module3/monitor](http://localhost:5000/module3/monitor) | Real-time CUSUM/Z-score alerts, +106.5 m early warning dashboard |
 | **Module 4** — Knowledge Graph & AI Studio | [http://localhost:5000/module4/](http://localhost:5000/module4/) | 4,037-node Vis.js graph, GraphRAG search, Gemini AI briefings |
-| **Module 5** — Engineering Decision Support | [http://localhost:5000/module5/](http://localhost:5000/module5/) | Dark console, 1-click scenarios, Gemini RAG, ChromaDB vector store |
+| **Module 5** — Engineering Decision Support | [http://localhost:5000/module5/](http://localhost:5000/module5/) | Dark console, 1-click scenarios, Qwen 2.5-72B / Gemini RAG, ChromaDB vector store |
 | **Live Telemetry WebSocket** | `ws://localhost:5000/ws/telemetry` | WITSML-style real-time drilling data stream |
 | **Live Risk WebSocket** | `ws://localhost:5000/ws/anomaly` | Real-time CUSUM anomaly & early warning alert stream |
 
@@ -49,53 +49,6 @@ Both launch `gateway.py` automatically and open your browser to `http://localhos
 
 ---
 
-## 🧪 Verify Everything is Working (Run Before Presenting)
-
-```bash
-cd NLP/nlp_task_ddr
-
-# Module 1 — data contract check (wells, events, telemetry)
-python check_setup.py
-
-# Module 2 — AHP weights & analog rankings check
-python final_verify_m2.py
-
-# Module 3 — unit tests: leakage, anomaly detector, sequence matcher (50 tests)
-python -m pytest module3/test_leakage.py module3/test_sequence_matcher.py module3/test_anomaly.py module3/test_simulator.py -v
-
-# Module 4 — unit tests: knowledge graph, GraphRAG, REST API (14 tests)
-python -m pytest module4/test_module4.py -v
-```
-
-Expected result: **64 passed**.
-
----
-
-## 🔌 API Health Check (Quick Sanity Test on Port 5000)
-
-```bash
-# Dashboard — central portal UI
-curl -I "http://localhost:5000/"
-
-# Module 2 — analog wells for a given well + hazard
-curl "http://localhost:5000/api/analogs?well_id=15/9-F-9A&hazard=stuck_pipe&top=3"
-
-# Module 3 — anomaly server status (buffer size, detector config)
-curl "http://localhost:5000/api/anomaly/status"
-
-# Module 4 — graph stats (node + edge counts)
-curl "http://localhost:5000/api/graph/stats"
-
-# Module 4 — status summary
-curl "http://localhost:5000/api/status"
-
-# Module 5 — engineering agent UI (returns HTTP 200) & health check
-curl -I "http://localhost:5000/module5/"
-curl "http://localhost:5000/module5/api/health"
-```
-
----
-
 ## 📦 Dependencies
 
 All dependencies are in `NLP/nlp_task_ddr/requirements.txt`. **Python 3.10+ required.**
@@ -109,7 +62,8 @@ Key libraries used:
 | `networkx` | Module 4 knowledge graph |
 | `sentence-transformers` | Module 4 GraphRAG semantic search |
 | `chromadb` | Module 5 vector store (2,022 indexed offset records) |
-| `google-generativeai`, `google-genai` | Module 4 & 5 Gemini AI briefings & agent |
+| `huggingface-hub` | Module 5 — Qwen 2.5-72B via Hugging Face Inference API (primary LLM) |
+| `google-generativeai`, `google-genai` | Module 4 Gemini AI briefings; Module 5 Gemini fallback |
 | `scikit-learn`, `scipy`, `numpy`, `pandas` | Anomaly detection & AHP calculations |
 | `statsmodels` | Wilson Score confidence intervals (Module 3) |
 | `fastdtw` | Fast Dynamic Time Warping (Module 3) |
@@ -132,27 +86,53 @@ Key libraries used:
 
 ---
 
-## 🔑 Optional: Gemini API Key (for Modules 4 & 5)
+## 🔑 API Keys (for LLM features)
 
-Modules 4 and 5 generate AI briefings and decision support using Google Gemini. Both modules also feature an automated **Local Evidence Synthesis Engine** as an offline fallback if no API key is provided. To use live Gemini generation:
+### Module 5 — Hugging Face Token (Qwen 2.5-72B, Primary LLM)
 
-**Option A — Enter in the browser UI:**  
-Open [http://localhost:5000/module4/](http://localhost:5000/module4/) or [http://localhost:5000/module5/](http://localhost:5000/module5/) → paste your key in the *API Key* field.
+Module 5 uses `Qwen/Qwen2.5-72B-Instruct` via the Hugging Face Inference API as its primary LLM. Get a **free token** at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
 
-**Option B — Set as environment variable (auto-loads):**
+```bash
+# Copy the example file and fill in your token
+cp NLP/nlp_task_ddr/module5_engineering_agent/.env.example \
+   NLP/nlp_task_ddr/module5_engineering_agent/.env
+# Then edit .env and replace hf_XXX... with your real token
+```
+
+Or set as an environment variable before launching:
 ```bash
 # Windows (PowerShell)
-$env:GOOGLE_API_KEY = "AIza..."
+$env:HF_TOKEN = "hf_your_token_here"
 
 # Windows (CMD)
-set GOOGLE_API_KEY=AIza...
+set HF_TOKEN=hf_your_token_here
+
+# Then launch
+python gateway.py
+```
+
+### Module 4 & 5 — Google Gemini API Key (Optional Fallback)
+
+Module 4 uses Gemini for AI briefings. Module 5 uses it as a fallback when `HF_TOKEN` is not set. Get a **free key** at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+
+```bash
+# Windows (PowerShell)
+$env:GEMINI_API_KEY = "AIza..."
+
+# Windows (CMD)
+set GEMINI_API_KEY=AIza...
 
 # Then launch gateway
 python gateway.py
 ```
 
-> ✅ All Knowledge Graph, GraphRAG, and map features work completely **without** an API key.
-> Only the AI briefing generation step needs one.
+Or add it to the same `.env` file in `module5_engineering_agent/`:
+```
+GEMINI_API_KEY=AIza...
+```
+
+> ✅ All Knowledge Graph, GraphRAG, map, and telemetry features work completely **without** any API key.
+> Only the AI briefing / agent response generation needs one. Module 5 also has a **Local Evidence Synthesis** fallback that always works offline.
 
 ---
 
@@ -183,9 +163,9 @@ python gateway.py
                                    ▼
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                     MODULE 5 (/module5)                                 ║
-║           Engineering RAG + LLM Decision Support Agent                   ║
+║        Engineering RAG + Decision Support (Qwen 2.5-72B / Gemini)       ║
 ║  • ChromaDB vector store (2,022 indexed offset event records)            ║
-║  • Multi-turn rig-floor engineering advisor with citations               ║
+║  • Qwen 2.5-72B primary LLM · Gemini fallback · Local synthesis         ║
 ║  • 5 one-click realistic drilling crisis scenarios                       ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 ```
@@ -199,14 +179,15 @@ SIH_2026_PLANNS/
 ├── start_all.bat                      ← Windows 1-click launcher (runs gateway.py)
 ├── start_all.ps1                      ← PowerShell 1-click launcher (runs gateway.py)
 ├── README.md                          ← This file
-├── ARCHITECTURE.md                    ← System architecture specification
+├── ARCHITECTURE.md                    ← Detailed system architecture
+├── PROJECT.md                         ← Research foundations & background
+├── nwis_data_sources.md               ← Data sources reference
 │
 └── NLP/nlp_task_ddr/                  ← ALL project code lives here
     ├── gateway.py                     ← Unified Gateway (port 5000 reverse-proxy orchestrator)
     ├── requirements.txt               ← pip install -r requirements.txt
     ├── start_all.bat / start_all.ps1  ← Subdirectory 1-click launchers
     ├── check_setup.py                 ← Module 1 data integrity check
-    ├── final_verify_m2.py             ← Module 2 AHP & outputs check
     │
     ├── dashboard/                     ← Central Operations Portal (port 5000 root)
     │   ├── app.py
@@ -234,10 +215,11 @@ SIH_2026_PLANNS/
     │   ├── anomaly_server.py          ← Real-time risk detection server
     │   ├── anomaly_detector.py
     │   ├── sequence_matcher.py
+    │   ├── backtest_runner.py
     │   ├── monitor.html               ← Live dashboard UI
-    │   ├── test_*.py                  ← 50 automated tests
+    │   ├── test_anomaly.py / test_leakage.py / test_sequence_matcher.py / test_simulator.py
     │   └── outputs/
-    │       ├── backtest_result.json   ← +106.48 m result
+    │       ├── backtest_result.json   ← +106.48 m early warning result
     │       ├── backtest_plot.png
     │       ├── risk_predictions.jsonl ← Live risk scores (grows at runtime)
     │       └── sequence_matches.json
@@ -258,10 +240,12 @@ SIH_2026_PLANNS/
     │
     └── module5_engineering_agent/     ← Engineering Decision Support Console
         ├── app.py                     ← Flask server
+        ├── config.py                  ← HF/Qwen + Gemini + ChromaDB config
+        ├── .env.example               ← Token setup template (copy to .env)
         ├── README.md                  ← Module 5 documentation
         ├── templates/module5.html     ← Bespoke engineering console
-        ├── agent/                     ← Hybrid LLM / Local synthesis agent
-        ├── retrieval/                 ← ChromaDB vector store wrapper
+        ├── agent/                     ← EngineeringAgent (Qwen primary, Gemini fallback, Local synthesis)
+        ├── retrieval/                 ← Analog lookup + ChromaDB vector search
         ├── ingestion/                 ← Data loader for Modules 1 & 2
         ├── schemas/                   ← Pydantic data schemas
         └── vector_store/
@@ -289,4 +273,7 @@ pip install -r requirements.txt
 Make sure `module4/outputs/knowledge_graph.gpickle` exists and is not 0 bytes. It is ~1.6 MB and pre-built — no need to regenerate it.
 
 **Gemini AI briefing button does nothing / errors?**
-Enter your Google AI Studio API key (`AIza...`) in the key field on the Module 4 or Module 5 UI page. All core features (graph, search, RAG, scenarios) work offline without a key.
+Set `GEMINI_API_KEY` as an environment variable (see *API Keys* section above). All core features (graph, search, RAG, scenarios) work offline without a key.
+
+**Module 5 agent gives generic responses without real LLM analysis?**
+Set `HF_TOKEN` (Hugging Face token) in `module5_engineering_agent/.env` or as an environment variable. Without it, the app falls back to local evidence synthesis which is functional but less conversational.

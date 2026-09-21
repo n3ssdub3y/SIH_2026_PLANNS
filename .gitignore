@@ -15,8 +15,13 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+**/.pytest_cache/
 
-# Operating System Files
+# Environment / secret files — never commit real keys
+.env
+*.env
+# OS files
 Thumbs.db
 .DS_Store
 desktop.ini

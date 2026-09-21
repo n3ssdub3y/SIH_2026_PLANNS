@@ -1,7 +1,7 @@
 # Module 5: Engineering RAG + LLM Decision Support Agent
 ### NWIS-Sentinel | SIH 2026 | Problem Statement: SIH26121 | Oil India Limited
 
-An evidence-grounded engineering decision-support console powered by Google Gemini and ChromaDB vector retrieval. It consumes structured offset well analog rankings and event histories from Modules 1–3 to assist drilling engineers with factual, cited advice during critical drilling operations.
+An evidence-grounded engineering decision-support console powered by **Qwen 2.5-72B** (via Hugging Face Inference API, primary) and Google Gemini (fallback), with a full offline **Local Evidence Synthesis** mode. It consumes structured offset well analog rankings and event histories from Modules 1–3 to assist drilling engineers with factual, cited advice during critical drilling operations.
 
 ---
 
@@ -17,7 +17,36 @@ cd NLP/nlp_task_ddr/module5_engineering_agent
 ```bash
 pip install -r requirements.txt
 ```
-*(Dependencies: `flask`, `flask-cors`, `pydantic`, `chromadb`, `google-genai`, `google-generativeai`, `python-dotenv`, `requests`).*
+*(Dependencies: `flask`, `flask-cors`, `pydantic`, `chromadb`, `huggingface-hub`, `google-genai`, `google-generativeai`, `python-dotenv`, `requests`).*
+
+### 3. Set API Tokens (Required for Full LLM Responses)
+
+**Module 5 uses Qwen 2.5-72B as its primary LLM.** To enable it, set your Hugging Face token:
+
+```bash
+# Option A: Create a .env file (recommended)
+cd NLP/nlp_task_ddr/module5_engineering_agent
+copy .env.example .env          # Windows CMD
+# then open .env and replace hf_XXX... with your real token from:
+# https://huggingface.co/settings/tokens
+```
+
+```bash
+# Option B: Environment variable (temporary, per-session)
+# Windows (PowerShell):
+$env:HF_TOKEN = "hf_your_token_here"
+# Windows (CMD):
+set HF_TOKEN=hf_your_token_here
+```
+
+**Module 4 Gemini briefings** (optional fallback for Module 5 too):
+```bash
+# Windows (PowerShell):
+$env:GEMINI_API_KEY = "AIza..."
+# Get a free key at: https://aistudio.google.com/apikey
+```
+
+> ✅ **Works without any key:** The Local Evidence Synthesis Engine activates automatically when no API keys are present — it compiles structured evidence directly from the ChromaDB records. The application never breaks.
 
 ### 3. Launch via Unified Gateway (Port 5000)
 From `NLP/nlp_task_ddr/`:
@@ -93,7 +122,7 @@ curl http://localhost:5000/module5/api/health
 ```json
 {
   "events_in_store": 2022,
-  "model": "gemini-2.5-flash",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
   "service": "module5_engineering_agent",
   "status": "healthy"
 }
@@ -145,8 +174,15 @@ module5_engineering_agent/
     └── chroma_db/             # Pre-computed ChromaDB vector collection (2,022 events)
 ```
 
-### Offline & Fallback Synthesis
-If an external Gemini API key is missing or expires, the agent automatically falls back to its **Local Evidence Synthesis Engine**, extracting and compiling factual historical mitigation steps directly from the 2,022 indexed records so the application never breaks.
+### Offline & Fallback Chain
+
+| Condition | LLM Used |
+|-----------|----------|
+| `HF_TOKEN` set | Qwen 2.5-72B via Hugging Face Inference API |
+| `HF_TOKEN` missing / HF call fails | Gemini 2.5 Flash via Google API |
+| Both unavailable | Local Evidence Synthesis — always works, no external calls |
+
+All three paths return the same response schema with citations and evidence items.
 
 ---
 
@@ -158,8 +194,10 @@ If an external Gemini API key is missing or expires, the agent automatically fal
   ```
 - **Verify vector database count**:
   Run `curl http://localhost:5000/module5/api/health` and verify `"events_in_store": 2022`.
-- **API Key Configuration**:
-  To supply a custom Gemini key:
+- **LLM responses are generic / not using real model:**
+  Set `HF_TOKEN` in `.env` or as an env var (see *Set API Tokens* section above).
+- **Gemini key configuration:**
   ```bash
-  export GEMINI_API_KEY="your-api-key"
+  # Windows PowerShell
+  $env:GEMINI_API_KEY = "AIza..."
   ```
