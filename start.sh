@@ -17,7 +17,7 @@ echo ""
 
 # Always ensure all deps are installed (catches newly added packages)
 echo "📦 Checking/installing dependencies..."
-pip install --quiet -r requirements.txt
+pip install --quiet -r ../../requirements.txt
 echo "✅ Dependencies ready!"
 
 echo ""

@@ -17,10 +17,12 @@ from datetime import datetime, timedelta
 sys.stdout.reconfigure(encoding='utf-8')
 
 # ─── PATHS ──────────────────────────────────────────────────────────────────
-SIH       = r"d:\New_folder\Desktop\SIH"
-FORCE_DIR = os.path.join(SIH, "volve_csv", "force2020")
-VOLVE_DIR = os.path.join(SIH, "volve_data")
-TELEM_SRC = os.path.join(SIH, "Volve Real-Time Drilling Data",
+# SIH root is 2 levels up from this file (NLP/nlp_task_ddr/p1_full_pipeline.py -> SIH_2026_PLANNS)
+SIH       = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+DATASETS  = os.path.join(SIH, "datasets")
+FORCE_DIR = os.path.join(DATASETS, "volve_csv", "force2020")
+VOLVE_DIR = os.path.join(DATASETS, "volve_data")
+TELEM_SRC = os.path.join(DATASETS, "Volve Real-Time Drilling Data",
                           "Norway-NA-15_47_9-F-9 A depth.csv")
 OUT       = os.path.join(SIH, "NLP", "nlp_task_ddr", "results", "module1_outputs")
 TEL_DIR   = os.path.join(OUT, "telemetry")

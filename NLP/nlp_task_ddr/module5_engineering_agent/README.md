@@ -15,7 +15,7 @@ cd NLP/nlp_task_ddr/module5_engineering_agent
 
 ### 2. Install Dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r ../../../requirements.txt
 ```
 *(Dependencies: `flask`, `flask-cors`, `pydantic`, `chromadb`, `huggingface-hub`, `google-genai`, `google-generativeai`, `python-dotenv`, `requests`).*
 

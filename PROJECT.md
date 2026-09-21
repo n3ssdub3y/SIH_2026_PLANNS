@@ -366,117 +366,81 @@ The real and synthetic data coexist in the same pipeline, but are always disting
 
 ## 9. Theoretical and Research Foundations
 
-### 9.1 Analytic Hierarchy Process (AHP) — Module 2
+### 7.1 Analytic Hierarchy Process (AHP) Multi-Criteria Weighting
+To evaluate offset well similarity rigorously, eRTMAC-NWIS implements Saaty’s Analytic Hierarchy Process (1980). A positive reciprocal pairwise comparison matrix $A = [a_{ij}]$ is constructed for each hazard:
 
-**Theory:** AHP (Saaty, 1980 — *The Analytic Hierarchy Process*) is a structured multi-criteria decision analysis technique. It allows decision-makers to break a complex decision into pairwise comparisons across criteria, derive relative weights from those comparisons using eigenvector analysis, and compute an overall preference ordering. The Consistency Ratio (CR) provides a built-in check on whether the pairwise judgments are internally consistent.
+$$A w = \lambda_{\max} w, \quad \text{CI} = \frac{\lambda_{\max} - n}{n - 1}, \quad \text{CR} = \frac{\text{CI}}{\text{RI}_n} < 0.10$$
 
-**Why AHP for offset well ranking:** Oil industry practice has always involved subjective weighting of similarity criteria (formation, trajectory, mud type, etc.) but without a principled method for combining them. AHP provides a transparent, auditable weighting methodology. The CR < 0.10 check ensures that the weights assigned to different features make logical sense (if formation is 3× more important than mud type, and mud type is 2× more important than trajectory, then formation should be ~5× more important than trajectory — AHP enforces this transitivity).
+For Stuck Pipe, trajectory inclination profiles are compared via FastDTW, yielding the validated weighting profile:
+* **Trajectory Shape ($w_1 = 0.4971$):** $\text{FastDTW}(\text{inclination}_A, \text{inclination}_B)$
+* **BHA Mechanical Configuration ($w_2 = 0.2454$):** Jaccard token overlap
+* **Mud Density Program ($w_3 = 0.1053$):** $\exp\left(-\frac{(\rho_A - \rho_B)^2}{2 \cdot 0.3^2}\right)$
+* **Mud Chemical Type ($w_4 = 0.1053$):** Jaccard token overlap
+* **Formation Stratigraphy ($w_5 = 0.0469$):** Jaccard formation overlap
 
-**Implementation:** Five features (formation Jaccard, mud weight Gaussian similarity, BHA token Jaccard, mud type token Jaccard, trajectory fastdtw) are compared pairwise for each of five hazard types. Different pairwise matrices reflect domain knowledge: for stuck pipe, trajectory is dominant; for overpressure, mud weight is dominant; for cementing, mud type is dominant.
+$$\text{Composite Similarity} = \sum_{k=1}^{5} w_k \cdot S_k(\text{Active Well}, \text{Offset Well})$$
 
-### 9.2 Z-Score Anomaly Detection — Module 3
+> *Note: A similarity score of 0.87 denotes an 87% multi-criteria match under the assigned AHP weighting. It does not represent an 87% incident probability.*
 
-**Theory:** The Z-Score (standard score) measures how many standard deviations a value is from the rolling mean. Using a **rolling window** rather than a global mean ensures the detector adapts to changing baseline conditions (e.g., formation changes, depth-dependent trends).
+---
 
-```
-z = (x_current - μ_window) / σ_window
-```
+### 7.2 Dual-Algorithm Anomaly Detection
 
-**Why rolling Z-Score:** In drilling, baseline conditions change continuously. A hookload of 200 kkgf may be normal at 500 m but abnormal at 3,000 m. A rolling window of 30 rows maintains a recent baseline that adapts to these changes without becoming insensitive to short-term anomalies.
-
-**Threshold selection:** The 2.5σ threshold is a deliberate trade-off between sensitivity and specificity. In a normal distribution, ~1.24% of values exceed 2.5σ by chance. With 7 monitored channels and ~16,670 rows, a threshold of 3σ would miss too many gradual deviations; 2.0σ would generate excessive false alarms.
-
-### 9.3 CUSUM (Cumulative Sum Control Chart) — Module 3
-
-**Theory:** CUSUM (Page, 1954 — *Continuous Inspection Schemes*) is a sequential detection algorithm designed to detect sustained shifts in a process mean that are too small to trigger individual threshold alerts. It maintains a running sum of deviations from a target, with an allowance parameter k that filters out minor noise:
+To detect both sudden mechanical stalls and slow, imperceptible friction buildup, Module 3 executes dual concurrent detection loops:
 
 ```
-S+ = max(0, S+_prev + (x - μ) - k)  [detects upward drift]
-S- = max(0, S-_prev - (x - μ) - k)  [detects downward drift]
+                  DUAL-ALGORITHM DETECTION TOPOLOGY
+ 
+                     [ Live Telemetry Channel ]
+                                 │
+                 ┌───────────────┴───────────────┐
+                 ▼                               ▼
+      [ Rolling Z-Score Loop ]        [ Recursive CUSUM Loop ]
+         Window W = 30 rows              k = 0.5σ, h = 5.0σ
+                 │                               │
+                 ▼                               ▼
+      Fast Spikes & Transients        Slow, Persistent Drift
+      (Kick, Severe Loss, Stall)     (Tight Hole, Hookload Drift)
+                 │                               │
+                 └───────────────┬───────────────┘
+                                 ▼
+                     [ Combined Anomaly State ]
 ```
 
-An alarm fires when S+ or S- exceeds the decision threshold h.
+1. **Rolling Z-Score (Transient Detection):**
+   $$\mu_t = \frac{1}{W}\sum_{i=0}^{W-1} x_{t-i}, \quad \sigma_t = \sqrt{\frac{1}{W}\sum_{i=0}^{W-1}(x_{t-i} - \mu_t)^2}, \quad z_t = \frac{x_t - \mu_t}{\sigma_t}$$
+   $$\text{Thresholds: } |z_t| \ge 2.5\sigma \text{ (WARN)}, \ge 3.0\sigma \text{ (ALERT)}, \ge 4.0\sigma \text{ (CRITICAL)}$$
 
-**Why CUSUM for drilling:** CUSUM excels at detecting the gradual process changes that precede major drilling incidents. A string that is slowly picking up drag over 20–30 rows will not trigger a Z-Score alert on any individual row; its cumulative deviation, however, will register clearly in CUSUM. This is exactly the pattern that precedes stuck pipe events (and was observed in the Volve backtest: the first CUSUM hookload alert appeared at 302.2 m, more than 300 m before the confirmed incident).
+2. **Recursive Two-Sided CUSUM (Persistent Drift Detection):**
+   $$S_t^+ = \max\left(0, S_{t-1}^+ + (x_t - \mu_t) - k\sigma_t\right), \quad S_t^- = \max\left(0, S_{t-1}^- - (x_t - \mu_t) - k\sigma_t\right)$$
+   $$\text{Alarm Condition: } \max(S_t^+, S_t^-) > h\sigma_t \quad (k = 0.5, h = 5.0)$$
 
-**Parameter selection:** k = 0.5σ (half the expected shift magnitude to detect) and h = 5.0σ (the cumulative threshold) follow standard CUSUM design rules for detecting a 1σ shift in the process mean.
+---
 
-### 9.4 Smith-Waterman Local Sequence Alignment — Module 3
+### 7.3 Smith-Waterman Local Sequence Alignment
+Borrowing from molecular bioinformatics, eRTMAC-NWIS adapts the **Smith-Waterman algorithm (1981)** to align live drilling event sequences against historical offset sequences.
 
-**Theory:** Smith-Waterman (1981 — *Identification of Common Molecular Subsequences*) is a dynamic programming algorithm originally designed for finding locally similar regions in biological sequences (DNA, protein). It finds the optimal local alignment between two sequences by allowing mismatches and gaps, scored with a substitution matrix.
+Let $A = (a_1, a_2, \dots, a_n)$ be the active event sequence and $B = (b_1, b_2, \dots, b_m)$ be an offset well sequence. The dynamic programming scoring matrix $H$ is constructed as:
 
-**Why Smith-Waterman for event sequence matching:** The analogy between biological sequence alignment and drilling event sequence alignment is direct: just as DNA mutations can insert, delete, or substitute bases, drilling operations can insert routine events, miss some warning signs, or express the same underlying hazard through different event labels. Local alignment (rather than global alignment) allows matching a sub-sequence of the query pattern against a sub-sequence of the historical record, which is appropriate when the historical well didn't drill to the same depth or experienced only part of the hazard progression.
+$$H_{i,j} = \max \begin{cases} 
+0 \\
+H_{i-1,j-1} + s(a_i, b_j) & \text{(Match / Mismatch)} \\
+H_{i-1,j} - d & \text{(Deletion / Gap)} \\
+H_{i,j-1} - d & \text{(Insertion / Gap)} 
+\end{cases}$$
 
-**Scoring scheme:**
-- Same event token: +4 (strong match)
-- Same hazard category: +2 (partial match — same hazard class, different severity)
-- Mismatch: -1
-- Gap: -1
+$$\text{Scoring Parameters: } s(a_i, b_j) = \begin{cases} +4 & \text{if } a_i = b_j \text{ (Exact event token match)} \\ +2 & \text{if category}(a_i) = \text{category}(b_j) \\ -1 & \text{if mismatch} \end{cases}, \quad d = 1 \text{ (Gap penalty)}$$
 
-The normalized score (raw / max-possible) provides a scale-independent measure of alignment quality, enabling comparison across sequences of different lengths.
+The optimal local alignment score is $H^* = \max_{i,j} H_{i,j}$. This permits identification of precursor patterns even when drilling events occur with altered durations or skipped intermediary steps.
 
-### 9.5 Wilson Score Confidence Interval — Module 3
+---
 
-**Theory:** The Wilson Score interval (Wilson, 1927 — *Probable Inference, the Law of Succession, and Statistical Inference*) is a confidence interval for a binomial proportion that performs well even with small sample sizes and proportions near 0 or 1. Unlike the simpler Wald interval (p ± z·√(p(1-p)/n)), the Wilson interval never extends below 0 or above 1.
+### 7.4 Wilson Score Confidence Intervals
+When estimating incident risk across small analog samples ($K = 5 \text{ to } 10$), standard normal approximations fail. eRTMAC-NWIS computes the **Wilson Score 95% Confidence Interval**:
 
-```
-center = (n_successes + z²/2) / (n + z²)
-lower, upper = (center ± z · √(p(1-p)/n + z²/(4n²))) / (1 + z²/n)
-```
+$$\hat{p} = \frac{n_{\text{aligned}}}{K}, \quad \text{CI}_{95\%} = \frac{\hat{p} + \frac{z^2}{2K} \pm z \sqrt{\frac{\hat{p}(1-\hat{p})}{K} + \frac{z^2}{4K^2}}}{1 + \frac{z^2}{K}} \quad (z = 1.95996)$$
 
-**Why Wilson CI for hazard probability:** The analog well population for any given target well and hazard is small (typically 5–10 wells). In this regime, the simple proportion (n_successes / n) is a poor estimator. The Wilson interval explicitly communicates the uncertainty in the probability estimate given the small sample. This directly addresses the requirement for transparent, uncertainty-aware risk communication: rather than reporting "probability = 0.6", the system reports "Wilson 95% CI [0.35, 0.79] based on 6 of 10 analog wells showing similar patterns."
-
-### 9.6 Knowledge Graphs — Module 4
-
-**Theory:** Knowledge graphs (introduced at scale by Google in 2012, theoretically grounded in semantic networks, ontologies, and Resource Description Framework since the 1990s) represent information as entities (nodes) and relationships (edges), enabling graph traversal queries that are impossible in flat databases.
-
-**Why a Knowledge Graph for drilling events:** The drilling domain has rich relational structure:
-- A Well `DRILLED_THROUGH` multiple Formations
-- An Event `FOLLOWED_BY` subsequent Events (temporal chain)
-- An Event `MITIGATED_BY` specific Interventions
-- An Event `LED_TO` an Outcome
-- A Well is `ANALOG_FOR_HAZARD` another Well (from Module 2 AHP ranking)
-- An Event `CLASSIFIED_AS` a Hazard type
-
-These relationships cannot be captured in a flat table without losing the relational context. The graph enables questions like: "What interventions were used for events that followed EVT_TIGHT_HOLE in wells drilled through Hordaland formation?" — a query that requires traversing multiple edge types.
-
-**NetworkX DiGraph:** The Python NetworkX library provides a flexible in-memory directed property graph. For the scale of this system (~4,037 nodes, ~12,392 edges), NetworkX is appropriate. The pre-built `.gpickle` serialization enables ~1-second load time at server startup.
-
-### 9.7 GraphRAG (Graph-Enhanced Retrieval Augmented Generation) — Module 4
-
-**Theory:** RAG (Retrieval Augmented Generation, Lewis et al., 2020) augments LLM generation by first retrieving relevant documents from a corpus and including them in the LLM's context. Standard RAG uses dense vector retrieval (embedding similarity). GraphRAG (Microsoft Research, 2024; and domain-specific variants) adds a graph traversal stage to pre-filter the retrieval corpus to a semantically coherent subset before applying vector similarity.
-
-**Our specific approach — Two-Stage Retrieval:**
-1. **Stage 1 (AHP Pre-filter):** Retrieve the top-10 AHP-ranked analog wells for the target well and hazard from `analog_wells.json`. This constrains the retrieval corpus to geologically similar wells — we only search for evidence within the subgraph of these wells.
-2. **Stage 2 (Semantic Search):** Embed all `ReportSnippet` nodes from the analog subgraph using `all-MiniLM-L6-v2` (sentence-transformers). Compute cosine similarity against the engineer's query. Return the top-K most semantically similar snippets.
-
-**Why this beats naive RAG:** If we embed all 1,898 snippets and search globally, the most "semantically similar" results might come from wells in a completely different geological setting that happen to use similar language. The AHP pre-filter ensures that retrieved evidence is both semantically relevant AND geologically contextually appropriate.
-
-### 9.8 Sentence Transformers (all-MiniLM-L6-v2) — Module 4
-
-**Model:** `all-MiniLM-L6-v2` is a compact (22M parameter), fast, general-purpose sentence embedding model from the sentence-transformers library. It maps sentences to a 384-dimensional dense vector space where semantically similar sentences are close under cosine distance.
-
-**Why this model:** For the GraphRAG Stage 2 search, we need embeddings that capture the semantic content of drilling-domain text (formation names, hazard types, operational descriptions). `all-MiniLM-L6-v2` was chosen because:
-- It runs entirely locally (no API call) — critical for offline availability
-- It is compact enough to load in seconds
-- It generalizes well to domain-specific text without fine-tuning
-- It is the standard choice for this use case in the sentence-transformers ecosystem
-
-**Limitation:** `all-MiniLM-L6-v2` is not fine-tuned on drilling-domain text. Highly domain-specific terminology (e.g., "POOH" meaning "Pull Out Of Hole") may not embed as expected relative to lay English. Fine-tuning on DDR text would improve retrieval quality.
-
-### 9.9 ChromaDB Vector Store — Module 5
-
-**Architecture:** ChromaDB is an open-source, embeddable vector database with persistent storage. Module 5 uses it to store all 1,959 events as vectorized documents, supporting filtered semantic search via metadata (`well_id`, `hazard`, `formation_id`, `depth_m`).
-
-**Role:** Module 5's retrieval strategy uses ChromaDB differently from Module 4's graph-based approach. Rather than traversing the knowledge graph, Module 5 directly queries ChromaDB with the engineer's question, combined with an optional `where_filter` that restricts results to the AHP-ranked analog wells. This provides a simpler, faster retrieval path that complements the deeper graph traversal of Module 4.
-
-### 9.10 LLM Selection and Role — Modules 4 and 5
-
-**Module 4 — Gemini (Primary) + Local Synthesis Engine (Fallback):** The briefing engine attempts Gemini API calls in priority order (gemini-2.5-flash → gemini-2.0-flash → gemini-1.5-flash → legacy gemini-1.5-flash → gemini-pro). If no API key is available or all calls fail, the `_synthesize_local_briefing()` function generates a structured, citation-grounded briefing deterministically from retrieved evidence without any LLM. This ensures 100% uptime for the briefing feature.
-
-**Module 5 — Qwen 2.5-72B (Primary) + Gemini (Secondary) + Local Synthesis (Final Fallback):** The engineering agent's primary LLM is `Qwen/Qwen2.5-72B-Instruct`, accessed via the Hugging Face Inference API using `InferenceClient`. This is a 72-billion parameter open-weight model that achieves strong performance on reasoning and instruction-following tasks. Qwen 2.5-72B was chosen for its state-of-the-art performance on engineering and technical language understanding benchmarks. The HF Inference API allows zero local compute requirement. Gemini is configured as a secondary option (used if `HF_TOKEN` is not set or the HF call fails), and the local synthesis engine provides final fallback.
-
-**LLM role constraints:** In both modules, the LLM is explicitly prevented from generating risk scores, probability numbers, or confidence intervals. These come only from Module 3's statistical system (Wilson Score CIs). The LLM's role is limited to: interpreting the situation, synthesizing retrieved evidence, formulating recommendations, and communicating uncertainty in natural language, with every factual claim backed by a cited node ID.
+This provides statistically honest error bars, avoiding false precision when reporting risk estimates to drilling managers.
 
 ---
 
@@ -736,3 +700,14 @@ In the longer term, with appropriate data anonymization, the knowledge graph inf
 *PROJECT.md — Theoretical, Research, and Conceptual Foundation*  
 *eRTMAC-NWIS | SIH 2026 | PS SIH26121 | Oil India Limited*  
 *September 2026*
+
+## 15. Future Scope & Roadmap
+
+While eRTMAC-NWIS is fully functional and demonstrated across real field datasets, the production roadmap envisions:
+
+1. **Native WITSML / ETP v1.2 Protocol Adaptors:** Replace HTTP/CSV simulators with direct Energistics Transfer Protocol (ETP) streams connected to Oil India's active rig telemetry servers.
+2. **Expansion to Assam-Arakan & Rajasthan Basin Corpora:** Ingest historical Daily Drilling Reports and mud logs from Oil India's operational fields (Duliajan, Digboi, Baghewala).
+3. **Multimodal Mud-Logging Integration:** Ingest real-time gas chromatography ratios (Pore Pressure / C1–C5 gas curves) into the anomaly detector.
+4. **Edge Deployment Containerization:** Lightweight Docker Compose image for rig-site edge gateways operating under intermittent satellite connectivity.
+
+---

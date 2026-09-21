@@ -569,16 +569,37 @@ Risk level mapping:
   else          → LOW
 ```
 
-### 6.5 Time-Travel Backtest (`backtest_runner.py`)
+### 6.5 Flagship Backtest: Zero-Leakage Validation
 
-The backtest replays the entire 16,670-row Volve telemetry in strict causal order (zero future-data leakage), running the full anomaly + sequence matching pipeline at every row. Results are validated by `test_leakage.py` (5/5 tests pass):
+To prove real-world predictive validity, Module 3 was benchmarked against the real **Equinor Volve Well 15/9-F-9A** MWD telemetry dataset (16,670 rows, 273.1 m to 1,206.0 m MD).
 
-- **Confirmed incident:** `NO_2014-02-05_EVT_STUCK_PIPE` at **619.0 m MD**
-- **First precursor warning:** at **302.2 m MD** (CUSUM hookload drift)
-- **First actionable alarm:** at **303.6 m MD** (Wilson CI risk = 0.80, CRITICAL)
-- **Sustained actionable alert (lead metric):** at **512.52 m MD**
-- **Early warning lead:** **+106.48 m** (≈ 44 minutes at observed ROP)
-- **Total alerts generated:** 4,306 (stuck_pipe: 3,786, torque_spike: 492, overpressure: 28)
+```
+                            VOLVE 15/9-F-9A BACKTEST TIMELINE
+ 
+   302.2 m MD               303.6 m MD               512.52 m MD              619.00 m MD
+───────┬────────────────────────┬─────────────────────────┬────────────────────────┬───────► Depth
+       │                        │                         │                        │
+       ▼                        ▼                         ▼                        ▼
+  First CUSUM              Actionable CRITICAL        Sustained Actionable     CONFIRMED STUCK PIPE
+  Hookload Drift Detected  Alert (Wilson CI = 0.80)   Warning Threshold        INCIDENT (Row 4,663)
+                                                      │◄─── +106.48 METRES ───►│
+                                                      │     (~44 MINUTES LEAD) │
+```
+
+### Verified Benchmark Metrics
+* **Confirmed Historical Incident:** `EVT_STUCK_PIPE` at **619.00 m MD** (Row 4,663). DDR Record: *"Troubleshot stuck tool, released tieback adapter and POOH tieback with stuck tool inside."*
+* **First Precursor Identified:** **302.2 m MD** (CUSUM hookload positive drift accumulator crossed $h$).
+* **Sustained Actionable Threshold:** **512.52 m MD** (Wilson Score Point Estimate = 0.80, Lower Bound = 0.49, Upper Bound = 0.94).
+* **Actionable Lead Distance:** **+106.48 metres**.
+* **Actionable Lead Time:** **~44 minutes** at observed average rate of penetration (ROP).
+
+### The Zero-Data-Leakage Guarantee
+The replay engine adheres to strict causal temporal invariance verified by 5 regression unit tests in `test_leakage.py`:
+1. **Temporal Horizon Shield:** At step $t$, the detector has zero access to data at $t+1$.
+2. **Causal Normalization:** Rolling baselines $(\mu_t, \sigma_t)$ strictly compute within $[t-W+1, t]$.
+3. **Recursive State Continuity:** CUSUM accumulators update recursively with zero future lookahead.
+4. **Target Well Exclusion:** Well 15/9-F-9A is strictly barred from its own analog candidate pool.
+5. **Automated Verification:** All 5 tests pass before deployment (`5/5 PASS`).
 
 ---
 
@@ -1086,25 +1107,20 @@ NLP/nlp_task_ddr/logs/
 
 ## 11. Technology Stack Summary
 
-| Category | Library/Tool | Version | Used In |
-|----------|-------------|---------|---------|
-| Gateway / async web | `fastapi`, `uvicorn` | ≥0.100.0, ≥0.22.0 | Gateway, Module 3 |
-| Sync HTTP proxy | `httpx` | ≥0.24.0 | Gateway (proxying) |
-| WebSocket client | `websockets` | ≥11.0 | Gateway (WS bridging), Module 3 Anomaly |
-| Sync web framework | `flask`, `flask-cors` | ≥2.3.0, ≥4.0.0 | Dashboard, Modules 2, 4, 5 |
-| Data science | `pandas`, `numpy`, `scipy`, `scikit-learn` | ≥2.0, ≥1.24, ≥1.10, ≥1.2 | All modules |
-| Knowledge graph | `networkx` | ≥3.0 | Module 4 |
-| Semantic embeddings | `sentence-transformers` (all-MiniLM-L6-v2) | ≥2.2.0 | Module 4 GraphRAG |
-| Vector store | `chromadb` (PersistentClient) | ≥0.5.0 | Module 5 |
-| LLM — Primary (M5) | `huggingface-hub` (InferenceClient) | ≥0.20.0 | Module 5 (Qwen 2.5-72B) |
-| LLM — Secondary (M4/M5) | `google-genai`, `google-generativeai` | ≥2.0.0, ≥0.8.0 | Modules 4, 5 (Gemini fallback) |
-| Statistics | `statsmodels` | ≥0.14.0 | Module 3 Wilson CI |
-| Dynamic Time Warping | `fastdtw` | ≥0.3.4 | Module 2 trajectory similarity |
-| Plotting | `matplotlib` | ≥3.7.0 | Module 3 backtest plot |
-| Data validation | `pydantic` | ≥2.0.0 | Module 3 FastAPI, Module 5 schemas |
-| Environment config | `python-dotenv` | ≥1.0.0 | Module 5 config.py |
-| Graph visualization | `vis-network.min.js` (bundled offline) | — | Module 4 UI |
-| Map visualization | Leaflet.js (CDN) | — | Module 2 UI |
+| Layer | Technologies | Primary Purpose |
+|---|---|---|
+| **Gateway & Reverse Proxy** | `FastAPI`, `Uvicorn`, `httpx`, `websockets` | Single-port 5000 reverse-proxy, WebSocket forwarding, process orchestration |
+| **Microservice Web Engines** | `Flask`, `Flask-CORS`, `Jinja2` | Serving Modules 2, 4, and 5 UI consoles and REST APIs |
+| **Real-Time Streaming** | `FastAPI`, `WebSockets`, `asyncio` | High-frequency WITSML sensor replay and anomaly broadcast |
+| **Primary LLM** | `Qwen/Qwen2.5-72B-Instruct` (Hugging Face) | Deep engineering reasoning and historical evidence synthesis in Module 5 |
+| **AI Briefing LLM** | `Google Gemini 2.5 / 2.0 / 1.5 Flash` | Rapid, verifiable pre-spud briefing synthesis in Module 4 |
+| **Offline Synthesis** | Deterministic Local Rule Engine | Offline zero-dependency synthesis fallback |
+| **Vector Database** | `ChromaDB` | Embedded vector database indexing 2,022 DDR event snippets |
+| **Semantic Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` | Dense vector embeddings for GraphRAG and DDR retrieval |
+| **Knowledge Graph** | `NetworkX`, `Vis.js` | Directed property graph (4,037 nodes, 12,392 edges) and network canvas |
+| **Mathematical & ML Core** | `NumPy`, `Pandas`, `SciPy`, `scikit-learn` | Matrix operations, rolling statistics, Gaussian kernels, and AHP solvers |
+| **Time Series & Statistics** | `fastdtw`, `statsmodels` | Fast Dynamic Time Warping and Wilson Score Confidence Intervals |
+| **Geospatial Mapping** | `Leaflet.js`, OpenStreetMap, CartoDB Dark | Tactical interactive well mapping (EPSG:4326) |
 
 ---
 

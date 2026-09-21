@@ -9,7 +9,7 @@ NWIS-Sentinel is a full-stack, AI-powered drilling intelligence platform that in
 
 ### Step 1 — Install dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r ../../requirements.txt
 ```
 
 ### Step 2 — Launch the gateway
