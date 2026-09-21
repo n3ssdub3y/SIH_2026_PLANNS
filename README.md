@@ -4,6 +4,10 @@
 
 ---
 
+>  **Judges & Evaluators:** For a complete breakdown of the project — problem statement, all five modules, technical novelties, dataset details, and the validated backtest result — see **[NWIS_PROJECT_SHOWCASE.md](./NWIS_PROJECT_SHOWCASE.md)**.
+
+---
+
 ## ⚡ Quick Start (Single-Port Unified Gateway)
 
 > **Working directory for ALL commands: `NLP/nlp_task_ddr/`**
