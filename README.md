@@ -155,53 +155,107 @@ For details on the flagship backtest validation and the SIH narrative, see **[NW
 ## 5. Setup & Installation
 
 ### Prerequisites
-Before you start, ensure you have the following installed on your system:
+
+Before starting, ensure the following are installed on your system:
+
 * **Operating System:** Windows 10/11, Linux, or macOS
-* **Python:** Version **3.10** or **3.11** is required (Download from [python.org](https://www.python.org/downloads/)).
-  * *Important for Windows users: When installing Python, make sure to check the box that says **"Add Python to PATH"** at the bottom of the installer window.*
-* **Memory:** 4 GB RAM minimum (8 GB highly recommended for the knowledge graph).
+* **Python:** **3.10 or 3.11**
+  Download from [python.org](https://www.python.org/downloads/?utm_source=chatgpt.com)
 
+  * **Windows users:** During installation, make sure to enable **"Add Python to PATH"** at the bottom of the installer.
+* **Memory:** **4 GB RAM minimum**; **8 GB or more is highly recommended** for the Knowledge Graph.
 
-### Option A: Windows 1-Click Launchers (Easiest)
+---
 
-We have provided single-click launch scripts that automatically handle starting the backend services.
+### Option A — Windows 1-Click Launchers **(Recommended / Easiest)**
 
-1. Locate `start_all.bat` (or `start_all.ps1` if you prefer PowerShell) in the root folder of the project.
-2. Double-click the file to run it.
-3. The script will automatically initiate the API gateway, boot all 5 internal microservices, and start the system.
-4. Open `http://localhost:5000` in your default browser.
+> **For Windows users, this is the simplest way to run the entire system.**
+> The provided launcher automatically starts the API gateway and all five internal microservices, so no manual environment setup or individual service startup is required.
 
-### Option B: Manual Command-Line Execution (Cross-Platform)
+#### Steps
 
-If you are on macOS/Linux or prefer manual execution, follow these steps:
+**1. Locate the launcher**
+
+In the **root directory of the project**, locate either:
+
+* `start_all.bat` — recommended for standard Windows usage
+* `start_all.ps1` — PowerShell alternative
+
+**2. Launch the system** - Double-click the appropriate file to start the application.
+
+**3. Wait for the services to initialize**
+The launcher will automatically:
+
+* Start the **API Gateway**
+* Boot all **5 internal microservices**
+* Initialize the complete eRTMAC-NWIS system
+
+**4. Open the application** - Once the services have started, open:
+
+**http://localhost:5000**
+
+The system is now ready to use.
+
+---
+
+### Option B — Manual Command-Line Execution **(Cross-Platform)**
+
+Use this method if you are on **macOS/Linux**, prefer command-line execution, or want to manually control the environment and services.
+
+#### 1. Navigate to the core implementation directory
 
 ```bash
-# 1. Navigate to the core implementation directory
 cd NLP/nlp_task_ddr
+```
 
-# 2. Create a virtual environment (Recommended)
+#### 2. Create a virtual environment
+
+```bash
 python -m venv venv
+```
 
-# Activate the environment:
-# On Windows:
+Activate the environment:
+
+**Windows:**
+
+```bash
 venv\Scripts\activate
-# On macOS/Linux:
+```
+
+**macOS/Linux:**
+
+```bash
 source venv/bin/activate
+```
 
-# 3. Install all unified dependencies (One-time setup)
+#### 3. Install the unified dependencies
+
+This is a **one-time setup step**:
+
+```bash
 pip install -r ../../requirements.txt
+```
 
-# 4. Verify data integrity
-# This confirms the datasets and NLP foundation are correctly placed
+#### 4. Verify the project setup
+
+Run the setup verification script to confirm that the required datasets and NLP foundation are correctly placed:
+
+```bash
 python check_setup.py
+```
 
-# 5. Launch the Unified Gateway
+#### 5. Launch the Unified Gateway
+
+```bash
 python gateway.py
 ```
 
-Open your browser to: **`http://localhost:5000`**
+Once the gateway has started, open:
+
+**http://localhost:5000**
 
 ---
+> **Recommendation:** If you are using **Windows**, use **Option A**. It is the intended quick-start path and minimizes the amount of manual configuration required.
 
 ## 6. Running the System
 
