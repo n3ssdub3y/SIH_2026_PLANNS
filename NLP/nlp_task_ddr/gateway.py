@@ -139,7 +139,6 @@ def start_all_modules():
         p = _start_module(m["name"], m["cmd"], m["log"])
         _processes.append(p)
 
-<<<<<<< HEAD
     logger.info("Waiting for all modules to come online (parallel check)...")
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -154,22 +153,7 @@ def start_all_modules():
         for fut in as_completed(futures):
             name, port, ok = fut.result()
             logger.info("  %-20s port:%d  %s", name, port, "UP" if ok else "TIMEOUT")
-=======
-    logger.info("Waiting for all modules to come online (parallel)...")
 
-    results = {}
-
-    def _check(m):
-        ok = _wait_for_port(m["port"], timeout=120)
-        results[m["name"]] = ok
-        logger.info("  %-22s port:%d  %s", m["name"], m["port"], "UP" if ok else "TIMEOUT")
-
-    threads = [threading.Thread(target=_check, args=(m,), daemon=True) for m in modules]
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join(timeout=125)
->>>>>>> 530ce42b478efd724ef02ad38a486421163a346f
 
     logger.info("All modules started. Gateway ready -> http://localhost:5000")
 
