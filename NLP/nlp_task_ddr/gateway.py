@@ -35,9 +35,9 @@ from pathlib import Path
 import httpx
 import uvicorn
 import websockets
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # -- Paths -------------------------------------------------------------------
@@ -179,7 +179,7 @@ def stop_all_modules():
 @asynccontextmanager
 async def lifespan(app):
     global _http_client
-    _http_client = httpx.AsyncClient(timeout=120.0, follow_redirects=True)
+    _http_client = httpx.AsyncClient(timeout=600.0, follow_redirects=True)
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, start_all_modules)
     yield
@@ -286,6 +286,27 @@ async def proxy_websocket(client_ws, backend_ws_url):
 async def dashboard():
     from fastapi.responses import FileResponse
     return FileResponse(BASE_DIR / "dashboard" / "templates" / "dashboard.html")
+
+
+# Module 1 — Simulated OCR/NLP Pipeline (served directly by gateway, no subprocess)
+@app.get("/module1")
+async def module1_ui():
+    from fastapi.responses import FileResponse
+    return FileResponse(BASE_DIR / "module1" / "module1.html")
+
+@app.post("/module1/upload")
+async def module1_upload(file: UploadFile = File(...)):
+    """Accept a PDF DDR document for simulated OCR processing.
+    The actual processing simulation runs client-side; this endpoint
+    validates the upload and returns a job token.
+    """
+    import uuid
+    return JSONResponse({
+        "status":   "accepted",
+        "filename": file.filename,
+        "job_id":   "m1-" + str(uuid.uuid4())[:8],
+        "message":  "Document queued for OCR processing (client-side simulation)",
+    })
 
 
 # Module 2

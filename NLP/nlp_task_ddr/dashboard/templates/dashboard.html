@@ -260,7 +260,7 @@
     /* ── Module cards grid ───────────────────────────────────────── */
     .modules-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
     }
 
@@ -356,6 +356,7 @@
     }
 
     /* ── Hover glow per card ────────────────────────────────────── */
+    .mc-m1:hover { border-color: #00e5ff; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,255,0.2); }
     .mc-m2:hover { border-color: #58a6ff; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(88,166,255,0.2); }
     .mc-m3:hover { border-color: #3fb950; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(63,185,80,0.2); }
     .mc-m4:hover { border-color: #d2a8ff; box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(210,168,255,0.2); }
@@ -381,6 +382,7 @@
     .module-card:nth-child(2) { animation-delay: 1.05s; }
     .module-card:nth-child(3) { animation-delay: 1.2s; }
     .module-card:nth-child(4) { animation-delay: 1.35s; }
+    .module-card:nth-child(5) { animation-delay: 1.50s; }
     @keyframes cardIn {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: none; }
@@ -416,6 +418,9 @@
       .neofetch { flex-direction: column; gap: 16px; }
       .term-body { padding: 18px 20px 22px; }
     }
+
+    /* ── Module 1 teal badge ─────────────────────────────────── */
+    .badge-teal  { color: #00e5ff; border-color: rgba(0,229,255,0.35); background: rgba(0,229,255,0.08); }
   </style>
 </head>
 <body>
@@ -485,7 +490,7 @@ SENTINEL</div>
           <div class="sysinfo-row"><span class="si-key">Partner</span> <span class="si-val">Oil India Limited</span></div>
           <div class="sysinfo-row"><span class="si-key">Stack</span>   <span class="si-val">Flask · FastAPI · Gemini · ChromaDB</span></div>
           <div class="sysinfo-row"><span class="si-key">Wells</span>   <span class="si-val">159 wells · Volve + Synthetic</span></div>
-          <div class="sysinfo-row"><span class="si-key">Modules</span><span class="si-val">4 active · single port :5000</span></div>
+          <div class="sysinfo-row"><span class="si-key">Modules</span><span class="si-val">5 active · single port :5000</span></div>
           <div class="sysinfo-row"><span class="si-key">Status</span> <span class="si-val" id="statusVal">● All systems operational</span></div>
 
           <div class="color-blocks">
@@ -512,6 +517,17 @@ SENTINEL</div>
 
       <!-- Module cards -->
       <div class="modules-grid">
+
+        <!-- Module 1 -->
+        <a class="module-card mc-m1" href="/module1" id="card-m1">
+          <div class="card-port">/module1</div>
+          <div class="card-header">
+            <span class="card-icon" style="color:#00e5ff;">🔬</span>
+            <div class="card-name"><span style="color:#00e5ff;">module1</span>.nlp</div>
+          </div>
+          <div class="card-desc">DDR Ingestion,<br>OCR &amp; Event Extraction.</div>
+          <div class="card-badge badge-teal">● PaddleOCR · NLP · Events</div>
+        </a>
 
         <!-- Module 2 -->
         <a class="module-card mc-m2" href="/module2/" id="card-m2">
@@ -562,7 +578,7 @@ SENTINEL</div>
       <!-- Status line -->
       <div class="status-line">
         <div class="status-dot"></div>
-        <span>4 modules indexed · Single-port gateway on :5000 · python gateway.py to launch</span>
+        <span>5 modules indexed · Single-port gateway on :5000 · python gateway.py to launch</span>
       </div>
 
     </div><!-- /term-body -->

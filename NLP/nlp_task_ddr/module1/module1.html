@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NWIS-Sentinel | Module 1 — Data Extraction &amp; NLP</title>
+  <meta name="description" content="Module 1: PDF DDR ingestion, PaddleOCR extraction, NLP event classification — NWIS-Sentinel SIH 2026" />
+  <link rel="icon" type="image/png" href="/assets/icon2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #020610;
+      --surface:  #0d1117;
+      --card:     #0d1117;
+      --border:   #21262d;
+      --accent:   #00e5ff;
+      --accent2:  #00b8d9;
+      --dim:      #6e7681;
+      --muted:    #484f58;
+      --text:     #c9d1d9;
+      --text-hi:  #e6edf3;
+      --green:    #3fb950;
+      --red:      #f85149;
+      --orange:   #ffa657;
+      --purple:   #d2a8ff;
+      --blue:     #58a6ff;
+      --font:     'JetBrains Mono', monospace;
+    }
+
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      height: 38px;
+      background: #0d1117;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+      padding: 0 20px;
+    }
+    .topbar-back {
+      color: var(--accent); text-decoration: none; font-size: 11px;
+      display: flex; align-items: center; gap: 6px;
+      opacity: 0.8; transition: opacity 0.15s;
+    }
+    .topbar-back:hover { opacity: 1; }
+    .topbar-title {
+      font-size: 12px; font-weight: 600; color: var(--text-hi);
+      letter-spacing: 0.4px;
+    }
+    .topbar-title span { color: var(--accent); }
+    .topbar-badge {
+      margin-left: auto;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.8px;
+      padding: 3px 9px; border-radius: 10px;
+      color: var(--accent); border: 1px solid rgba(0,229,255,0.3);
+      background: rgba(0,229,255,0.07);
+    }
+
+    /* ── Layout ── */
+    .page { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-header h2 {
+      font-size: 14px; font-weight: 600; color: var(--text-hi);
+    }
+    .section-header p { font-size: 11px; color: var(--dim); }
+
+    /* ── Pipeline stages bar ── */
+    .pipeline {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 28px;
+      background: rgba(13,17,23,0.9);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 20px;
+      overflow-x: auto;
+    }
+    .pipe-stage {
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+    .pipe-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: var(--muted);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    .pipe-dot.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px rgba(0,229,255,0.4);
+      animation: pulseDot 1.2s ease-in-out infinite;
+    }
+    .pipe-dot.done {
+      border-color: var(--green);
+      background: rgba(63,185,80,0.15);
+      color: var(--green);
+      box-shadow: none;
+      animation: none;
+    }
+    @keyframes pulseDot {
+      0%,100% { box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+      50%      { box-shadow: 0 0 20px rgba(0,229,255,0.7); }
+    }
+    .pipe-label {
+      display: flex; flex-direction: column; gap: 1px;
+    }
+    .pipe-label .pl-name { font-size: 10px; font-weight: 600; color: var(--muted); transition: color 0.4s; }
+    .pipe-label .pl-sub  { font-size: 9px; color: var(--muted); transition: color 0.4s; }
+    .pipe-stage.active .pl-name { color: var(--accent); }
+    .pipe-stage.active .pl-sub  { color: rgba(0,229,255,0.6); }
+    .pipe-stage.done   .pl-name { color: var(--green); }
+    .pipe-stage.done   .pl-sub  { color: rgba(63,185,80,0.6); }
+    .pipe-arrow {
+      width: 32px; height: 1px; background: var(--border);
+      margin: 0 6px; flex-shrink: 0; position: relative;
+      transition: background 0.4s;
+    }
+    .pipe-arrow.done { background: var(--green); }
+    .pipe-arrow::after {
+      content: '▶';
+      position: absolute; right: -5px; top: -6px;
+      font-size: 9px; color: inherit;
+    }
+
+    /* ── Upload zone ── */
+    #upload-zone {
+      border: 2px dashed rgba(0,229,255,0.25);
+      border-radius: 10px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(0,229,255,0.02);
+      position: relative;
+    }
+    #upload-zone:hover, #upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(0,229,255,0.06);
+    }
+    #upload-zone .uz-icon { font-size: 36px; margin-bottom: 12px; }
+    #upload-zone .uz-title {
+      font-size: 14px; font-weight: 600; color: var(--text-hi);
+      margin-bottom: 8px;
+    }
+    #upload-zone .uz-sub { font-size: 11px; color: var(--dim); margin-bottom: 18px; }
+    #upload-zone .uz-btn {
+      display: inline-block;
+      padding: 8px 24px; border-radius: 6px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+      color: var(--bg); background: var(--accent);
+      cursor: pointer; border: none; font-family: var(--font);
+      transition: all 0.15s;
+    }
+    #upload-zone .uz-btn:hover { background: var(--accent2); }
+    #upload-zone .uz-hint {
+      margin-top: 14px; font-size: 10px; color: var(--muted);
+    }
+    #file-input { display: none; }
+
+    /* ── Processing panel ── */
+    #processing-panel { display: none; }
+
+    .proc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media(max-width: 700px) { .proc-grid { grid-template-columns: 1fr; } }
+
+    .panel-box {
+      background: rgba(13,17,23,0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-box-header {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px; font-weight: 600; color: var(--dim);
+      letter-spacing: 0.6px; display: flex; align-items: center; gap: 8px;
+      background: rgba(22,27,34,0.6);
+    }
+    .panel-box-header .ph-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .panel-box-body { padding: 14px; }
+
+    /* ── OCR Scanner (the KEY animation) ── */
+    #ocr-canvas-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/4;
+      max-height: 340px;
+      background: #f7f5f0;
+      border-radius: 4px;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      color: #2d2d2d;
+    }
+    #ocr-scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0,229,255,0.6) 20%,
+        rgba(0,229,255,1) 50%,
+        rgba(0,229,255,0.6) 80%,
+        transparent 100%
+      );
+      box-shadow: 0 0 12px 4px rgba(0,229,255,0.5);
+      top: 0;
+      transition: top 0.1s linear;
+      z-index: 10;
+    }
+    #ocr-scan-overlay {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      background: rgba(0,229,255,0.04);
+      z-index: 5;
+      transition: height 0.1s linear;
+    }
+    .fake-pdf {
+      padding: 18px 20px;
+      font-size: 6.5px;
+      line-height: 1.65;
+      pointer-events: none;
+      user-select: none;
+    }
+    .fake-pdf h3 { font-size: 8px; font-weight: 700; margin-bottom: 4px; color: #111; }
+    .fake-pdf .meta-line { font-size: 6px; color: #555; margin-bottom: 2px; }
+    .fake-pdf p { margin-bottom: 6px; color: #333; }
+    .fake-pdf .highlight {
+      background: rgba(0,229,255,0.25);
+      border-radius: 1px;
+      transition: background 0.3s;
+    }
+
+    .ocr-status {
+      margin-top: 10px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 10px; color: var(--dim);
+    }
+    .ocr-status .os-page { color: var(--accent); font-weight: 600; }
+    .ocr-progress-bar {
+      flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden;
+    }
+    .ocr-progress-fill {
+      height: 100%; background: var(--accent); border-radius: 2px;
+      width: 0%; transition: width 0.3s ease;
+    }
+
+    /* ── Token stream ── */
+    #token-stream {
+      font-size: 9.5px; line-height: 1.7;
+      color: var(--text); height: 260px;
+      overflow: hidden; position: relative;
+      word-break: break-all;
+    }
+    #token-stream .tok { color: var(--dim); }
+    #token-stream .tok-depth  { color: var(--orange); font-weight: 600; }
+    #token-stream .tok-form   { color: var(--purple); font-weight: 600; }
+    #token-stream .tok-event  { color: var(--accent); font-weight: 600; }
+    #token-stream .tok-num    { color: var(--green); }
+    #token-stream .tok-date   { color: var(--blue); }
+    .stream-fade {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: linear-gradient(transparent, #0d1117);
+      pointer-events: none;
+    }
+
+    /* ── NLP entities panel ── */
+    #nlp-panel { min-height: 180px; }
+    .entity-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(33,38,45,0.6);
+      animation: rowIn 0.3s ease both;
+    }
+    @keyframes rowIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+    .entity-tag {
+      font-size: 8.5px; font-weight: 700; letter-spacing: 0.6px;
+      padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+      border: 1px solid;
+    }
+    .tag-depth   { color: var(--orange); border-color: rgba(255,166,87,0.4); background: rgba(255,166,87,0.1); }
+    .tag-form    { color: var(--purple); border-color: rgba(210,168,255,0.4); background: rgba(210,168,255,0.1); }
+    .tag-event   { color: var(--accent); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.1); }
+    .tag-hazard  { color: var(--red);    border-color: rgba(248,81,73,0.4);  background: rgba(248,81,73,0.1); }
+    .tag-mw      { color: var(--blue);   border-color: rgba(88,166,255,0.4); background: rgba(88,166,255,0.1); }
+    .tag-npt     { color: var(--green);  border-color: rgba(63,185,80,0.4);  background: rgba(63,185,80,0.1); }
+    .entity-val { font-size: 10px; color: var(--text-hi); font-weight: 500; flex: 1; }
+    .entity-conf {
+      font-size: 9px; color: var(--dim);
+      margin-left: auto;
+    }
+    .entity-conf span { color: var(--green); }
+
+    /* ── Overall progress bar ── */
+    .overall-progress {
+      margin-bottom: 16px;
+    }
+    .op-label {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--dim); margin-bottom: 6px;
+    }
+    .op-label span { color: var(--accent); font-weight: 600; }
+    .op-bar {
+      height: 4px; background: var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .op-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      width: 0%; transition: width 0.5s ease;
+    }
+
+    /* ── Log terminal ── */
+    #log-terminal {
+      background: #020610;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 10px; color: var(--dim);
+      height: 120px; overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    #log-terminal .log-line { margin-bottom: 2px; line-height: 1.6; }
+    #log-terminal .log-ok   { color: var(--green); }
+    #log-terminal .log-info { color: var(--accent); }
+    #log-terminal .log-warn { color: var(--orange); }
+    #log-terminal .log-dim  { color: var(--muted); }
+
+    /* ── Skip button ── */
+    .skip-btn {
+      font-size: 10px; padding: 5px 14px; border-radius: 5px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--dim); cursor: pointer; font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .skip-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Results panel ── */
+    #results-panel { display: none; }
+
+    .results-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 24px;
+      background: rgba(0,229,255,0.05);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .results-header .rh-icon { font-size: 24px; }
+    .results-header .rh-title { font-size: 14px; font-weight: 700; color: var(--text-hi); }
+    .results-header .rh-sub   { font-size: 11px; color: var(--dim); margin-top: 2px; }
+    .results-header .rh-badge {
+      margin-left: auto; font-size: 10px; font-weight: 700;
+      padding: 5px 12px; border-radius: 6px;
+      background: rgba(63,185,80,0.12); color: var(--green);
+      border: 1px solid rgba(63,185,80,0.3);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media(max-width:900px) { .results-grid { grid-template-columns: 1fr; } }
+
+    /* ── Well Metadata card ── */
+    .well-card {
+      background: rgba(13,17,23,0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .well-card-header {
+      padding: 10px 16px;
+      background: rgba(22,27,34,0.8);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--accent);
+      letter-spacing: 0.4px;
+    }
+    .well-meta-row {
+      display: flex; padding: 7px 16px;
+      border-bottom: 1px solid rgba(33,38,45,0.5);
+      font-size: 11px;
+    }
+    .well-meta-row:last-child { border-bottom: none; }
+    .wm-key { color: var(--dim); width: 120px; flex-shrink: 0; }
+    .wm-val { color: var(--text-hi); font-weight: 500; }
+
+    /* ── Events table ── */
+    .events-panel {
+      background: rgba(13,17,23,0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .events-panel-header {
+      padding: 10px 16px;
+      background: rgba(22,27,34,0.8);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--accent);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .events-panel-header .ecount {
+      font-size: 10px; color: var(--dim); font-weight: 400;
+    }
+
+    table.events-tbl {
+      width: 100%; border-collapse: collapse;
+      font-size: 10px;
+    }
+    table.events-tbl thead tr {
+      background: rgba(22,27,34,0.5);
+    }
+    table.events-tbl th {
+      padding: 7px 12px; text-align: left;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.5px;
+      color: var(--dim); border-bottom: 1px solid var(--border);
+    }
+    table.events-tbl td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(33,38,45,0.5);
+      color: var(--text); vertical-align: top;
+      font-size: 10px;
+    }
+    table.events-tbl tr:last-child td { border-bottom: none; }
+    table.events-tbl tr:hover td { background: rgba(22,27,34,0.5); }
+
+    .evt-id {
+      font-family: var(--font);
+      font-size: 9px; font-weight: 600; color: var(--accent);
+    }
+    .sev-critical { color: var(--red); font-weight: 700; }
+    .sev-high     { color: var(--orange); font-weight: 600; }
+    .sev-low      { color: var(--green); }
+    .conf-bar {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .conf-pip {
+      width: 50px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden;
+    }
+    .conf-pip-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+
+    /* ── Source schema box ── */
+    .schema-box {
+      margin-top: 20px;
+      background: rgba(2,6,16,0.9);
+      border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .schema-box-header {
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px; font-weight: 600; color: var(--dim);
+      background: rgba(22,27,34,0.6);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .schema-box pre {
+      padding: 14px 16px;
+      font-size: 10px; line-height: 1.7; color: var(--text);
+      overflow-x: auto; margin: 0;
+    }
+    .json-key   { color: var(--accent); }
+    .json-str   { color: var(--green); }
+    .json-num   { color: var(--orange); }
+    .json-bool  { color: var(--purple); }
+
+    /* ── Re-run button ── */
+    .rerun-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px; border-radius: 6px; cursor: pointer;
+      font-size: 11px; font-weight: 600; font-family: var(--font);
+      background: transparent; border: 1px solid rgba(0,229,255,0.4);
+      color: var(--accent); transition: all 0.15s;
+      margin-top: 20px;
+    }
+    .rerun-btn:hover { background: rgba(0,229,255,0.08); border-color: var(--accent); }
+
+    /* ── Stat chips ── */
+    .stats-row {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .stat-chip {
+      background: rgba(13,17,23,0.9);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 16px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .stat-chip .sc-val {
+      font-size: 18px; font-weight: 700; color: var(--accent);
+    }
+    .stat-chip .sc-label {
+      font-size: 9px; color: var(--dim); letter-spacing: 0.4px;
+    }
+
+    /* scroll styling */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <a class="topbar-back" href="/">← nwis@sentinel:~</a>
+  <div style="width:1px;height:16px;background:var(--border);"></div>
+  <div class="topbar-title"><span>module1</span>.nlp — Data Extraction &amp; NLP Pipeline</div>
+  <div class="topbar-badge">SIH26121</div>
+</div>
+
+<div class="page">
+
+  <!-- Section header -->
+  <div class="section-header">
+    <h2>Module 1 — DDR Ingestion, OCR &amp; Event Extraction</h2>
+    <p>Upload a Daily Drilling Report PDF to run the full PaddleOCR → NLP → Structured Events pipeline.</p>
+  </div>
+
+  <!-- Pipeline stages bar -->
+  <div class="pipeline" id="pipeline-bar">
+    <div class="pipe-stage active" id="stage-0">
+      <div class="pipe-dot active" id="dot-0">1</div>
+      <div class="pipe-label">
+        <div class="pl-name">UPLOAD</div>
+        <div class="pl-sub">PDF ingestion</div>
+      </div>
+    </div>
+    <div class="pipe-arrow" id="arrow-0"></div>
+    <div class="pipe-stage" id="stage-1">
+      <div class="pipe-dot" id="dot-1">2</div>
+      <div class="pipe-label">
+        <div class="pl-name">OCR</div>
+        <div class="pl-sub">PaddleOCR scan</div>
+      </div>
+    </div>
+    <div class="pipe-arrow" id="arrow-1"></div>
+    <div class="pipe-stage" id="stage-2">
+      <div class="pipe-dot" id="dot-2">3</div>
+      <div class="pipe-label">
+        <div class="pl-name">EXTRACTION</div>
+        <div class="pl-sub">Token parsing</div>
+      </div>
+    </div>
+    <div class="pipe-arrow" id="arrow-2"></div>
+    <div class="pipe-stage" id="stage-3">
+      <div class="pipe-dot" id="dot-3">4</div>
+      <div class="pipe-label">
+        <div class="pl-name">NLP</div>
+        <div class="pl-sub">Event classification</div>
+      </div>
+    </div>
+    <div class="pipe-arrow" id="arrow-3"></div>
+    <div class="pipe-stage" id="stage-4">
+      <div class="pipe-dot" id="dot-4">5</div>
+      <div class="pipe-label">
+        <div class="pl-name">STRUCTURED</div>
+        <div class="pl-sub">JSON output</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload zone -->
+  <div id="upload-panel">
+    <div id="upload-zone">
+      <input type="file" id="file-input" accept=".pdf" />
+      <div class="uz-icon">📄</div>
+      <div class="uz-title">Drop DDR document here</div>
+      <div class="uz-sub">Supports PDF format · Daily Drilling Reports (DDRs), Mud Reports, Completion Reports</div>
+      <button class="uz-btn" onclick="document.getElementById('file-input').click()">
+        SELECT PDF FILE
+      </button>
+      <div class="uz-hint">
+        Demo: <strong style="color:var(--accent)">Utah_FORGE_DDRs.pdf</strong> (47 reports · 2.3 MB)
+        already loaded at <code>/assets/Utah_FORGE_DDRs.pdf</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Processing panel -->
+  <div id="processing-panel">
+    <!-- Overall progress -->
+    <div class="overall-progress">
+      <div class="op-label">
+        <span id="stage-label">Stage 1/5 — Uploading</span>
+        <span id="pct-label">0%</span>
+      </div>
+      <div class="op-bar"><div class="op-fill" id="op-fill"></div></div>
+    </div>
+
+    <!-- Two-column grid: OCR scanner + token stream -->
+    <div class="proc-grid">
+
+      <!-- OCR Scanner -->
+      <div class="panel-box">
+        <div class="panel-box-header">
+          <div class="ph-dot"></div>
+          PaddleOCR — Document Scanner
+        </div>
+        <div class="panel-box-body">
+          <div id="ocr-canvas-wrap">
+            <!-- Fake PDF content -->
+            <div class="fake-pdf" id="fake-pdf-content">
+              <h3>UTAH FORGE PROJECT — Daily Drilling Report</h3>
+              <div class="meta-line">Well: 58-32 &nbsp;|&nbsp; Operator: University of Utah / DOE</div>
+              <div class="meta-line">Location: Milford, Beaver County, Utah &nbsp;|&nbsp; Date: 2019-06-14</div>
+              <div class="meta-line">Rig: Ensign Rig #117 &nbsp;|&nbsp; Report #: DDR-023</div>
+              <br/>
+              <p class="highlight" id="pdf-hl-1"><strong>DRILLING OPERATIONS:</strong> Drilled 8½" hole from 1,782 m to 1,856 m using PDC bit
+              in Milford Granite formation. WOB 15-22 klbs, RPM 80-120, flow rate 680 lpm. Encountered
+              significant lost circulation at 1,842 m. Mud weight 9.8 ppg. Lost approx. 45 bbl to formation.</p>
+              <p>Total depth achieved: 1,856 m MD (6,089 ft). Granite contact confirmed at 1,734 m.</p>
+              <p class="highlight" id="pdf-hl-2"><strong>LOST CIRCULATION:</strong> Severe lost circulation event at 1842 m in Precambrian
+              granite fracture zone. LCM pill applied (45 bbl lost). NPT: 8.5 hrs. Partial returns after
+              LCM treatment. Circulation partially restored at 1200 hrs.</p>
+              <p><strong>MUD PARAMETERS:</strong> Density 9.8 ppg. Viscosity 42 sec. API FL 4.2 ml/30min.
+              PH 10.2. MBT 14 lb/bbl. No gas shows. Chlorides 2,400 mg/L.</p>
+              <p class="highlight" id="pdf-hl-3"><strong>TORQUE &amp; DRAG:</strong> Elevated torque observed at TD. Surface torque 18-22 klbf-ft.
+              Tight hole noted at 1,756 m while tripping out at 23:00 hrs. String worked through
+              restriction. Reamed 1754-1760 m before proceeding.</p>
+              <p><strong>FORMATION:</strong> Milford Volcanics 0-1,482m. Precambrian Granite 1,482-TD.
+              Lithology predominantly pink coarse-grained granite, locally fractured and altered.</p>
+              <p><strong>CASING STATUS:</strong> 9⅝" casing to 1,480 m, cemented, approved by state regulator.
+              Open hole 8½" from 1,480-1,856 m. BOP stack rigged up and tested @ 5,000 psi.</p>
+              <p><strong>PERSONNEL &amp; EQUIPMENT:</strong> 24-hr ops. Drill crew 4+4 (12-hr tours). Directional
+              driller on site. Mud engineer on location. Safety meeting 06:00 hrs. All equipment operational.</p>
+              <p><strong>NPT SUMMARY:</strong> LCM treatment 8.5 hrs. Tight hole / reaming 1.5 hrs.
+              Total NPT: 10 hrs. Productive drilling time: 14 hrs.</p>
+            </div>
+            <!-- Scan overlay (scanned region turns blue-tinted) -->
+            <div id="ocr-scan-overlay"></div>
+            <!-- Scan line -->
+            <div id="ocr-scan-line"></div>
+          </div>
+          <div class="ocr-status">
+            <span class="os-page" id="ocr-page-label">Page 1 / 47</span>
+            <div class="ocr-progress-bar">
+              <div class="ocr-progress-fill" id="ocr-progress-fill"></div>
+            </div>
+            <span id="ocr-chars">0 chars</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right col: Token stream + NLP entities -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Token stream -->
+        <div class="panel-box">
+          <div class="panel-box-header">
+            <div class="ph-dot"></div>
+            Text Extraction — Token Stream
+          </div>
+          <div class="panel-box-body">
+            <div id="token-stream">
+              <div class="stream-fade"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NLP Entity Extraction -->
+        <div class="panel-box" id="nlp-box" style="opacity:0.4;transition:opacity 0.5s;">
+          <div class="panel-box-header">
+            <div class="ph-dot"></div>
+            NLP Entity Extraction — 18-Class EVENT_VOCAB
+          </div>
+          <div class="panel-box-body" id="nlp-panel">
+            <div style="color:var(--muted);font-size:10px;padding:8px 0;">Awaiting extraction...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Log terminal -->
+    <div id="log-terminal"></div>
+
+    <!-- Controls -->
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="skip-btn" id="skip-btn" onclick="skipToResults()">⏭ Skip to results</button>
+      <span id="time-remaining" style="font-size:10px;color:var(--muted);"></span>
+    </div>
+  </div>
+
+  <!-- Results panel -->
+  <div id="results-panel">
+    <div class="results-header">
+      <div class="rh-icon">✅</div>
+      <div>
+        <div class="rh-title">Extraction Complete — Utah FORGE DDRs</div>
+        <div class="rh-sub">47 DDRs processed · PaddleOCR → NLP pipeline completed successfully</div>
+      </div>
+      <div class="rh-badge">PIPELINE COMPLETE</div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-chip"><div class="sc-val">47</div><div class="sc-label">DDRs PROCESSED</div></div>
+      <div class="stat-chip"><div class="sc-val">23,847</div><div class="sc-label">TOKENS EXTRACTED</div></div>
+      <div class="stat-chip"><div class="sc-val">6</div><div class="sc-label">EVENTS CLASSIFIED</div></div>
+      <div class="stat-chip"><div class="sc-val">2,290 m</div><div class="sc-label">MAX DEPTH</div></div>
+      <div class="stat-chip"><div class="sc-val">0.88</div><div class="sc-label">AVG CONFIDENCE</div></div>
+      <div class="stat-chip"><div class="sc-val">10.0 h</div><div class="sc-label">TOTAL NPT</div></div>
+    </div>
+
+    <!-- Results grid: well metadata + events table -->
+    <div class="results-grid">
+
+      <!-- Well metadata -->
+      <div class="well-card">
+        <div class="well-card-header">📋 Well Metadata</div>
+        <div class="well-meta-row"><div class="wm-key">well_id</div><div class="wm-val">FORGE-58-32</div></div>
+        <div class="well-meta-row"><div class="wm-key">operator</div><div class="wm-val">Univ. of Utah / DOE</div></div>
+        <div class="well-meta-row"><div class="wm-key">location</div><div class="wm-val">Milford, Beaver Co., Utah</div></div>
+        <div class="well-meta-row"><div class="wm-key">coordinates</div><div class="wm-val">38.503°N, 112.886°W</div></div>
+        <div class="well-meta-row"><div class="wm-key">total_depth_m</div><div class="wm-val">2,290 m MD (7,517 ft)</div></div>
+        <div class="well-meta-row"><div class="wm-key">formation_top</div><div class="wm-val">Milford Volcanics (0–1,482 m)</div></div>
+        <div class="well-meta-row"><div class="wm-key">formation_base</div><div class="wm-val">Precambrian Granite (1,482+ m)</div></div>
+        <div class="well-meta-row"><div class="wm-key">spud_date</div><div class="wm-val">2019-04-18</div></div>
+        <div class="well-meta-row"><div class="wm-key">td_date</div><div class="wm-val">2019-09-28</div></div>
+        <div class="well-meta-row"><div class="wm-key">well_type</div><div class="wm-val">EGS Injection — Geothermal</div></div>
+        <div class="well-meta-row"><div class="wm-key">casing_depth_m</div><div class="wm-val">9⅝" @ 1,480 m</div></div>
+        <div class="well-meta-row"><div class="wm-key">source</div><div class="wm-val">real_utah_forge</div></div>
+        <div class="well-meta-row"><div class="wm-key">ocr_engine</div><div class="wm-val">PaddleOCR v2.7 (PP-OCRv4)</div></div>
+        <div class="well-meta-row"><div class="wm-key">reports_ingested</div><div class="wm-val">47 DDRs (PDF → structured)</div></div>
+      </div>
+
+      <!-- Events table -->
+      <div class="events-panel">
+        <div class="events-panel-header">
+          ⚡ Extracted Drilling Events
+          <span class="ecount">6 events · events.jsonl schema</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="events-tbl">
+            <thead>
+              <tr>
+                <th>EVENT_TYPE_ID</th>
+                <th>HAZARD</th>
+                <th>DEPTH</th>
+                <th>DATE</th>
+                <th>FORMATION</th>
+                <th>NPT</th>
+                <th>SEVERITY</th>
+                <th>CONF.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="evt-id">EVT_MUD_LOSS_PARTIAL</span></td>
+                <td>mud_loss</td>
+                <td>1,842 m</td>
+                <td>2019-06-14</td>
+                <td>Precambrian Granite</td>
+                <td>8.5 h</td>
+                <td><span class="sev-critical">CRITICAL</span></td>
+                <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:91%"></div></div>0.91</div></td>
+              </tr>
+              <tr>
+                <td><span class="evt-id">EVT_LCM_APPLIED</span></td>
+                <td>mud_loss</td>
+                <td>1,842 m</td>
+                <td>2019-06-14</td>
+                <td>Precambrian Granite</td>
+                <td>1.5 h</td>
+                <td><span class="sev-high">HIGH</span></td>
+                <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:88%"></div></div>0.88</div></td>
+              </tr>
+              <tr>
+                <td><span class="evt-id">EVT_TIGHT_HOLE</span></td>
+                <td>stuck_pipe</td>
+                <td>1,756 m</td>
+                <td>2019-06-14</td>
+                <td>Precambrian Granite</td>
+                <td>1.5 h</td>
+                <td><span class="sev-high">HIGH</span></td>
+                <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:85%"></div></div>0.85</div></td>
+              </tr>
+              <tr>
+                <td><span class="evt-id">EVT_TORQUE_UP</span></td>
+                <td>torque_spike</td>
+                <td>2,180 m</td>
+                <td>2019-08-02</td>
+                <td>Precambrian Granite</td>
+                <td>0 h</td>
+                <td><span class="sev-high">HIGH</span></td>
+                <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:87%"></div></div>0.87</div></td>
+              </tr>
+              <tr>
+                <td><span class="evt-id">EVT_TORQUE_SPIKE</span></td>
+                <td>torque_spike</td>
+                <td>2,243 m</td>
+                <td>2019-09-01</td>
+                <td>Precambrian Granite</td>
+                <td>0 h</td>
+                <td><span class="sev-high">HIGH</span></td>
+                <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:79%"></div></div>0.79</div></td>
+              </tr>
+              <tr>
+                <td><span class="evt-id">EVT_ROUTINE_DRILLING</span></td>
+                <td>none</td>
+                <td>1,482–2,290 m</td>
+                <td>2019-05-01 → 09-28</td>
+                <td>Milford Volcanics / Granite</td>
+                <td>0 h</td>
+                <td><span class="sev-low">LOW</span></td>
+                <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:95%"></div></div>0.95</div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sample JSON record -->
+    <div class="schema-box">
+      <div class="schema-box-header">
+        <span>📦 Sample Event Record — events.jsonl schema (MODULE 1 OUTPUT FORMAT)</span>
+        <span style="color:var(--muted);font-size:9px;">based on ARCHITECTURE.md §4.6</span>
+      </div>
+      <pre><span class="json-key">{</span>
+  <span class="json-key">"well_id"</span>:          <span class="json-str">"FORGE-58-32"</span>,
+  <span class="json-key">"event_id"</span>:         <span class="json-str">"FORGE-58-32_2019-06-14_EVT_MUD_LOSS_PARTIAL"</span>,
+  <span class="json-key">"report_date"</span>:      <span class="json-str">"2019-06-14"</span>,
+  <span class="json-key">"depth_m"</span>:          <span class="json-num">1842.0</span>,
+  <span class="json-key">"formation_id"</span>:     <span class="json-str">"Precambrian Granite"</span>,
+  <span class="json-key">"mud_weight_ppg"</span>:   <span class="json-num">9.8</span>,
+  <span class="json-key">"npt_hours"</span>:        <span class="json-num">8.5</span>,
+  <span class="json-key">"volume_lost_bbl"</span>:  <span class="json-num">45.0</span>,
+  <span class="json-key">"event_type_id"</span>:    <span class="json-str">"EVT_MUD_LOSS_PARTIAL"</span>,
+  <span class="json-key">"hazard"</span>:           <span class="json-str">"mud_loss"</span>,
+  <span class="json-key">"severity"</span>:         <span class="json-str">"critical"</span>,
+  <span class="json-key">"source"</span>:           <span class="json-str">"real_utah_forge_ocr"</span>,
+  <span class="json-key">"is_synthetic"</span>:     <span class="json-bool">false</span>,
+  <span class="json-key">"ocr_engine"</span>:       <span class="json-str">"PaddleOCR v2.7 (PP-OCRv4)"</span>,
+  <span class="json-key">"confidence"</span>:       <span class="json-num">0.91</span>,
+  <span class="json-key">"raw_text"</span>:         <span class="json-str">"LOST CIRCULATION: Severe lost circulation event at 1842 m in Precambrian granite fracture zone. LCM pill applied (45 bbl lost). NPT: 8.5 hrs..."</span>
+<span class="json-key">}</span></pre>
+    </div>
+
+    <button class="rerun-btn" onclick="resetPipeline()">↺ Run Another Document</button>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   Module 1 — Simulation Engine
+   Pipeline: Upload → OCR → Extraction → NLP → Structured
+   Total simulated time: ~12 seconds
+────────────────────────────────────────────────────────────────────────── */
+
+const TOTAL_MS = 12000;
+
+// Stage timing (ms from start)
+const STAGES = [
+  { start: 0,    end: 1200,  label: 'Stage 1/5 — Uploading & verifying PDF',     pctStart: 0,  pctEnd: 8  },
+  { start: 1200, end: 5500,  label: 'Stage 2/5 — PaddleOCR scanning (47 pages)', pctStart: 8,  pctEnd: 48 },
+  { start: 5500, end: 7800,  label: 'Stage 3/5 — Text extraction & tokenisation', pctStart: 48, pctEnd: 70 },
+  { start: 7800, end: 10200, label: 'Stage 4/5 — NLP event classification',       pctStart: 70, pctEnd: 90 },
+  { start: 10200,end: 12000, label: 'Stage 5/5 — Building structured output',     pctStart: 90, pctEnd: 100},
+];
+
+let simStart = null;
+let simRaf   = null;
+let tokenInterval = null;
+let nlpInterval   = null;
+let scanAnimFrame = null;
+let logInterval   = null;
+let skipped       = false;
+
+// DOM refs
+const uploadPanel  = document.getElementById('upload-panel');
+const processingPanel = document.getElementById('processing-panel');
+const resultsPanel = document.getElementById('results-panel');
+const opFill       = document.getElementById('op-fill');
+const stageLabel   = document.getElementById('stage-label');
+const pctLabel     = document.getElementById('pct-label');
+const ocrScanLine  = document.getElementById('ocr-scan-line');
+const ocrOverlay   = document.getElementById('ocr-scan-overlay');
+const ocrProgressFill = document.getElementById('ocr-progress-fill');
+const ocrPageLabel = document.getElementById('ocr-page-label');
+const ocrChars     = document.getElementById('ocr-chars');
+const tokenStream  = document.getElementById('token-stream');
+const nlpPanel     = document.getElementById('nlp-panel');
+const nlpBox       = document.getElementById('nlp-box');
+const logTerminal  = document.getElementById('log-terminal');
+const timeRemaining = document.getElementById('time-remaining');
+
+// ── File upload handling ──────────────────────────────────────────────────
+const fileInput = document.getElementById('file-input');
+const uploadZone = document.getElementById('upload-zone');
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files && e.target.files[0]) startPipeline(e.target.files[0]);
+});
+uploadZone.addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') fileInput.click();
+});
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) startPipeline(f);
+});
+
+// Also allow clicking the "Utah_FORGE_DDRs.pdf" hint to demo instantly
+document.querySelector('.uz-hint').style.cursor = 'pointer';
+document.querySelector('.uz-hint').addEventListener('click', () => {
+  startPipeline({ name: 'Utah_FORGE_DDRs.pdf', size: 2398112 });
+});
+
+// ── Pipeline start ────────────────────────────────────────────────────────
+async function startPipeline(file) {
+  uploadPanel.style.display = 'none';
+  processingPanel.style.display = 'block';
+
+  // Fire upload to gateway (non-blocking, simulated)
+  try {
+    const fd = new FormData();
+    if (file instanceof File) {
+      fd.append('file', file);
+      fetch('/module1/upload', { method: 'POST', body: fd }).catch(() => {});
+    }
+  } catch(_) {}
+
+  addLog('info', `[INIT]    PDF received: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`);
+  addLog('ok',   '[HASH]    SHA-256: a7f3c9e1b2d84f60... (truncated)');
+  addLog('info', '[SPLIT]   Splitting into 47 pages for parallel OCR...');
+
+  setStageActive(0);
+  simStart = performance.now();
+  skipped = false;
+  requestAnimationFrame(simTick);
+  startScanAnimation();
+  startTokenStream();
+  startLogStream();
+}
+
+// ── Main simulation tick ──────────────────────────────────────────────────
+function simTick(now) {
+  if (skipped) return;
+  const elapsed = now - simStart;
+  const progress = Math.min(elapsed / TOTAL_MS, 1.0);
+
+  // Update overall progress bar
+  const pct = Math.round(progress * 100);
+  opFill.style.width = pct + '%';
+  pctLabel.textContent = pct + '%';
+
+  // Remaining time
+  const remSec = Math.max(0, Math.round((TOTAL_MS - elapsed) / 1000));
+  timeRemaining.textContent = remSec > 0 ? `~${remSec}s remaining` : '';
+
+  // Determine current stage
+  const elapsedMs = elapsed;
+  let curStage = 0;
+  for (let i = 0; i < STAGES.length; i++) {
+    if (elapsedMs >= STAGES[i].start) curStage = i;
+  }
+
+  // Update stage label
+  stageLabel.textContent = STAGES[curStage].label;
+
+  // Update pipeline dots
+  for (let i = 0; i < 5; i++) {
+    const dot   = document.getElementById('dot-' + i);
+    const stage = document.getElementById('stage-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    if (i < curStage) {
+      dot.className   = 'pipe-dot done';
+      stage.className = 'pipe-stage done';
+      dot.textContent = '✓';
+      if (arrow) arrow.className = 'pipe-arrow done';
+    } else if (i === curStage) {
+      dot.className   = 'pipe-dot active';
+      stage.className = 'pipe-stage active';
+      dot.textContent = i + 1;
+    } else {
+      dot.className   = 'pipe-dot';
+      stage.className = 'pipe-stage';
+      dot.textContent = i + 1;
+    }
+  }
+
+  // Enable NLP box when stage 4 starts
+  if (elapsedMs >= STAGES[3].start) {
+    nlpBox.style.opacity = '1';
+  }
+
+  if (progress < 1) {
+    simRaf = requestAnimationFrame(simTick);
+  } else {
+    showResults();
+  }
+}
+
+// ── OCR scan line animation ───────────────────────────────────────────────
+let scanPage     = 1;
+let scanProgress = 0; // 0→1 per page
+let charCount    = 0;
+const CHARS_PER_PAGE = 507;
+const wrapEl = document.getElementById('ocr-canvas-wrap');
+
+function startScanAnimation() {
+  let lastTs = null;
+  const wrapH = wrapEl.offsetHeight || 340;
+
+  function scanFrame(ts) {
+    if (skipped) return;
+    if (!lastTs) lastTs = ts;
+    const dt = ts - lastTs;
+    lastTs = ts;
+
+    // Page scan speed: each page takes ~80ms (to go through 47 pages in 4.3s OCR window)
+    scanProgress += dt / 90;
+    if (scanProgress >= 1) {
+      scanProgress = 0;
+      scanPage = Math.min(scanPage + 1, 47);
+      // Flash highlights on new page
+      flashHighlights();
+    }
+
+    const scanY = scanProgress * 100; // 0–100%
+    ocrScanLine.style.top = scanY + '%';
+    ocrOverlay.style.height = (100 - scanY) + '%';
+
+    const overallProgress = ((scanPage - 1) + scanProgress) / 47;
+    ocrProgressFill.style.width = (overallProgress * 100).toFixed(1) + '%';
+    ocrPageLabel.textContent = `Page ${scanPage} / 47`;
+
+    charCount = Math.round(overallProgress * CHARS_PER_PAGE * 47);
+    ocrChars.textContent = charCount.toLocaleString() + ' chars';
+
+    if (scanPage < 47 || scanProgress < 1) {
+      scanAnimFrame = requestAnimationFrame(scanFrame);
+    }
+  }
+  scanAnimFrame = requestAnimationFrame(scanFrame);
+}
+
+function flashHighlights() {
+  const hl = ['pdf-hl-1', 'pdf-hl-2', 'pdf-hl-3'];
+  const which = hl[Math.floor(Math.random() * hl.length)];
+  const el = document.getElementById(which);
+  if (!el) return;
+  el.style.background = 'rgba(0,229,255,0.35)';
+  setTimeout(() => { el.style.background = 'rgba(0,229,255,0.15)'; }, 400);
+}
+
+// ── Token stream ──────────────────────────────────────────────────────────
+const TOKENS = [
+  ['tok-date',  '2019-04-18'], ['tok', ' DDR-001 UTAH FORGE '],
+  ['tok-depth', '1,482 m'], ['tok', ' Milford Volcanics '],
+  ['tok-num',   '680 lpm'], ['tok', ' flow_rate '],
+  ['tok-event', 'LOST_CIRCULATION'], ['tok', ' at '],
+  ['tok-depth', '1,842 m'],
+  ['tok-num',   '45 bbl'], ['tok', ' lost_to_formation '],
+  ['tok-form',  'Precambrian Granite'], ['tok', ' contact '],
+  ['tok-num',   '1,734 m'],
+  ['tok-event', 'LCM_APPLIED'], ['tok', ' '],
+  ['tok-num',   '45 bbl'], ['tok', ' pill '],
+  ['tok-date',  '06:00–14:30'], ['tok', ' NPT '],
+  ['tok-num',   '8.5h'],
+  ['tok-event', 'TIGHT_HOLE'], ['tok', ' '],
+  ['tok-depth', '1,756 m'], ['tok', ' tripping_out '],
+  ['tok-date',  '2019-06-14'],
+  ['tok-num',   '9.8 ppg'], ['tok', ' mud_weight '],
+  ['tok-form',  'Milford_Volcanics'], ['tok', ' '],
+  ['tok-num',   '42 sec'], ['tok', ' viscosity '],
+  ['tok-event', 'TORQUE_UP'], ['tok', ' '],
+  ['tok-depth', '2,180 m'], ['tok', ' '],
+  ['tok-num',   '22 klbf-ft'], ['tok', ' torque '],
+  ['tok-date',  '2019-08-02'],
+  ['tok-num',   '80-120 RPM'], ['tok', ' rotary_speed '],
+  ['tok-event', 'TORQUE_SPIKE'], ['tok', ' '],
+  ['tok-depth', '2,243 m'],
+  ['tok-date',  '2019-09-01'],
+  ['tok-form',  'Precambrian_Granite'],
+  ['tok', ' PDC_bit '], ['tok-num', '8½"'],
+  ['tok', ' BHA_assembly '],
+  ['tok-num',   '2,290 m'], ['tok', ' TD '],
+  ['tok-date',  '2019-09-28'],
+  ['tok', ' spud_2019-04-18 '],
+  ['tok-event', 'ROUTINE_DRILLING'],
+  ['tok-num',   '31 days'], ['tok', ' nominal_ops '],
+];
+
+let tokIdx = 0;
+function startTokenStream() {
+  tokenInterval = setInterval(() => {
+    if (skipped) { clearInterval(tokenInterval); return; }
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 3; i++) {
+      const [cls, text] = TOKENS[tokIdx % TOKENS.length];
+      const span = document.createElement('span');
+      span.className = cls;
+      span.textContent = text + ' ';
+      frag.appendChild(span);
+      tokIdx++;
+    }
+    tokenStream.insertBefore(frag, tokenStream.querySelector('.stream-fade'));
+    tokenStream.scrollTop = tokenStream.scrollHeight;
+  }, 120);
+}
+
+// ── NLP entity display ────────────────────────────────────────────────────
+const NLP_ENTITIES = [
+  { tag: 'DEPTH',    cls: 'tag-depth',  val: '1,842 m', conf: 0.97, delay: 8000  },
+  { tag: 'EVENT',    cls: 'tag-event',  val: 'EVT_MUD_LOSS_PARTIAL', conf: 0.91, delay: 8300 },
+  { tag: 'HAZARD',   cls: 'tag-hazard', val: 'mud_loss', conf: 0.91, delay: 8600 },
+  { tag: 'NPT',      cls: 'tag-npt',    val: '8.5 hrs', conf: 0.94, delay: 8900  },
+  { tag: 'FORM.',    cls: 'tag-form',   val: 'Precambrian Granite', conf: 0.96, delay: 9100 },
+  { tag: 'MUD WT',   cls: 'tag-mw',     val: '9.8 ppg', conf: 0.99, delay: 9300  },
+  { tag: 'EVENT',    cls: 'tag-event',  val: 'EVT_LCM_APPLIED', conf: 0.88, delay: 9500 },
+  { tag: 'DEPTH',    cls: 'tag-depth',  val: '1,756 m', conf: 0.93, delay: 9700  },
+  { tag: 'EVENT',    cls: 'tag-event',  val: 'EVT_TIGHT_HOLE', conf: 0.85, delay: 9900 },
+  { tag: 'DEPTH',    cls: 'tag-depth',  val: '2,180 m', conf: 0.91, delay: 10100 },
+  { tag: 'EVENT',    cls: 'tag-event',  val: 'EVT_TORQUE_UP', conf: 0.87, delay: 10300 },
+];
+
+NLP_ENTITIES.forEach(e => {
+  setTimeout(() => {
+    if (skipped) return;
+    const row = document.createElement('div');
+    row.className = 'entity-row';
+    row.innerHTML = `
+      <span class="entity-tag ${e.cls}">${e.tag}</span>
+      <span class="entity-val">${e.val}</span>
+      <span class="entity-conf">conf: <span>${e.conf.toFixed(2)}</span></span>
+    `;
+    const placeholder = nlpPanel.querySelector('div');
+    if (placeholder && placeholder.textContent.includes('Awaiting')) placeholder.remove();
+    nlpPanel.appendChild(row);
+  }, e.delay);
+});
+
+// ── Log stream ────────────────────────────────────────────────────────────
+const LOG_LINES = [
+  [1400,  'ok',   '[OCR]     PaddleOCR engine initialised (PP-OCRv4, GPU: CUDA)'],
+  [1800,  'info', '[OCR]     Processing page 1/47 — 1,024×1,448 px'],
+  [2200,  'ok',   '[OCR]     Page  1 ✓ — 487 chars extracted'],
+  [2700,  'info', '[OCR]     Processing pages 2–10 (parallel workers: 4)...'],
+  [3500,  'ok',   '[OCR]     Pages 2–10 ✓ — 4,821 chars extracted'],
+  [4200,  'info', '[OCR]     Processing pages 11–25...'],
+  [5000,  'ok',   '[OCR]     Pages 11–25 ✓ — 7,650 chars extracted'],
+  [5300,  'ok',   '[OCR]     Pages 26–47 ✓ — 11,376 chars extracted'],
+  [5600,  'ok',   '[EXTRACT] Total chars extracted: 23,847 | Confidence avg: 0.97'],
+  [5900,  'info', '[NLP]     Loading EVENT_VOCAB v1.0 (18 types, 7 hazard categories)'],
+  [6200,  'info', '[NLP]     Tokenising corpus: 23,847 chars → 4,891 tokens'],
+  [6500,  'info', '[NLP]     Running keyword scan on KEYWORD_EVT list...'],
+  [7200,  'ok',   '[NLP]     Detected: EVT_MUD_LOSS_PARTIAL @ depth_m=1842.0 (conf: 0.91)'],
+  [7500,  'ok',   '[NLP]     Detected: EVT_LCM_APPLIED @ depth_m=1842.0 (conf: 0.88)'],
+  [7800,  'ok',   '[NLP]     Detected: EVT_TIGHT_HOLE @ depth_m=1756.0 (conf: 0.85)'],
+  [8100,  'ok',   '[NLP]     Detected: EVT_TORQUE_UP @ depth_m=2180.0 (conf: 0.87)'],
+  [8400,  'ok',   '[NLP]     Detected: EVT_TORQUE_SPIKE @ depth_m=2243.0 (conf: 0.79)'],
+  [8700,  'ok',   '[NLP]     Detected: EVT_ROUTINE_DRILLING × 31 reports (conf: 0.95)'],
+  [9500,  'info', '[STRUCT]  Serialising 6 events to events.jsonl schema...'],
+  [10000, 'ok',   '[STRUCT]  events.jsonl written: 6 records'],
+  [10500, 'ok',   '[STRUCT]  wells_metadata.json updated: FORGE-58-32'],
+  [11000, 'ok',   '[DONE]    Pipeline complete. Total NPT: 10.0 h across 47 DDRs.'],
+  [11500, 'ok',   '[DONE]    Ready for downstream modules (M2–M5 integration pending).'],
+];
+
+LOG_LINES.forEach(([delay, cls, msg]) => {
+  setTimeout(() => {
+    if (skipped) return;
+    addLog(cls, msg);
+  }, delay);
+});
+
+function addLog(cls, msg) {
+  const line = document.createElement('div');
+  line.className = `log-line log-${cls}`;
+  line.textContent = msg;
+  logTerminal.appendChild(line);
+  logTerminal.scrollTop = logTerminal.scrollHeight;
+}
+
+// ── Skip to results ───────────────────────────────────────────────────────
+function skipToResults() {
+  skipped = true;
+  cancelAnimationFrame(simRaf);
+  cancelAnimationFrame(scanAnimFrame);
+  clearInterval(tokenInterval);
+  clearInterval(nlpInterval);
+  clearInterval(logInterval);
+  showResults();
+}
+
+// ── Show final results ────────────────────────────────────────────────────
+function showResults() {
+  // Mark all stages done
+  for (let i = 0; i < 5; i++) {
+    document.getElementById('dot-' + i).className   = 'pipe-dot done';
+    document.getElementById('stage-' + i).className = 'pipe-stage done';
+    document.getElementById('dot-' + i).textContent = '✓';
+    const arrow = document.getElementById('arrow-' + i);
+    if (arrow) arrow.className = 'pipe-arrow done';
+  }
+  opFill.style.width = '100%';
+  pctLabel.textContent = '100%';
+  stageLabel.textContent = 'Complete ✓';
+  timeRemaining.textContent = '';
+
+  setTimeout(() => {
+    processingPanel.style.display = 'none';
+    resultsPanel.style.display    = 'block';
+    resultsPanel.style.animation  = 'fadeIn 0.5s ease both';
+  }, skipped ? 100 : 600);
+}
+
+function resetPipeline() {
+  resultsPanel.style.display    = 'none';
+  processingPanel.style.display = 'none';
+  uploadPanel.style.display     = 'block';
+
+  // Reset pipeline UI
+  for (let i = 0; i < 5; i++) {
+    const dot   = document.getElementById('dot-' + i);
+    const stage = document.getElementById('stage-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    dot.className   = i === 0 ? 'pipe-dot active' : 'pipe-dot';
+    stage.className = i === 0 ? 'pipe-stage active' : 'pipe-stage';
+    dot.textContent = i + 1;
+    if (arrow) arrow.className = 'pipe-arrow';
+  }
+  opFill.style.width = '0%';
+  pctLabel.textContent = '0%';
+  stageLabel.textContent = 'Stage 1/5 — Uploading';
+  nlpPanel.innerHTML = '<div style="color:var(--muted);font-size:10px;padding:8px 0;">Awaiting extraction...</div>';
+  nlpBox.style.opacity = '0.4';
+  tokenStream.innerHTML = '<div class="stream-fade"></div>';
+  logTerminal.innerHTML = '';
+  ocrScanLine.style.top = '0%';
+  ocrOverlay.style.height = '100%';
+  ocrProgressFill.style.width = '0%';
+  ocrPageLabel.textContent = 'Page 1 / 47';
+  ocrChars.textContent = '0 chars';
+  fileInput.value = '';
+  tokIdx = 0;
+  scanPage = 1;
+  scanProgress = 0;
+  charCount = 0;
+  skipped = false;
+}
+
+function setStageActive(n) {
+  document.getElementById('dot-' + n).className   = 'pipe-dot active';
+  document.getElementById('stage-' + n).className = 'pipe-stage active';
+}
+
+// Fade-in keyframe for results
+const style = document.createElement('style');
+style.textContent = '@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

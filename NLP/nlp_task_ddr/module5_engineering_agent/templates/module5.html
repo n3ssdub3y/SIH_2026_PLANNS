@@ -7,6 +7,7 @@
   <meta name="description" content="NWIS-Sentinel Module 5: Evidence-grounded drilling engineering decision support agent powered by Gemini and ChromaDB." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
     /* ── Reset & Design Tokens ────────────────────────────────────── */
@@ -1667,25 +1668,75 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
       group.className = "msg-group agent";
       group.id = id;
       group.innerHTML = `
+        <style>
+          @keyframes spin { 100% { transform: rotate(360deg); } }
+        </style>
         <div class="msg-sender">
           <span>&#x1f916;</span>
           <span>NWIS Engineering Decision Agent</span>
         </div>
         <div class="agent-card" style="border-left-color: var(--cyan-bright);">
           <div class="agent-meta">
-            <span style="font-size:11px; color:var(--text-secondary);">Retrieving ChromaDB vectors and evaluating offset wells...</span>
-            <span class="uncertainty-pill uncertainty-med">Processing</span>
+            <span id="${id}-phase" style="font-size:11px; color:var(--text-secondary);">Initializing...</span>
+            <span class="uncertainty-pill uncertainty-med"><span id="${id}-percent">0</span>%</span>
           </div>
           <div class="agent-body" style="color:var(--text-secondary);">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="cursor"></span>
-              <span>Grounding decision support against 2,022 historical records...</span>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="spinner" style="width:14px; height:14px; border:2px solid var(--text-muted); border-top-color:var(--cyan-bright); border-radius:50%; animation:spin 1s linear infinite;"></div>
+                <span id="${id}-text">Preparing to consult historical analogs...</span>
+              </div>
+              <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                <div id="${id}-bar" style="width: 0%; height: 100%; background: var(--cyan-bright); transition: width 0.2s;"></div>
+              </div>
             </div>
           </div>
         </div>
       `;
       chatStream.appendChild(group);
       chatStream.scrollTop = chatStream.scrollHeight;
+      
+      let pct = 0;
+      const phases = [
+        "Connecting to knowledge base...",
+        "Retrieving well data...",
+        "Evaluating offset analogs...",
+        "Extracting relevant interventions...",
+        "Synthesizing operational context...",
+        "Formatting final response..."
+      ];
+      
+      let phaseIdx = 0;
+      const interval = setInterval(() => {
+        const barEl = document.getElementById(id + "-bar");
+        const pctEl = document.getElementById(id + "-percent");
+        const textEl = document.getElementById(id + "-text");
+        const phaseEl = document.getElementById(id + "-phase");
+        
+        if (!document.getElementById(id) || !barEl) {
+          clearInterval(interval);
+          return;
+        }
+        
+        const remaining = 99 - pct;
+        let inc = Math.max(0.1, remaining * 0.03); 
+        if (pct < 20) inc = Math.random() * 3 + 1;
+        else if (pct < 50) inc = Math.random() * 2 + 0.5;
+        
+        pct += inc;
+        if (pct > 99) pct = 99;
+        
+        const currentPct = Math.floor(pct);
+        barEl.style.width = currentPct + "%";
+        pctEl.innerText = currentPct;
+        
+        const targetPhase = Math.min(phases.length - 1, Math.floor((currentPct / 100) * phases.length));
+        if (targetPhase !== phaseIdx) {
+          phaseIdx = targetPhase;
+          textEl.innerText = phases[phaseIdx];
+          phaseEl.innerText = "Phase " + (phaseIdx + 1) + "/" + phases.length;
+        }
+      }, 300);
     }
 
     function replaceLoadingWithAgentResponse(id, data) {
@@ -1809,11 +1860,40 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
 
     function formatMarkdown(text) {
       if (!text) return "";
-      let html = escapeHtml(text);
-      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      html = html.replace(/`(.*?)`/g, '<code style="background:rgba(0, 229, 255, 0.1); padding:2px 5px; border-radius:4px; font-family:\'JetBrains Mono\', monospace; color:var(--cyan-bright);">$1</code>');
-      return html;
+      let html = marked.parse(text);
+      return `
+        <style>
+          .agent-body p { margin-bottom: 0.8em; line-height: 1.5; }
+          .agent-body p:last-child { margin-bottom: 0; }
+          .agent-body ul, .agent-body ol { margin-left: 1.5em; margin-bottom: 0.8em; line-height: 1.5; }
+          .agent-body li { margin-bottom: 0.4em; }
+          .agent-body code { 
+            background: rgba(0, 229, 255, 0.1); 
+            padding: 2px 5px; 
+            border-radius: 4px; 
+            font-family: 'JetBrains Mono', monospace; 
+            color: var(--cyan-bright); 
+          }
+          .agent-body pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border-muted);
+            margin-bottom: 0.8em;
+          }
+          .agent-body pre code {
+            background: transparent;
+            padding: 0;
+            color: var(--text-main);
+          }
+          .agent-body strong { color: var(--cyan-bright); font-weight: 600; }
+          .agent-body h1, .agent-body h2, .agent-body h3 {
+            margin-top: 1em; margin-bottom: 0.5em; color: #fff;
+          }
+        </style>
+        ${html}
+      `;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
