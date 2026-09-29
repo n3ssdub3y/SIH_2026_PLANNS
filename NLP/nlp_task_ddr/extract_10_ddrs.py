@@ -1,5 +1,5 @@
 """
-NWIS Sentinel - DDR NLP Extraction & Prompt Tuning Tool
+eRTMAC - NWIS - DDR NLP Extraction & Prompt Tuning Tool
 Runs NLP extraction on 10 Daily Drilling Reports (DDRs).
 Extracts structured parameters, hazard classification, severity, depth, and mitigations.
 """

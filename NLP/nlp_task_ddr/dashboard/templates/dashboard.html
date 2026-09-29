@@ -460,7 +460,7 @@
       <div class="dot close"  title="Close"   onclick="window.close()"></div>
       <div class="dot min"    title="Minimize"></div>
       <div class="dot max"    title="Maximize"></div>
-      <div class="titlebar-text">alacritty — <span>nwis@sentinel:~/system</span></div>
+      <div class="titlebar-text">alacritty — <span>eRTMAC - NWIS:~/system</span></div>
     </div>
 
     <!-- Body -->
@@ -483,12 +483,12 @@ SENTINEL</div>
 
         <!-- System info -->
         <div class="sysinfo">
-          <div class="sysinfo-user">nwis@sentinel</div>
+          <div class="sysinfo-user">eRTMAC - NWIS</div>
 
           <div class="sysinfo-row"><span class="si-key">Platform</span><span class="si-val">NWIS-Sentinel x86_64</span></div>
           <div class="sysinfo-row"><span class="si-key">Project</span> <span class="si-val">SIH 2026 — PS SIH26121</span></div>
           <div class="sysinfo-row"><span class="si-key">Partner</span> <span class="si-val">Oil India Limited</span></div>
-          <div class="sysinfo-row"><span class="si-key">Stack</span>   <span class="si-val">Flask · FastAPI · Gemini · ChromaDB</span></div>
+          <div class="sysinfo-row"><span class="si-key">Stack</span>   <span class="si-val">Flask · FastAPI · Qwen · ChromaDB</span></div>
           <div class="sysinfo-row"><span class="si-key">Wells</span>   <span class="si-val">159 wells · Volve + Synthetic</span></div>
           <div class="sysinfo-row"><span class="si-key">Modules</span><span class="si-val">5 active · single port :5000</span></div>
           <div class="sysinfo-row"><span class="si-key">Status</span> <span class="si-val" id="statusVal">● All systems operational</span></div>
@@ -508,7 +508,7 @@ SENTINEL</div>
 
       <!-- Prompt -->
       <div class="prompt-line">
-        <span class="prompt-user">nwis@sentinel</span>
+        <span class="prompt-user">eRTMAC - NWIS</span>
         <span class="prompt-path">~/system</span>
         <span class="prompt-sym">#</span>
         <span class="prompt-cmd">ls -la</span>
@@ -520,9 +520,8 @@ SENTINEL</div>
 
         <!-- Module 1 -->
         <a class="module-card mc-m1" href="/module1" id="card-m1">
-          <div class="card-port">/module1</div>
           <div class="card-header">
-            <span class="card-icon" style="color:#00e5ff;">🔬</span>
+            <span class="card-icon" style="color:#00e5ff;">🔍</span>
             <div class="card-name"><span style="color:#00e5ff;">module1</span>.nlp</div>
           </div>
           <div class="card-desc">DDR Ingestion,<br>OCR &amp; Event Extraction.</div>
@@ -531,18 +530,16 @@ SENTINEL</div>
 
         <!-- Module 2 -->
         <a class="module-card mc-m2" href="/module2/" id="card-m2">
-          <div class="card-port">/module2</div>
           <div class="card-header">
-            <span class="card-icon dir">📁</span>
-            <div class="card-name"><span>module2</span>/</div>
+            <span class="card-icon dir">🗺️</span>
+            <div class="card-name"><span>module2</span>.map</div>
           </div>
           <div class="card-desc">Geospatial &amp; Offset<br>Similarity Engine.</div>
-          <div class="card-badge badge-blue">● Leaflet · AHP · 159 Wells</div>
+          <div class="card-badge badge-blue">● Leaflet · AHP</div>
         </a>
 
         <!-- Module 3 -->
         <a class="module-card mc-m3" href="/module3/monitor" id="card-m3">
-          <div class="card-port">/module3</div>
           <div class="card-header">
             <span class="card-icon file">📡</span>
             <div class="card-name"><span>module3</span>.live</div>
@@ -553,24 +550,22 @@ SENTINEL</div>
 
         <!-- Module 4 -->
         <a class="module-card mc-m4" href="/module4/" id="card-m4">
-          <div class="card-port">/module4</div>
           <div class="card-header">
             <span class="card-icon exec">🕸</span>
             <div class="card-name"><span>module4</span>.graph</div>
           </div>
           <div class="card-desc">Knowledge Graph,<br>GraphRAG &amp; LLM Studio.</div>
-          <div class="card-badge badge-purple">● Vis.js · GraphRAG · Gemini</div>
+          <div class="card-badge badge-purple">● GraphRAG · Gemini</div>
         </a>
 
         <!-- Module 5 -->
         <a class="module-card mc-m5" href="/module5/" id="card-m5">
-          <div class="card-port">/module5</div>
           <div class="card-header">
             <span class="card-icon sock">🤖</span>
             <div class="card-name"><span>module5</span>.agent</div>
           </div>
           <div class="card-desc">Engineering RAG<br>Decision Support Agent.</div>
-          <div class="card-badge badge-orange">● ChromaDB · LLM · Scenarios</div>
+          <div class="card-badge badge-orange">● ChromaDB · Qwen </div>
         </a>
 
       </div>

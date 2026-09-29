@@ -78,17 +78,23 @@ graph TD
 
 ## 3. Dashboard & Module Showcase
 
-The system features a bespoke cyber-tactical interface designed for real-time mission control rooms.
+The system features a clean cyber-tactical interface designed for real-time mission control rooms.
 
 ### 3.1 Central Operations Command Portal
 ![Central Operations Dashboard](assets/main_dash.png)
 * **Interface:** Unified Operations Portal (`http://localhost:5000/`)
 * **What the Engineer Sees:** Single-pane-of-glass overview displaying system-wide operational health, active microservices, real-time node metrics, and 1-click launchers for all four specialized modules.
-* **Engineering Impact:** Eliminates fragmented tools by unifying spatial, telemetry, graph, and conversational decision support under one single-origin, enterprise-secure session.
 
 ---
 
-### 3.2 Geospatial Intelligence & AHP Offset-Well Selection
+### 3.2 Data Foundation & NLP Pipeline
+![NLP & OCR Extraction](assets/module_1.png)
+* **What the Engineer Sees:** A data foundation pipeline that performs OCR and NLP extraction on unstructured Daily Drilling Reports (DDRs). The module identifies specialized vocabulary and extracts critical keywords, operational parameters, and 18-class structured hazard events.
+* **Engineering Impact:** Transforms decades of fragmented, unstructured drilling knowledge into a queryable, structured event database, acting as the system's historical memory.
+
+---
+
+### 3.3 Geospatial Intelligence & AHP Offset-Well Selection
 ![Geospatial & Offset Similarity Engine](assets/module_2.png)
 * **Interface:** Module 2 Interactive Map (`http://localhost:5000/module2/`)
 * **What the Engineer Sees:** Dark Tactical Leaflet map of the North Sea basin (EPSG:4326), dynamic search radius (e.g., 20 km), well category distribution (119 real wells, 40 synthetic controls), and hazard-specific AHP tabs (`mud_loss`, `stuck_pipe`, `overpressure`, `torque_spike`, `cementing`). Target well `15/9-15` shows detailed stratigraphy, BHA mechanics, and historical incident tallies.
@@ -96,7 +102,7 @@ The system features a bespoke cyber-tactical interface designed for real-time mi
 
 ---
 
-### 3.3 Live Telemetry Streaming & Physical Anomaly Monitor
+### 3.4 Live Telemetry Streaming & Physical Anomaly Monitor
 ![Real-Time Telemetry & Anomaly Monitor](assets/module3.png)
 * **Interface:** Module 3 Monitor (`http://localhost:5000/module3/monitor`)
 * **What the Engineer Sees:** Real-time WITSML feed replaying at up to 50x speed. Real-time telemetry cards display Measured Depth (365.3 m), TVD, Rotary Speed, Corrected Hookload (91.3 kkgf), WOB, and Mud Density. The lower console streams CUSUM alerts showing cumulative drift vs. decision interval $h$ with physical diagnostic explanations (e.g., mechanical overpull precursor).
@@ -104,7 +110,7 @@ The system features a bespoke cyber-tactical interface designed for real-time mi
 
 ---
 
-### 3.4 Validated Flagship Backtest (+106.48 m Early Warning Lead)
+### 3.5 Validated Flagship Backtest (+106.48 m Early Warning Lead)
 ![Flagship Backtest Result](assets/image%20copy%202.png)
 * **Interface:** Module 3 Backtest Studio (`[01] FLAGSHIP_BACKTEST` Tab)
 * **What the Engineer Sees:** Dual-panel time-series validation on Volve Well 15/9-F-9A. Upper panel contrasts Hookload and RPM trajectories toward the confirmed stuck pipe incident at 619.00 m MD. Lower panel tracks the predicted Stuck Pipe Risk bounded by **Wilson Score 95% Confidence Intervals**, triggering a sustained critical alert at 512.52 m MD. The right pane confirms **5/5 Zero Future Data Leakage regression tests passed**.
@@ -114,7 +120,7 @@ For details on the flagship backtest validation and the SIH narrative, see **[NW
 
 ---
 
-### 3.5 Knowledge Graph Explorer & GraphRAG Briefing Studio
+### 3.6 Knowledge Graph Explorer & GraphRAG Briefing Studio
 ![Knowledge Graph & AI Briefing Studio](assets/module_4_graph.png)
 * **Interface:** Module 4 Knowledge Graph (`http://localhost:5000/module4/`)
 * **What the Engineer Sees:** Vis.js interactive graph visualizing 4,037 nodes and 12,392 edges. Highlights target well `15/9-F-9A` and its multi-hop topological connections across formations, events, hazard nodes, and mitigating interventions. The right pane hosts the Gemini Pre-Spud Briefing Studio, verifying 5/5 output sentences against underlying snippet nodes with zero hallucination.
@@ -122,11 +128,14 @@ For details on the flagship backtest validation and the SIH narrative, see **[NW
 
 ---
 
-### 3.6 Engineering Decision Support Console
-![Engineering Decision Support Agent](assets/moeule5_rag.png)
+### 3.7 Engineering Decision Support Console
+![Engineering Decision Support Agent](assets/module5_rag.png)
 * **Interface:** Module 5 Decision Console (`http://localhost:5000/module5/`)
-* **What the Engineer Sees:** Mission-critical conversational terminal. Left sidebar tracks active well state (`15/9-F-9A` at 303.5 m MD), live telemetry (Torque 22.5 kNm, WOB 110 kN, ROP 5.5 m/hr, RPM 90, Flow 420 L/min, Pressure 310 bar), and event timeline tokens. Main pane displays **Qwen 2.5-72B** answering complex engineering queries with explicit citations (`SYNTH-W35`, `SYNTH-W09`, `SYNTH-W12`) retrieved from 2,022 indexed records.
-* **Engineering Impact:** Delivers synthesized, verified offset interventions directly to drilling superintendents under high-stress operational conditions.
+* **What the Engineer Sees:** Mission-critical conversational terminal. Left sidebar tracks active well state (`15/9-F-9A` at 303.5 m MD), live telemetry (Torque 22.5 kNm, WOB 110 kN, ROP 5.5 m/hr, RPM 90, Flow 420 L/min, Pressure 310 bar), and event timeline tokens. Complex engineering queries with explicit citations answered (`SYNTH-W35`, `SYNTH-W09`, `SYNTH-W12`) retrieved from 2,022 indexed records.
+* **Engineering Impact:** Delivers synthesized, verified offset interventions directly to drilling engineers
+* **AI Integration & Offline Capabilities:** Powered by Qwen 2.5-72B via Hugging Face Inference APIs as the primary LLM (with Gemini fallback). 
+It also features a deterministic **Local Evidence Synthesis Engine** that operates **fully offline**, ensuring continuous functionality in air-gapped rig environments without external API dependencies.
+* For a detailed overview, see the **[Module 5 Documentation](./NLP/nlp_task_ddr/module5_engineering_agent/README.md)**.
 
 
 ---
