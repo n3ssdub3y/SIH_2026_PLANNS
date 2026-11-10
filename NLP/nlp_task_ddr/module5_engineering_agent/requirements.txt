@@ -1,9 +1,0 @@
-flask
-flask-cors
-pydantic
-chromadb
-google-genai
-google-generativeai
-python-dotenv
-requests
-huggingface-hub
