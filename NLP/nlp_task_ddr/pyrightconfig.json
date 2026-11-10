@@ -1,0 +1,12 @@
+{
+  "pythonVersion": "3.11",
+  "venvPath": ".",
+  "venv": "venv",
+  "extraPaths": [
+    "module1"
+  ],
+  "ignore": [
+    "module1/ocr_worker.py"
+  ]
+}
+

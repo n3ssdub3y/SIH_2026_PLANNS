@@ -18,6 +18,8 @@ __pycache__/
 .pytest_cache/
 **/.pytest_cache/
 
+/assets/NLP docs/
+
 # Environment / secret files — never commit real keys
 .env
 *.env
@@ -40,3 +42,7 @@ notes/implementation_plan.md
 # Runtime-generated state (never commit)
 NLP/nlp_task_ddr/module3/outputs/risk_predictions_live.jsonl
 NLP/nlp_task_ddr/data/runtime/
+# Module 1 live uploads + opt-in hybrid NLP corpus run (never commit)
+NLP/nlp_task_ddr/results/module1_outputs/uploads/
+NLP/nlp_task_ddr/results/module1_outputs_hybrid/
+NLP/nlp_task_ddr/module1/outputs/model_selection_partial.json

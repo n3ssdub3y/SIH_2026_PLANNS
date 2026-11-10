@@ -1,0 +1,6104 @@
+{
+  "device": "cuda",
+  "n_sentences": 60,
+  "eval_set": [
+    {
+      "sentence": "Flowchecked well and initial loss 12 m/ HR, reduced to 1,1 m3/ HR.",
+      "gold": "EVT_MUD_LOSS_PARTIAL",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Took loss rate at 840m 540 LPM.",
+      "gold": "EVT_MUD_LOSS_PARTIAL",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Partial returns observed while drilling at 2,310 m, approx. 4 m3/hr seeping to formation.",
+      "gold": "EVT_MUD_LOSS_PARTIAL",
+      "origin": "authored"
+    },
+    {
+      "sentence": "MU BHA for side track, RIH to 1266m, lost returns.",
+      "gold": "EVT_MUD_LOSS_TOTAL",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Lost standpipe pressure and returns.",
+      "gold": "EVT_MUD_LOSS_TOTAL",
+      "origin": "volve"
+    },
+    {
+      "sentence": "No returns at surface after drilling into fractured zone at 3,105 m; well taking all fluid.",
+      "gold": "EVT_MUD_LOSS_TOTAL",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Pumped 38m3 LCM pill from 2495m to 2351m.",
+      "gold": "EVT_LCM_APPLIED",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Bled in LCM mix while drilling ty fm.",
+      "gold": "EVT_LCM_APPLIED",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Spotted 20 bbl nut plug and mica sweep across thief zone to cure seepage.",
+      "gold": "EVT_LCM_APPLIED",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Full returns regained after second pill; circulation re-established at 1,800 lpm.",
+      "gold": "EVT_CIRC_RESTORED",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Losses healed, well static and circulating with full returns.",
+      "gold": "EVT_CIRC_RESTORED",
+      "origin": "authored"
+    },
+    {
+      "sentence": "While reaming down from 3680m string became stuck momentarily at 3772m and 3842m.",
+      "gold": "EVT_STUCK_PIPE",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Not able to come free with tool with 5 MT overpull.",
+      "gold": "EVT_STUCK_PIPE",
+      "origin": "volve"
+    },
+    {
+      "sentence": "String packed off at 2,045 m while pulling out, unable to rotate or circulate.",
+      "gold": "EVT_STUCK_PIPE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Attmepted to RIH with casing negative casing was differential stuck.",
+      "gold": "EVT_DIFF_STICKING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Pipe held against permeable sand after 15 min stationary survey; free with spotting fluid.",
+      "gold": "EVT_DIFF_STICKING",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Attemted to POOH, had to work tight spots at 4515m, 4454m and 4415m.",
+      "gold": "EVT_TIGHT_HOLE",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Circulated bottoms up due to high drag.",
+      "gold": "EVT_TIGHT_HOLE",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Pulled 40k over string weight at 1,620 m on trip out, backreamed through.",
+      "gold": "EVT_TIGHT_HOLE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Took weight at 2,210 m running in, worked string down.",
+      "gold": "EVT_TIGHT_HOLE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Worked and jarred pipe to 3241 where no further progress could be made.",
+      "gold": "EVT_JARRING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Fired jars two times and came free.",
+      "gold": "EVT_JARRING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Washed and reamed to top of fish.",
+      "gold": "EVT_FISHING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "RIH with overshot to retrieve parted BHA left in hole at 2,980 m.",
+      "gold": "EVT_FISHING",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Got influx when testing BOP with spring loaded tool.",
+      "gold": "EVT_KICK",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Pit gain of 12 bbl observed while drilling at 3,410 m, flow check positive.",
+      "gold": "EVT_KICK",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Well flowing on connection, trip tank increasing.",
+      "gold": "EVT_KICK",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Background gas rose to 18% with connection gas peaks of 35% at 3,500 m.",
+      "gold": "EVT_GAS_INFLUX",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Gas-cut mud at shakers, mud weight out reduced from 1.45 to 1.38 SG.",
+      "gold": "EVT_GAS_INFLUX",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Closed annular preventer and recorded SIDPP 320 psi, SICP 450 psi.",
+      "gold": "EVT_BOP_SHUTIN",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Shut well in on upper pipe rams and circulated out influx through choke.",
+      "gold": "EVT_BOP_SHUTIN",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Pore pressure indicators rising, d-exponent trending down and splintery cavings at shakers.",
+      "gold": "EVT_OVERPRESSURE_DETECTED",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Abnormal formation pressure encountered at 3,850 m, raised mud weight to 1.62 SG.",
+      "gold": "EVT_OVERPRESSURE_DETECTED",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Erratic torque 18-26 kft-lbs while drilling the interbedded sandstone.",
+      "gold": "EVT_TORQUE_UP",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Rotary torque increasing steadily over the last stand, reduced WOB.",
+      "gold": "EVT_TORQUE_UP",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Top drive stalled out when torque spiked to the 35 kft-lbs limit at 2,744 m.",
+      "gold": "EVT_TORQUE_SPIKE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Sudden torque jump tripped the top drive at 1,960 m.",
+      "gold": "EVT_TORQUE_SPIKE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Attempted to perform cement job, but got problems with bulk transfer system.",
+      "gold": "EVT_CEMENTING_FAILURE",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Lost returns during cement displacement, plug did not bump; squeeze job required.",
+      "gold": "EVT_CEMENTING_FAILURE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Top of cement found 300 m lower than planned on CBL, poor bond across shoe.",
+      "gold": "EVT_CEMENTING_FAILURE",
+      "origin": "authored"
+    },
+    {
+      "sentence": "WOC prior to bullheading b-annulus to brine.",
+      "gold": "EVT_WOC",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Waited on cement for 8 hrs before testing casing.",
+      "gold": "EVT_WOC",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Circulated and conditioned mud.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "RIH with stinger to set kickoff plug.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Pressure tested BOP/HPDR against BOP test plug and closed pipe rams.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Backreamed from 2850m to 2608m.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Drilled from 978 m to 1083 m, performed wiper trip to the shoe and back to TD, no tight spots.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Investigated faulty torque setting on casing tong.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Circulated well clean and flow checked well.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Tested production packer from above.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Waited on handover of well f-14.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Released liner hanger running tool and circulated out excess cement.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Circulated btms up to clean hole before POOH to take pressure points.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Washed/reamed down from 4393 m to 4911 m MD.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Waited one weather, not able to discharge cuttings to vessel due to bad weather.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Changed to back-up xceed and drilling jar.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Performed torque test on drilling jar and xceed.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Rigged up for cut and thread fishing.",
+      "gold": "EVT_FISHING",
+      "origin": "volve"
+    },
+    {
+      "sentence": "Drilled 8 1/2\" section from 3,250 m to 3,412 m, ROP 18 m/hr, no problems.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "authored"
+    },
+    {
+      "sentence": "Made up BHA and RIH to 1,200 m.",
+      "gold": "EVT_ROUTINE_DRILLING",
+      "origin": "authored"
+    }
+  ],
+  "results": {
+    "keyword": {
+      "hf_id": "nlp_rules.KEYWORD_EVT",
+      "params_m": 0,
+      "load_s": 0.0,
+      "ms_per_sentence": 0.0,
+      "standalone": {
+        "accuracy": 0.383,
+        "macro_f1": 0.277,
+        "hazard_detection_recall": 0.302,
+        "hazard_family_accuracy": 0.302,
+        "routine_false_alarm_rate": 0.235,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.333,
+            "recall": 0.25,
+            "f1": 0.286,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1": 0.571,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.302,
+            "recall": 0.765,
+            "f1": 0.433,
+            "support": 17
+          }
+        }
+      },
+      "predictions": [
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_LCM_APPLIED",
+        "EVT_LCM_APPLIED",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_STUCK_PIPE",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_STUCK_PIPE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_JARRING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_UP",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_WOC",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_KICK",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_TORQUE_UP",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TORQUE_UP",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING"
+      ]
+    },
+    "bert": {
+      "hf_id": "bert-base-uncased",
+      "params_m": 109.5,
+      "load_s": 11.5,
+      "ms_per_sentence": 2.62,
+      "standalone": {
+        "accuracy": 0.55,
+        "macro_f1": 0.522,
+        "hazard_detection_recall": 0.884,
+        "hazard_family_accuracy": 0.698,
+        "routine_false_alarm_rate": 0.353,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.2,
+            "recall": 0.333,
+            "f1": 0.25,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.2,
+            "recall": 0.75,
+            "f1": 0.316,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.688,
+            "recall": 0.647,
+            "f1": 0.667,
+            "support": 17
+          }
+        }
+      },
+      "predictions": [
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_BOP_SHUTIN",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TIGHT_HOLE",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TIGHT_HOLE",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_CIRC_RESTORED",
+        "EVT_TIGHT_HOLE",
+        "EVT_STUCK_PIPE",
+        "EVT_STUCK_PIPE",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_TORQUE_UP",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_JARRING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_KICK",
+        "EVT_GAS_INFLUX",
+        "EVT_GAS_INFLUX",
+        "EVT_BOP_SHUTIN",
+        "EVT_TIGHT_HOLE",
+        "EVT_GAS_INFLUX",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_SPIKE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_WOC",
+        "EVT_WOC",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_WOC",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_WOC",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING"
+      ],
+      "hybrid_with_keyword": {
+        "accuracy": 0.567,
+        "macro_f1": 0.583,
+        "hazard_detection_recall": 0.907,
+        "hazard_family_accuracy": 0.767,
+        "routine_false_alarm_rate": 0.529,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.667,
+            "recall": 0.667,
+            "f1": 0.667,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.25,
+            "recall": 0.75,
+            "f1": 0.375,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.333,
+            "recall": 1.0,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.471,
+            "f1": 0.552,
+            "support": 17
+          }
+        }
+      },
+      "hybrid_with_keyword_veto": {
+        "accuracy": 0.6,
+        "macro_f1": 0.572,
+        "hazard_detection_recall": 0.884,
+        "hazard_family_accuracy": 0.744,
+        "routine_false_alarm_rate": 0.353,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.667,
+            "recall": 0.667,
+            "f1": 0.667,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.273,
+            "recall": 0.75,
+            "f1": 0.4,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.688,
+            "recall": 0.647,
+            "f1": 0.667,
+            "support": 17
+          }
+        }
+      },
+      "calibrated": {
+        "precision_margin": 0.02,
+        "test_hybrid_precision_margin": {
+          "accuracy": 0.538,
+          "macro_f1": 0.446,
+          "hazard_detection_recall": 0.833,
+          "hazard_family_accuracy": 0.667,
+          "routine_false_alarm_rate": 0.375,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.25,
+              "recall": 0.5,
+              "f1": 0.333,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.25,
+              "recall": 1.0,
+              "f1": 0.4,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.625,
+              "recall": 0.625,
+              "f1": 0.625,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone_precision_margin": {
+          "accuracy": 0.615,
+          "macro_f1": 0.521,
+          "hazard_detection_recall": 0.833,
+          "hazard_family_accuracy": 0.667,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.25,
+              "recall": 0.5,
+              "f1": 0.333,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.667,
+              "recall": 0.75,
+              "f1": 0.706,
+              "support": 8
+            }
+          }
+        },
+        "full_set_hybrid_precision_margin": {
+          "accuracy": 0.55,
+          "macro_f1": 0.505,
+          "hazard_detection_recall": 0.698,
+          "hazard_family_accuracy": 0.605,
+          "routine_false_alarm_rate": 0.294,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.667,
+              "recall": 0.667,
+              "f1": 0.667,
+              "support": 3
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.429,
+              "recall": 0.75,
+              "f1": 0.545,
+              "support": 4
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_FISHING": {
+              "precision": 1.0,
+              "recall": 0.333,
+              "f1": 0.5,
+              "support": 3
+            },
+            "EVT_KICK": {
+              "precision": 0.5,
+              "recall": 0.333,
+              "f1": 0.4,
+              "support": 3
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.667,
+              "recall": 1.0,
+              "f1": 0.8,
+              "support": 2
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 2
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 0.333,
+              "f1": 0.5,
+              "support": 3
+            },
+            "EVT_WOC": {
+              "precision": 0.667,
+              "recall": 1.0,
+              "f1": 0.8,
+              "support": 2
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.48,
+              "recall": 0.706,
+              "f1": 0.571,
+              "support": 17
+            }
+          }
+        },
+        "margin": 0.0,
+        "dev_macro_f1": 0.622,
+        "n_dev": 34,
+        "n_test": 26,
+        "test_uncalibrated_hybrid": {
+          "accuracy": 0.462,
+          "macro_f1": 0.425,
+          "hazard_detection_recall": 0.889,
+          "hazard_family_accuracy": 0.722,
+          "routine_false_alarm_rate": 0.625,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.2,
+              "recall": 0.5,
+              "f1": 0.286,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.25,
+              "recall": 1.0,
+              "f1": 0.4,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.6,
+              "recall": 0.375,
+              "f1": 0.462,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone": {
+          "accuracy": 0.538,
+          "macro_f1": 0.501,
+          "hazard_detection_recall": 0.889,
+          "hazard_family_accuracy": 0.722,
+          "routine_false_alarm_rate": 0.5,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.2,
+              "recall": 0.5,
+              "f1": 0.286,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.667,
+              "recall": 0.5,
+              "f1": 0.571,
+              "support": 8
+            }
+          }
+        },
+        "test_hybrid": {
+          "accuracy": 0.462,
+          "macro_f1": 0.425,
+          "hazard_detection_recall": 0.889,
+          "hazard_family_accuracy": 0.722,
+          "routine_false_alarm_rate": 0.625,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.2,
+              "recall": 0.5,
+              "f1": 0.286,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.25,
+              "recall": 1.0,
+              "f1": 0.4,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.6,
+              "recall": 0.375,
+              "f1": 0.462,
+              "support": 8
+            }
+          }
+        },
+        "test_keyword": {
+          "accuracy": 0.308,
+          "macro_f1": 0.107,
+          "hazard_detection_recall": 0.222,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.3,
+              "recall": 0.75,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        }
+      }
+    },
+    "roberta": {
+      "hf_id": "roberta-base",
+      "params_m": 124.6,
+      "load_s": 2.6,
+      "ms_per_sentence": 2.57,
+      "standalone": {
+        "accuracy": 0.467,
+        "macro_f1": 0.454,
+        "hazard_detection_recall": 0.93,
+        "hazard_family_accuracy": 0.605,
+        "routine_false_alarm_rate": 0.647,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.375,
+            "recall": 1.0,
+            "f1": 0.545,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.2,
+            "recall": 0.333,
+            "f1": 0.25,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.4,
+            "recall": 0.5,
+            "f1": 0.444,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1": 0.571,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.143,
+            "recall": 0.5,
+            "f1": 0.222,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1": 0.571,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.353,
+            "f1": 0.462,
+            "support": 17
+          }
+        }
+      },
+      "predictions": [
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_GAS_INFLUX",
+        "EVT_TIGHT_HOLE",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_LCM_APPLIED",
+        "EVT_GAS_INFLUX",
+        "EVT_TORQUE_SPIKE",
+        "EVT_CIRC_RESTORED",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TORQUE_SPIKE",
+        "EVT_GAS_INFLUX",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_FISHING",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_STUCK_PIPE",
+        "EVT_FISHING",
+        "EVT_FISHING",
+        "EVT_FISHING",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_KICK",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_GAS_INFLUX",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_BOP_SHUTIN",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_SPIKE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_WOC",
+        "EVT_WOC",
+        "EVT_GAS_INFLUX",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TORQUE_UP",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_WOC",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_GAS_INFLUX",
+        "EVT_TIGHT_HOLE",
+        "EVT_GAS_INFLUX",
+        "EVT_STUCK_PIPE",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_ROUTINE_DRILLING"
+      ],
+      "hybrid_with_keyword": {
+        "accuracy": 0.517,
+        "macro_f1": 0.544,
+        "hazard_detection_recall": 0.953,
+        "hazard_family_accuracy": 0.721,
+        "routine_false_alarm_rate": 0.765,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.375,
+            "recall": 0.75,
+            "f1": 0.5,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.857,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.167,
+            "recall": 0.5,
+            "f1": 0.25,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1": 0.571,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.25,
+            "recall": 0.5,
+            "f1": 0.333,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.235,
+            "f1": 0.348,
+            "support": 17
+          }
+        }
+      },
+      "hybrid_with_keyword_veto": {
+        "accuracy": 0.533,
+        "macro_f1": 0.551,
+        "hazard_detection_recall": 0.93,
+        "hazard_family_accuracy": 0.698,
+        "routine_false_alarm_rate": 0.647,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.375,
+            "recall": 0.75,
+            "f1": 0.5,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.667,
+            "recall": 0.667,
+            "f1": 0.667,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.167,
+            "recall": 0.5,
+            "f1": 0.25,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.25,
+            "recall": 0.5,
+            "f1": 0.333,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.353,
+            "f1": 0.462,
+            "support": 17
+          }
+        }
+      },
+      "calibrated": {
+        "precision_margin": 0.01,
+        "test_hybrid_precision_margin": {
+          "accuracy": 0.385,
+          "macro_f1": 0.192,
+          "hazard_detection_recall": 0.333,
+          "hazard_family_accuracy": 0.333,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.333,
+              "recall": 0.75,
+              "f1": 0.462,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone_precision_margin": {
+          "accuracy": 0.462,
+          "macro_f1": 0.233,
+          "hazard_detection_recall": 0.222,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 0.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.364,
+              "recall": 1.0,
+              "f1": 0.533,
+              "support": 8
+            }
+          }
+        },
+        "full_set_hybrid_precision_margin": {
+          "accuracy": 0.467,
+          "macro_f1": 0.395,
+          "hazard_detection_recall": 0.419,
+          "hazard_family_accuracy": 0.419,
+          "routine_false_alarm_rate": 0.235,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 1.0,
+              "recall": 0.333,
+              "f1": 0.5,
+              "support": 3
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.5,
+              "recall": 0.333,
+              "f1": 0.4,
+              "support": 3
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5,
+              "support": 4
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_FISHING": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_KICK": {
+              "precision": 0.5,
+              "recall": 0.333,
+              "f1": 0.4,
+              "support": 3
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.4,
+              "recall": 1.0,
+              "f1": 0.571,
+              "support": 2
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.342,
+              "recall": 0.765,
+              "f1": 0.473,
+              "support": 17
+            }
+          }
+        },
+        "margin": 0.0,
+        "dev_macro_f1": 0.555,
+        "n_dev": 34,
+        "n_test": 26,
+        "test_uncalibrated_hybrid": {
+          "accuracy": 0.423,
+          "macro_f1": 0.448,
+          "hazard_detection_recall": 0.889,
+          "hazard_family_accuracy": 0.778,
+          "routine_false_alarm_rate": 1.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.333,
+              "recall": 0.5,
+              "f1": 0.4,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone": {
+          "accuracy": 0.5,
+          "macro_f1": 0.529,
+          "hazard_detection_recall": 0.889,
+          "hazard_family_accuracy": 0.722,
+          "routine_false_alarm_rate": 0.875,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.333,
+              "recall": 0.125,
+              "f1": 0.182,
+              "support": 8
+            }
+          }
+        },
+        "test_hybrid": {
+          "accuracy": 0.423,
+          "macro_f1": 0.448,
+          "hazard_detection_recall": 0.889,
+          "hazard_family_accuracy": 0.778,
+          "routine_false_alarm_rate": 1.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.333,
+              "recall": 0.5,
+              "f1": 0.4,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 8
+            }
+          }
+        },
+        "test_keyword": {
+          "accuracy": 0.308,
+          "macro_f1": 0.107,
+          "hazard_detection_recall": 0.222,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.3,
+              "recall": 0.75,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        }
+      }
+    },
+    "deberta": {
+      "hf_id": "microsoft/deberta-v3-base",
+      "params_m": 183.8,
+      "load_s": 8.0,
+      "ms_per_sentence": 10.28,
+      "standalone": {
+        "accuracy": 0.2,
+        "macro_f1": 0.189,
+        "hazard_detection_recall": 0.814,
+        "hazard_family_accuracy": 0.302,
+        "routine_false_alarm_rate": 0.824,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.25,
+            "recall": 0.333,
+            "f1": 0.286,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.143,
+            "recall": 0.25,
+            "f1": 0.182,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.2,
+            "recall": 0.333,
+            "f1": 0.25,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.083,
+            "recall": 0.5,
+            "f1": 0.143,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.273,
+            "recall": 0.176,
+            "f1": 0.214,
+            "support": 17
+          }
+        }
+      },
+      "predictions": [
+        "EVT_ROUTINE_DRILLING",
+        "EVT_STUCK_PIPE",
+        "EVT_TIGHT_HOLE",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_WOC",
+        "EVT_DIFF_STICKING",
+        "EVT_LCM_APPLIED",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TORQUE_SPIKE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_STUCK_PIPE",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_TIGHT_HOLE",
+        "EVT_STUCK_PIPE",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_FISHING",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_KICK",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_BOP_SHUTIN",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_TORQUE_SPIKE",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_FISHING",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_TIGHT_HOLE",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TORQUE_UP",
+        "EVT_FISHING",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_DIFF_STICKING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_BOP_SHUTIN",
+        "EVT_TIGHT_HOLE",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_STUCK_PIPE",
+        "EVT_FISHING"
+      ],
+      "hybrid_with_keyword": {
+        "accuracy": 0.333,
+        "macro_f1": 0.364,
+        "hazard_detection_recall": 0.837,
+        "hazard_family_accuracy": 0.535,
+        "routine_false_alarm_rate": 0.882,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.25,
+            "recall": 0.333,
+            "f1": 0.286,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.2,
+            "recall": 0.333,
+            "f1": 0.25,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.286,
+            "recall": 0.5,
+            "f1": 0.364,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.4,
+            "recall": 0.667,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.125,
+            "recall": 0.5,
+            "f1": 0.2,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.333,
+            "recall": 1.0,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.222,
+            "recall": 0.118,
+            "f1": 0.154,
+            "support": 17
+          }
+        }
+      },
+      "hybrid_with_keyword_veto": {
+        "accuracy": 0.333,
+        "macro_f1": 0.358,
+        "hazard_detection_recall": 0.814,
+        "hazard_family_accuracy": 0.512,
+        "routine_false_alarm_rate": 0.824,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.25,
+            "recall": 0.333,
+            "f1": 0.286,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.2,
+            "recall": 0.333,
+            "f1": 0.25,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.333,
+            "recall": 0.5,
+            "f1": 0.4,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.25,
+            "recall": 0.333,
+            "f1": 0.286,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 0.125,
+            "recall": 0.5,
+            "f1": 0.2,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.333,
+            "recall": 1.0,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.273,
+            "recall": 0.176,
+            "f1": 0.214,
+            "support": 17
+          }
+        }
+      },
+      "calibrated": {
+        "precision_margin": 0.02,
+        "test_hybrid_precision_margin": {
+          "accuracy": 0.308,
+          "macro_f1": 0.107,
+          "hazard_detection_recall": 0.222,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.3,
+              "recall": 0.75,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone_precision_margin": {
+          "accuracy": 0.308,
+          "macro_f1": 0.026,
+          "hazard_detection_recall": 0.0,
+          "hazard_family_accuracy": 0.0,
+          "routine_false_alarm_rate": 0.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.308,
+              "recall": 1.0,
+              "f1": 0.471,
+              "support": 8
+            }
+          }
+        },
+        "full_set_hybrid_precision_margin": {
+          "accuracy": 0.383,
+          "macro_f1": 0.277,
+          "hazard_detection_recall": 0.302,
+          "hazard_family_accuracy": 0.302,
+          "routine_false_alarm_rate": 0.235,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.5,
+              "recall": 0.333,
+              "f1": 0.4,
+              "support": 3
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.333,
+              "recall": 0.25,
+              "f1": 0.286,
+              "support": 4
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_FISHING": {
+              "precision": 1.0,
+              "recall": 0.333,
+              "f1": 0.5,
+              "support": 3
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.4,
+              "recall": 1.0,
+              "f1": 0.571,
+              "support": 2
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 3
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.302,
+              "recall": 0.765,
+              "f1": 0.433,
+              "support": 17
+            }
+          }
+        },
+        "margin": 0.0,
+        "dev_macro_f1": 0.459,
+        "n_dev": 34,
+        "n_test": 26,
+        "test_uncalibrated_hybrid": {
+          "accuracy": 0.154,
+          "macro_f1": 0.139,
+          "hazard_detection_recall": 0.778,
+          "hazard_family_accuracy": 0.389,
+          "routine_false_alarm_rate": 1.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.2,
+              "recall": 1.0,
+              "f1": 0.333,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone": {
+          "accuracy": 0.115,
+          "macro_f1": 0.106,
+          "hazard_detection_recall": 0.778,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 1.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.143,
+              "recall": 1.0,
+              "f1": 0.25,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 8
+            }
+          }
+        },
+        "test_hybrid": {
+          "accuracy": 0.154,
+          "macro_f1": 0.139,
+          "hazard_detection_recall": 0.778,
+          "hazard_family_accuracy": 0.389,
+          "routine_false_alarm_rate": 1.0,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.2,
+              "recall": 1.0,
+              "f1": 0.333,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 8
+            }
+          }
+        },
+        "test_keyword": {
+          "accuracy": 0.308,
+          "macro_f1": 0.107,
+          "hazard_detection_recall": 0.222,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.3,
+              "recall": 0.75,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        }
+      }
+    },
+    "minilm": {
+      "hf_id": "sentence-transformers/all-MiniLM-L6-v2",
+      "params_m": 22.7,
+      "load_s": 5.6,
+      "ms_per_sentence": 3.29,
+      "standalone": {
+        "accuracy": 0.733,
+        "macro_f1": 0.771,
+        "hazard_detection_recall": 0.884,
+        "hazard_family_accuracy": 0.837,
+        "routine_false_alarm_rate": 0.412,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1": 0.4,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1": 0.75,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1": 0.571,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.667,
+            "recall": 0.667,
+            "f1": 0.667,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.588,
+            "f1": 0.625,
+            "support": 17
+          }
+        }
+      },
+      "predictions": [
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_MUD_LOSS_TOTAL",
+        "EVT_LCM_APPLIED",
+        "EVT_CIRC_RESTORED",
+        "EVT_FISHING",
+        "EVT_CIRC_RESTORED",
+        "EVT_CIRC_RESTORED",
+        "EVT_STUCK_PIPE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TORQUE_SPIKE",
+        "EVT_DIFF_STICKING",
+        "EVT_DIFF_STICKING",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_TIGHT_HOLE",
+        "EVT_JARRING",
+        "EVT_JARRING",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_BOP_SHUTIN",
+        "EVT_KICK",
+        "EVT_KICK",
+        "EVT_GAS_INFLUX",
+        "EVT_GAS_INFLUX",
+        "EVT_BOP_SHUTIN",
+        "EVT_BOP_SHUTIN",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_SPIKE",
+        "EVT_TORQUE_SPIKE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_CEMENTING_FAILURE",
+        "EVT_WOC",
+        "EVT_WOC",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_WOC",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_TIGHT_HOLE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_KICK",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_STUCK_PIPE",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_JARRING",
+        "EVT_JARRING",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING"
+      ],
+      "hybrid_with_keyword": {
+        "accuracy": 0.683,
+        "macro_f1": 0.737,
+        "hazard_detection_recall": 0.907,
+        "hazard_family_accuracy": 0.86,
+        "routine_false_alarm_rate": 0.529,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1": 0.6,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1": 0.571,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1": 0.571,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1": 0.571,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.471,
+            "f1": 0.552,
+            "support": 17
+          }
+        }
+      },
+      "hybrid_with_keyword_veto": {
+        "accuracy": 0.717,
+        "macro_f1": 0.755,
+        "hazard_detection_recall": 0.884,
+        "hazard_family_accuracy": 0.837,
+        "routine_false_alarm_rate": 0.412,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.333,
+            "recall": 0.333,
+            "f1": 0.333,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1": 0.75,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1": 0.571,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1": 0.571,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.667,
+            "recall": 0.588,
+            "f1": 0.625,
+            "support": 17
+          }
+        }
+      },
+      "calibrated": {
+        "precision_margin": 0.13,
+        "test_hybrid_precision_margin": {
+          "accuracy": 0.654,
+          "macro_f1": 0.62,
+          "hazard_detection_recall": 0.778,
+          "hazard_family_accuracy": 0.778,
+          "routine_false_alarm_rate": 0.375,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.333,
+              "recall": 0.5,
+              "f1": 0.4,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.556,
+              "recall": 0.625,
+              "f1": 0.588,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone_precision_margin": {
+          "accuracy": 0.731,
+          "macro_f1": 0.676,
+          "hazard_detection_recall": 0.667,
+          "hazard_family_accuracy": 0.667,
+          "routine_false_alarm_rate": 0.125,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.538,
+              "recall": 0.875,
+              "f1": 0.667,
+              "support": 8
+            }
+          }
+        },
+        "full_set_hybrid_precision_margin": {
+          "accuracy": 0.7,
+          "macro_f1": 0.746,
+          "hazard_detection_recall": 0.791,
+          "hazard_family_accuracy": 0.767,
+          "routine_false_alarm_rate": 0.294,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 1.0,
+              "recall": 0.333,
+              "f1": 0.5,
+              "support": 3
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.5,
+              "recall": 0.333,
+              "f1": 0.4,
+              "support": 3
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.667,
+              "support": 2
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.5,
+              "recall": 0.75,
+              "f1": 0.6,
+              "support": 4
+            },
+            "EVT_JARRING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_FISHING": {
+              "precision": 1.0,
+              "recall": 0.667,
+              "f1": 0.8,
+              "support": 3
+            },
+            "EVT_KICK": {
+              "precision": 0.667,
+              "recall": 0.667,
+              "f1": 0.667,
+              "support": 3
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.4,
+              "recall": 1.0,
+              "f1": 0.571,
+              "support": 2
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5,
+              "support": 2
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 0.333,
+              "f1": 0.5,
+              "support": 3
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.571,
+              "recall": 0.706,
+              "f1": 0.632,
+              "support": 17
+            }
+          }
+        },
+        "margin": 0.07,
+        "dev_macro_f1": 0.798,
+        "n_dev": 34,
+        "n_test": 26,
+        "test_uncalibrated_hybrid": {
+          "accuracy": 0.615,
+          "macro_f1": 0.648,
+          "hazard_detection_recall": 0.833,
+          "hazard_family_accuracy": 0.833,
+          "routine_false_alarm_rate": 0.625,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.333,
+              "recall": 0.5,
+              "f1": 0.4,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.5,
+              "recall": 0.375,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        },
+        "test_standalone": {
+          "accuracy": 0.692,
+          "macro_f1": 0.69,
+          "hazard_detection_recall": 0.778,
+          "hazard_family_accuracy": 0.778,
+          "routine_false_alarm_rate": 0.375,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.556,
+              "recall": 0.625,
+              "f1": 0.588,
+              "support": 8
+            }
+          }
+        },
+        "test_hybrid": {
+          "accuracy": 0.615,
+          "macro_f1": 0.648,
+          "hazard_detection_recall": 0.833,
+          "hazard_family_accuracy": 0.833,
+          "routine_false_alarm_rate": 0.625,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.333,
+              "recall": 0.5,
+              "f1": 0.4,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.5,
+              "recall": 1.0,
+              "f1": 0.667,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.5,
+              "recall": 0.375,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        },
+        "test_keyword": {
+          "accuracy": 0.308,
+          "macro_f1": 0.107,
+          "hazard_detection_recall": 0.222,
+          "hazard_family_accuracy": 0.222,
+          "routine_false_alarm_rate": 0.25,
+          "per_class": {
+            "EVT_MUD_LOSS_PARTIAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_MUD_LOSS_TOTAL": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_LCM_APPLIED": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 1
+            },
+            "EVT_CIRC_RESTORED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_STUCK_PIPE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_DIFF_STICKING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TIGHT_HOLE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 2
+            },
+            "EVT_JARRING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_FISHING": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_KICK": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_GAS_INFLUX": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_BOP_SHUTIN": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_OVERPRESSURE_DETECTED": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_TORQUE_UP": {
+              "precision": 0.333,
+              "recall": 1.0,
+              "f1": 0.5,
+              "support": 1
+            },
+            "EVT_TORQUE_SPIKE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_CEMENTING_FAILURE": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_WOC": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 1
+            },
+            "EVT_ROUTINE_DRILLING": {
+              "precision": 0.3,
+              "recall": 0.75,
+              "f1": 0.429,
+              "support": 8
+            }
+          }
+        }
+      }
+    },
+    "gliner": {
+      "hf_id": "urchade/gliner_medium-v2.1",
+      "params_m": 195.2,
+      "load_s": 9.5,
+      "ms_per_sentence": 41.37,
+      "standalone": {
+        "accuracy": 0.5,
+        "macro_f1": 0.43,
+        "hazard_detection_recall": 0.465,
+        "hazard_family_accuracy": 0.442,
+        "routine_false_alarm_rate": 0.118,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.395,
+            "recall": 0.882,
+            "f1": 0.545,
+            "support": 17
+          }
+        }
+      },
+      "predictions": [
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_LCM_APPLIED",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_CIRC_RESTORED",
+        "EVT_MUD_LOSS_PARTIAL",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_DIFF_STICKING",
+        "EVT_STUCK_PIPE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_JARRING",
+        "EVT_JARRING",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_GAS_INFLUX",
+        "EVT_GAS_INFLUX",
+        "EVT_BOP_SHUTIN",
+        "EVT_GAS_INFLUX",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_OVERPRESSURE_DETECTED",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_UP",
+        "EVT_TORQUE_SPIKE",
+        "EVT_STUCK_PIPE",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_BOP_SHUTIN",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_JARRING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_FISHING",
+        "EVT_ROUTINE_DRILLING",
+        "EVT_ROUTINE_DRILLING"
+      ],
+      "hybrid_with_keyword": {
+        "accuracy": 0.483,
+        "macro_f1": 0.462,
+        "hazard_detection_recall": 0.581,
+        "hazard_family_accuracy": 0.558,
+        "routine_false_alarm_rate": 0.353,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.25,
+            "recall": 0.333,
+            "f1": 0.286,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.333,
+            "recall": 0.25,
+            "f1": 0.286,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.4,
+            "recall": 1.0,
+            "f1": 0.571,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.379,
+            "recall": 0.647,
+            "f1": 0.478,
+            "support": 17
+          }
+        }
+      },
+      "hybrid_with_keyword_veto": {
+        "accuracy": 0.483,
+        "macro_f1": 0.393,
+        "hazard_detection_recall": 0.465,
+        "hazard_family_accuracy": 0.442,
+        "routine_false_alarm_rate": 0.118,
+        "per_class": {
+          "EVT_MUD_LOSS_PARTIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_MUD_LOSS_TOTAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_LCM_APPLIED": {
+            "precision": 1.0,
+            "recall": 0.333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "EVT_CIRC_RESTORED": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_STUCK_PIPE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_DIFF_STICKING": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_TIGHT_HOLE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "EVT_JARRING": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_FISHING": {
+            "precision": 1.0,
+            "recall": 0.667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "EVT_KICK": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_GAS_INFLUX": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_BOP_SHUTIN": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 2
+          },
+          "EVT_OVERPRESSURE_DETECTED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 2
+          },
+          "EVT_TORQUE_UP": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 2
+          },
+          "EVT_TORQUE_SPIKE": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.667,
+            "support": 2
+          },
+          "EVT_CEMENTING_FAILURE": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          },
+          "EVT_WOC": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "EVT_ROUTINE_DRILLING": {
+            "precision": 0.395,
+            "recall": 0.882,
+            "f1": 0.545,
+            "support": 17
+          }
+        }
+      }
+    }
+  },
+  "entity_eval": {
+    "regex_original": {
+      "depth_m": 0.7,
+      "mud_weight_ppg": 0.75,
+      "volume_lost_bbl": 0.8,
+      "formation": 0.75,
+      "all_fields": 0.75,
+      "ms_per_sentence": 0.05
+    },
+    "regex_unit_aware": {
+      "depth_m": 1.0,
+      "mud_weight_ppg": 1.0,
+      "volume_lost_bbl": 1.0,
+      "formation": 1.0,
+      "all_fields": 1.0,
+      "ms_per_sentence": 0.1
+    },
+    "unit_aware+gliner": {
+      "depth_m": 1.0,
+      "mud_weight_ppg": 1.0,
+      "volume_lost_bbl": 1.0,
+      "formation": 0.85,
+      "all_fields": 0.963,
+      "ms_per_sentence": 46.92
+    }
+  },
+  "minilm_operating_curve": [
+    {
+      "margin": 0.1,
+      "hazard_recall": 0.7441860465116279,
+      "routine_fa": 0.23529411764705882,
+      "volve_fire_rate": 0.07688915024992649
+    },
+    {
+      "margin": 0.13,
+      "hazard_recall": 0.6976744186046512,
+      "routine_fa": 0.058823529411764705,
+      "volve_fire_rate": 0.050573360776242283
+    },
+    {
+      "margin": 0.16,
+      "hazard_recall": 0.6744186046511628,
+      "routine_fa": 0.0,
+      "volve_fire_rate": 0.036165833578359306
+    },
+    {
+      "margin": 0.19,
+      "hazard_recall": 0.6046511627906976,
+      "routine_fa": 0.0,
+      "volve_fire_rate": 0.022640399882387533
+    },
+    {
+      "margin": 0.22,
+      "hazard_recall": 0.5581395348837209,
+      "routine_fa": 0.0,
+      "volve_fire_rate": 0.016612760952660982
+    },
+    {
+      "margin": 0.25,
+      "hazard_recall": 0.4883720930232558,
+      "routine_fa": 0.0,
+      "volve_fire_rate": 0.0116142311084975
+    },
+    {
+      "margin": 0.28,
+      "hazard_recall": 0.3953488372093023,
+      "routine_fa": 0.0,
+      "volve_fire_rate": 0.008673919435460158
+    }
+  ],
+  "entity_set": [
+    {
+      "sentence": "Pumped 38m3 LCM pill from 2495m to 2351m.",
+      "depth_m": 2495.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": 239.0,
+      "formation": null
+    },
+    {
+      "sentence": "Took loss rate at 840m 540 LPM.",
+      "depth_m": 840.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "While reaming down from 3680m string became stuck momentarily at 3772m and 3842m.",
+      "depth_m": 3680.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "Pumped and spotted a third 5 m3 LCM pill at TD due to heavy losses of 36 m3/hr.",
+      "depth_m": null,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": 31.4,
+      "formation": null
+    },
+    {
+      "sentence": "Bled in LCM mix while drilling ty fm.",
+      "depth_m": null,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": "Ty"
+    },
+    {
+      "sentence": "Washed/reamed down from 4393 m to 4911 m MD.",
+      "depth_m": 4393.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "Finished drilling 22 in hole to 421 ft",
+      "depth_m": 128.3,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "Drill 36\" hole from surface to 100'. All material was alluvium (decomposed granite).",
+      "depth_m": 30.5,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": "Alluvium"
+    },
+    {
+      "sentence": "Lost 45 bbl to formation at 6,043 ft in Precambrian granite, MW 9.8 ppg.",
+      "depth_m": 1841.9,
+      "mud_weight_ppg": 9.8,
+      "volume_lost_bbl": 45.0,
+      "formation": "Precambrian Granite"
+    },
+    {
+      "sentence": "Severe losses at 1842 m in Precambrian granite fracture zone, mud density 1.18 SG.",
+      "depth_m": 1842.0,
+      "mud_weight_ppg": 9.83,
+      "volume_lost_bbl": null,
+      "formation": "Precambrian Granite"
+    },
+    {
+      "sentence": "Tight hole at 1,756 m while tripping out; reamed 1754-1760 m.",
+      "depth_m": 1756.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "Overpull 40 klbs at 2210 m in Hordaland claystone, MW 1.35 sg.",
+      "depth_m": 2210.0,
+      "mud_weight_ppg": 11.25,
+      "volume_lost_bbl": null,
+      "formation": "Hordaland"
+    },
+    {
+      "sentence": "Gas-cut mud at shakers, mud weight out reduced from 1.45 to 1.38 SG.",
+      "depth_m": null,
+      "mud_weight_ppg": 11.5,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "Pit gain of 12 bbl observed while drilling at 3,410 m, flow check positive.",
+      "depth_m": 3410.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": 12.0,
+      "formation": null
+    },
+    {
+      "sentence": "Drilled 12 1/4\" hole from 2,890 ft to 3,412 ft in the Milford Volcanics, 9.4 ppg WBM.",
+      "depth_m": 880.9,
+      "mud_weight_ppg": 9.4,
+      "volume_lost_bbl": null,
+      "formation": "Milford Volcanics"
+    },
+    {
+      "sentence": "Partial losses (35 bbl/hr) while drilling at 2,310 m in the Draupne Fm.",
+      "depth_m": 2310.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": "Draupne"
+    },
+    {
+      "sentence": "Spotted 20 bbl nut plug pill across thief zone at 7,850'.",
+      "depth_m": 2392.7,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": 20.0,
+      "formation": null
+    },
+    {
+      "sentence": "Losses of 4 m3 to formation while drilling Utsira sand at 875 m, mud 1.20 sg.",
+      "depth_m": 875.0,
+      "mud_weight_ppg": 10.0,
+      "volume_lost_bbl": 25.2,
+      "formation": "Utsira"
+    },
+    {
+      "sentence": "Circulated bottoms up at 6,512 ft MD, mud weight 72 pcf.",
+      "depth_m": 1984.9,
+      "mud_weight_ppg": 9.62,
+      "volume_lost_bbl": null,
+      "formation": null
+    },
+    {
+      "sentence": "Stuck at 3,105 m in the Shetland Group chalk, jarred free.",
+      "depth_m": 3105.0,
+      "mud_weight_ppg": null,
+      "volume_lost_bbl": null,
+      "formation": "Shetland"
+    }
+  ]
+}

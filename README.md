@@ -195,9 +195,11 @@ In the **root directory of the project**, locate either:
 **3. Wait for the services to initialize**
 The launcher will automatically:
 
-* Start the **API Gateway**
-* Boot all **5 internal microservices**
-* Initialize the complete eRTMAC-NWIS system
+* Create a `.venv` with **Python 3.11** (or 3.10) on the first run. Python 3.11 must be installed; newer versions such as 3.13 and 3.14 are not supported by PaddleOCR.
+* Install the single `requirements.txt`. The first run downloads about 2–3 GB and takes several minutes; later runs skip this unless the file changed.
+* Start the **API Gateway** and all **6 internal services**, including Module 1's OCR/NLP ingestion server.
+
+For a full guide to the system (architecture, data flow, models, evaluation), see **[Walkthrough.md](Walkthrough.md)**.
 
 **4. Open the application** - Once the services have started, open:
 
@@ -211,38 +213,24 @@ The system is now ready to use.
 
 Use this method if you are on **macOS/Linux**, prefer command-line execution, or want to manually control the environment and services.
 
-#### 1. Navigate to the core implementation directory
+#### 1. Create a Python 3.11 virtual environment in the repository root
+
+```bash
+python3.11 -m venv .venv          # Windows: py -3.11 -m venv .venv
+```
+
+Activate it (**Windows:** `.venv\Scripts\activate`, **macOS/Linux:** `source .venv/bin/activate`).
+
+#### 2. Install all dependencies (one file, one command)
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 3. Move into the implementation directory
 
 ```bash
 cd NLP/nlp_task_ddr
-```
-
-#### 2. Create a virtual environment
-
-```bash
-python -m venv venv
-```
-
-Activate the environment:
-
-**Windows:**
-
-```bash
-venv\Scripts\activate
-```
-
-**macOS/Linux:**
-
-```bash
-source venv/bin/activate
-```
-
-#### 3. Install the unified dependencies
-
-This is a **one-time setup step**:
-
-```bash
-pip install -r ../../requirements.txt
 ```
 
 #### 4. Verify the project setup
@@ -257,6 +245,8 @@ python check_setup.py
 
 ```bash
 python gateway.py
+# or, equivalent and runnable from any folder inside your IDE terminal:
+python NLP/nlp_task_ddr/run_all_modules.py
 ```
 
 Once the gateway has started, open:
@@ -273,6 +263,7 @@ Once the gateway has started, open:
 | Service / View | Public URL (Port 5000 Gateway) | Description |
 |---|---|---|
 | **Central Operations Dashboard** | [http://localhost:5000](http://localhost:5000) | Main command center and module navigator |
+| **Module 1: DDR OCR & NLP** | [http://localhost:5000/module1](http://localhost:5000/module1) | Upload a DDR PDF: real PaddleOCR + hybrid NLP; "Show Demo" for the offline simulation |
 | **Module 2: Geospatial Map** | [http://localhost:5000/module2/](http://localhost:5000/module2/) | Leaflet map, 159 wells, AHP rankings |
 | **Module 3: Live Risk Monitor** | [http://localhost:5000/module3/monitor](http://localhost:5000/module3/monitor) | Real-time CUSUM/Z-Score telemetry monitor |
 | **Module 4: Knowledge Graph Studio** | [http://localhost:5000/module4/](http://localhost:5000/module4/) | 4,037-node Vis.js graph & GraphRAG studio |
@@ -286,29 +277,30 @@ Once the gateway has started, open:
 
 ```
 SIH_2026_PLANNS/
-├── start_all.bat                      ← Windows 1-click batch launcher
-├── start_all.ps1                      ← PowerShell master launcher
+├── start_all.bat / start_all.ps1      ← Windows 1-click launchers (create .venv, install, run)
+├── start.sh                           ← Linux / Codespaces launcher
+├── requirements.txt                   ← THE dependency file (Python 3.11)
 ├── README.md                          ← Main project documentation
+├── Walkthrough.md                     ← Complete guide: architecture, setup, models, data flow
 ├── ARCHITECTURE.md                    ← Deep-dive system architecture
 ├── NWIS_PROJECT_SHOWCASE.md           ← Executive summary & competition pitch
 ├── PROJECT.md                         ← Background research & literature
-├── nwis_data_sources.md               ← Data lineage documentation
-├── ss/                                ← Production dashboard screenshots
-│   ├── main_dash.png                  ← Unified Gateway Operations Portal
-│   ├── module_2.png                   ← Geospatial & AHP Engine
-│   ├── module3.png                    ← Real-Time Telemetry & Anomaly Engine
-│   ├── image copy 2.png               ← Flagship Zero-Leakage Backtest Studio
-│   ├── module_4_graph.png             ← Knowledge Graph & Gemini Studio
-│   └── moeule5_rag.png                ← Engineering Decision Console (Qwen)
+├── assets/                            ← Screenshots, sample DDR PDFs, data lineage notes
+├── datasets/                          ← Volve DDRs, FORCE 2020 well data, Volve telemetry
 │
 └── NLP/nlp_task_ddr/                  ← Core Project Implementation Root
     ├── gateway.py                     ← Unified Gateway (Port 5000 Reverse Proxy)
-    ├── requirements.txt               ← Unified Python dependencies
+    ├── run_all_modules.py             ← Run-everything launcher for IDE terminals (wraps gateway.py)
+    ├── p1_full_pipeline.py            ← Module 1 offline data pipeline
     ├── check_setup.py                 ← Module 1 data integrity validator
     │
-    ├── dashboard/                     ← Operations Dashboard (Port 5000 Root)
-    │   ├── app.py                     ← Gateway portal Flask app
-    │   └── templates/dashboard.html   ← Cyberdeck dark terminal dashboard
+    ├── dashboard/templates/dashboard.html ← Operations Dashboard (served at /)
+    │
+    ├── module1/                       ← Live DDR OCR + hybrid NLP (:15006)
+    │   ├── module1.html               ← Upload UI
+    │   ├── server.py                  ← Upload/job API, runs the two workers
+    │   ├── ocr_worker.py / nlp_worker.py ← PaddleOCR and MiniLM worker processes
+    │   └── nlp_rules.py / nlp_engine.py / units.py ← Extraction logic
     │
     ├── results/module1_outputs/       ← Module 1 Processed Data Foundation
     │   ├── wells_metadata.json        ← 159 wells metadata

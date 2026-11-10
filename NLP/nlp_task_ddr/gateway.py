@@ -7,6 +7,10 @@ Runs all modules on internal ports and exposes a single port 5000.
 URL Map
 -------
   GET  /                       - Dashboard UI
+  GET  /module1                - Module 1 UI (served directly)
+  POST /module1/upload         - Module 1 DDR ingestion server (internal :15006)
+  GET  /module1/jobs/{id}      - Module 1 OCR/NLP job progress + results
+  GET  /module1/health         - Module 1 OCR/NLP engine status
   GET  /module2/*              - Module 2  (internal :15001)
   GET  /module3/monitor        - Module 3 Monitor UI (proxied from :15003)
   ANY  /module3/sim/*          - Module 3 Simulator REST (internal :15002)
@@ -52,6 +56,7 @@ INTERNAL = {
     "module3_anomaly": 15003,
     "module4":         15004,
     "module5":         15005,
+    "module1":         15006,
 }
 
 # -- Logging -----------------------------------------------------------------
@@ -134,6 +139,15 @@ def start_all_modules():
             "log":  "module5.log",
             "port": INTERNAL["module5"],
         },
+        {
+            # Live DDR ingestion: real OCR + hybrid NLP. The HTTP port comes up
+            # immediately; OCR/NLP model warm-up continues in its worker processes.
+            "name": "module1",
+            "cmd":  [PYTHON_EXE, str(BASE_DIR / "module1" / "server.py"),
+                     "--port", str(INTERNAL["module1"])],
+            "log":  "module1.log",
+            "port": INTERNAL["module1"],
+        },
     ]
 
     for m in modules:
@@ -174,6 +188,11 @@ def stop_all_modules():
     logger.info("All module processes terminated.")
 
 
+# -- HTTP Client State -------------------------------------------------------
+
+_http_client: httpx.AsyncClient | None = None
+
+
 # -- FastAPI Lifespan --------------------------------------------------------
 
 @asynccontextmanager
@@ -184,7 +203,8 @@ async def lifespan(app):
     await loop.run_in_executor(None, start_all_modules)
     yield
     stop_all_modules()
-    await _http_client.aclose()
+    if _http_client is not None:
+        await _http_client.aclose()
 
 
 # -- FastAPI App -------------------------------------------------------------
@@ -201,8 +221,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_http_client = None
-
 
 # -- Generic HTTP reverse proxy ----------------------------------------------
 
@@ -212,11 +230,15 @@ HOP_BY_HOP = {"host", "content-length", "transfer-encoding", "connection",
 
 
 async def proxy_http(request, target_url):
+    global _http_client
+    client = _http_client
+    if client is None:
+        client = _http_client = httpx.AsyncClient(timeout=600.0, follow_redirects=True)
     headers = {k: v for k, v in request.headers.items()
                if k.lower() not in HOP_BY_HOP}
     body = await request.body()
     try:
-        resp = await _http_client.request(
+        resp = await client.request(
             method=request.method,
             url=target_url,
             headers=headers,
@@ -288,25 +310,24 @@ async def dashboard():
     return FileResponse(BASE_DIR / "dashboard" / "templates" / "dashboard.html")
 
 
-# Module 1 — Simulated OCR/NLP Pipeline (served directly by gateway, no subprocess)
+# Module 1 — UI served directly; upload/jobs/health proxied to the ingestion
+# server (:15006), which runs real OCR (PaddleOCR) + hybrid NLP.
 @app.get("/module1")
 async def module1_ui():
     from fastapi.responses import FileResponse
     return FileResponse(BASE_DIR / "module1" / "module1.html")
 
 @app.post("/module1/upload")
-async def module1_upload(file: UploadFile = File(...)):
-    """Accept a PDF DDR document for simulated OCR processing.
-    The actual processing simulation runs client-side; this endpoint
-    validates the upload and returns a job token.
-    """
-    import uuid
-    return JSONResponse({
-        "status":   "accepted",
-        "filename": file.filename,
-        "job_id":   "m1-" + str(uuid.uuid4())[:8],
-        "message":  "Document queued for OCR processing (client-side simulation)",
-    })
+async def module1_upload(request: Request):
+    return await proxy_http(request, f"http://localhost:{INTERNAL['module1']}/upload")
+
+@app.get("/module1/jobs/{job_id}")
+async def module1_job(request: Request, job_id: str):
+    return await proxy_http(request, f"http://localhost:{INTERNAL['module1']}/jobs/{job_id}")
+
+@app.get("/module1/health")
+async def module1_health(request: Request):
+    return await proxy_http(request, f"http://localhost:{INTERNAL['module1']}/health")
 
 
 # Module 2

@@ -26,7 +26,7 @@
 
 ## 1. System Overview
 
-eRTMAC-NWIS is a **multi-module AI platform** for real-time drilling hazard prediction, offset-well intelligence, and decision support. It integrates real-world datasets (Volve Field WITSML + FORCE 2020 NCS wells) with NLP extraction, live telemetry anomaly detection, knowledge graph reasoning, and LLM-powered decision support into a unified five-module system served through a **single-port gateway**.
+eRTMAC-NWIS is a **multi-module AI platform** for real-time drilling hazard prediction, offset-well intelligence, and decision support. It integrates real-world datasets (Volve Field WITSML + FORCE 2020 NCS wells) with NLP extraction, live telemetry anomaly detection, knowledge graph reasoning, and LLM-powered decision support into a unified five-module system served through a **single-port gateway**. Module 1 also runs a live ingestion server for uploaded DDR PDFs (real OCR + hybrid NLP, §4.7).
 
 ### Core Design Principles
 
@@ -42,13 +42,15 @@ eRTMAC-NWIS is a **multi-module AI platform** for real-time drilling hazard pred
 |---------|-------------|---------------|----------|------|
 | **Unified Gateway** | `:5000` (public) | — | HTTP + WebSocket | Reverse proxy, dashboard, WebSocket bridging |
 | Central Dashboard | `/` | — | HTTP | BSPWM-style portal & navigation |
+| Module 1 UI | `/module1` | — (served by gateway) | HTTP | DDR upload page: live OCR job view + a "Show Demo" client-side simulation |
+| Module 1 Ingestion | `/module1/upload`, `/module1/jobs/{id}`, `/module1/health` | `15006` | HTTP (FastAPI) | Real OCR (PaddleOCR GPU worker) + hybrid NLP (MiniLM worker) on uploaded DDR/WCR PDFs |
 | Module 2 | `/module2/*` | `15001` | HTTP (Flask) | Geospatial map + AHP analog ranking |
 | Module 3 Simulator | `/module3/sim/*`, `/ws/telemetry` | `15002` | HTTP + WebSocket (FastAPI) | Live telemetry replay stream |
 | Module 3 Anomaly | `/module3/monitor`, `/module3/anomaly/*`, `/ws/anomaly` | `15003` | HTTP + WebSocket (FastAPI) | Real-time risk detection + monitor UI |
 | Module 4 | `/module4/*` | `15004` | HTTP (Flask) | Knowledge graph + GraphRAG + AI briefings |
 | Module 5 | `/module5/*` | `15005` | HTTP (Flask) | Engineering decision support agent |
 
-> **Note:** Internal ports 15001–15005 bind only to loopback (`127.0.0.1`) and are never directly exposed. The gateway on port 5000 is the **only** public-facing entry point.
+> **Note:** Internal ports 15001–15006 bind only to loopback (`127.0.0.1`) and are never directly exposed. The gateway on port 5000 is the **only** public-facing entry point.
 
 ---
 
@@ -63,14 +65,21 @@ graph TD
     end
 
     subgraph "MODULE 1 — Data Foundation (Offline)"
-        M1_NLP["NLP Extraction Engine\nRegex + Keyword Vocab"]
+        M1_NLP["NLP Extraction Engine\nnlp_rules.py: Regex + Keyword Vocab"]
         M1_SYNTH["Synthetic DDR Generator\nTemplate + RNG seed=42"]
         M1_OUT["Module 1 Outputs\nwells_metadata.json\nevents.jsonl\ntelemetry/15_9-F-9A.csv\nflagged_real_incidents.json\nevent_type_vocabulary.json"]
     end
 
+    subgraph "MODULE 1 — Live DDR Ingestion :15006"
+        M1_SRV["server.py (FastAPI)\nupload / jobs / health"]
+        M1_OCR["ocr_worker.py (process)\nPaddleOCR PP-OCRv4 · GPU if available"]
+        M1_HYB["nlp_worker.py (process)\nnlp_engine.py: keyword/regex\n+ MiniLM semantic typing"]
+        M1_UP["uploads/JOB_ID.jsonl\n(git-ignored, events.jsonl schema)"]
+    end
+
     subgraph "UNIFIED GATEWAY — Port 5000"
         GW["gateway.py\nFastAPI Reverse Proxy\nWebSocket Bridging\nHTTP Proxy (httpx)"]
-        DASH["dashboard/app.py\nCentral Operations Portal\n(served at root /)"]
+        DASH["dashboard/templates/dashboard.html\nCentral Operations Portal\n(served by gateway at root /)"]
         GW --> DASH
     end
 
@@ -111,6 +120,10 @@ graph TD
     H --> M1_NLP
     M1_NLP --> M1_OUT
     M1_SYNTH --> M1_OUT
+    M1_SRV --> M1_OCR
+    M1_OCR --> M1_HYB
+    M1_NLP -.->|"rules reused"| M1_HYB
+    M1_HYB --> M1_UP
 
     M1_OUT --> M2_SIM
     M2_SIM --> M2_OUT
@@ -144,6 +157,7 @@ graph TD
     M5_AGT --> M5_APP
     M5_APP --> M5_UI
 
+    GW -->|"HTTP proxy (/module1/upload, /jobs, /health)"| M1_SRV
     GW -->|"HTTP proxy (/module2/*)"| M2_APP
     GW -->|"HTTP proxy (/module3/*)"| M3_ANO
     GW -->|"WS proxy (/ws/telemetry)"| M3_SIM
@@ -160,11 +174,11 @@ graph TD
 
 `gateway.py` is a **FastAPI-based single-port reverse proxy and process supervisor** that:
 
-1. Spawns all 5 module subprocesses (`subprocess.Popen`) with their internal ports (15001–15005)
+1. Spawns all 6 module subprocesses (`subprocess.Popen`) with their internal ports (15001–15006); the Module 1 server in turn spawns its two ML worker processes (see §4.7)
 2. Waits in parallel for each internal port to come online before accepting external traffic
 3. Proxies all HTTP requests transparently to the correct module using `httpx`
 4. Bridges WebSocket connections in both directions using `websockets`
-5. Serves the Central Dashboard HTML directly at the root path `/`
+5. Serves the Central Dashboard HTML directly at the root path `/`, and the Module 1 page at `/module1`
 6. Exposes a unified `/api/*` namespace with intelligent routing by path prefix
 
 ### 3.2 Gateway Architecture
@@ -178,14 +192,14 @@ graph TD
         HTTP_CLIENT["httpx.AsyncClient\ntimeout=120s, follow_redirects=True"]
         PROXY_HTTP["proxy_http()\nStrips hop-by-hop headers\nForwards body + params"]
         PROXY_WS["proxy_websocket()\nBidirectional bridge\nping_interval=20s"]
-        ROUTES["URL Routes\n/ → dashboard.html\n/module2/* → :15001\n/module3/monitor → :15003/monitor\n/module3/sim/* → :15002\n/module3/anomaly/* → :15003\n/module4/* → :15004\n/module5/* → :15005\n/ws/telemetry → :15002 WS\n/ws/anomaly → :15003 WS\n/api/* → intelligent dispatch\n/gateway/health → module health check"]
+        ROUTES["URL Routes\n/ → dashboard.html\n/module1 → module1.html (direct)\n/module1/upload,jobs,health → :15006\n/module2/* → :15001\n/module3/monitor → :15003/monitor\n/module3/sim/* → :15002\n/module3/anomaly/* → :15003\n/module4/* → :15004\n/module5/* → :15005\n/ws/telemetry → :15002 WS\n/ws/anomaly → :15003 WS\n/api/* → intelligent dispatch\n/gateway/health → module health check"]
     end
 
     BROWSER --> ROUTES
     ROUTES --> PROXY_HTTP
     ROUTES --> PROXY_WS
     PROXY_HTTP --> HTTP_CLIENT
-    LIFE --> SUBPROC["5 subprocesses\n:15001,:15002,:15003,:15004,:15005"]
+    LIFE --> SUBPROC["6 subprocesses\n:15001,:15002,:15003,:15004,:15005,:15006"]
 ```
 
 ### 3.3 Unified API Namespace
@@ -209,18 +223,21 @@ sequenceDiagram
     participant M3A as "M3 Anomaly :15003"
     participant M4 as "Module 4 :15004"
     participant M5 as "Module 5 :15005"
+    participant M1 as "Module 1 :15006"
 
     GW->>M2: subprocess.Popen + log file
     GW->>M3S: subprocess.Popen + log file
     GW->>M3A: subprocess.Popen + log file
     GW->>M4: subprocess.Popen + log file
     GW->>M5: subprocess.Popen + log file
-    Note over GW: Parallel wait via threading (120s timeout)
+    GW->>M1: subprocess.Popen + log file
+    Note over GW: Parallel wait via threading (90s; 180s for M3 Anomaly)
     M2-->>GW: port 15001 UP
     M3S-->>GW: port 15002 UP
     M3A-->>GW: port 15003 UP
     M4-->>GW: port 15004 UP
     M5-->>GW: port 15005 UP
+    M1-->>GW: port 15006 UP (OCR/NLP workers keep warming up)
     GW->>GW: webbrowser.open("http://localhost:5000") after 5s delay
 ```
 
@@ -230,7 +247,12 @@ sequenceDiagram
 
 ### 4.1 Responsibility
 
-Module 1 is the **offline data acquisition and NLP extraction layer**. It ingests real public drilling datasets, runs regex-based Named Entity Recognition (NER) on 1,759 real DDRs (Daily Drilling Reports), generates a reproducible synthetic corpus, and emits structured output files consumed by all downstream modules. It does **not** expose an HTTP server.
+Module 1 has two parts:
+
+1. **Offline data foundation (`p1_full_pipeline.py`)**: ingests real public drilling datasets, runs the deterministic keyword/regex extractor on 1,759 real DDRs (Daily Drilling Reports), generates a reproducible synthetic corpus, and emits the structured files consumed by all downstream modules (§4.6). This path is unchanged and still produces the committed `events.jsonl` byte-for-byte (enforced by `module1/test_nlp_engine.py`).
+2. **Live DDR ingestion (`module1/server.py`, internal `:15006`)**: accepts an uploaded DDR/WCR PDF, runs **real OCR** (PaddleOCR on GPU) and the **hybrid NLP engine** (keyword/regex + MiniLM semantic event typing), and returns events in the same 15-key schema (§4.7). Results are shown in `module1.html` and saved to a git-ignored directory. **They are not fed to Modules 2–5.**
+
+The rules live in `module1/nlp_rules.py` (moved verbatim out of `p1_full_pipeline.py`, which used to execute the whole pipeline on import and now runs behind `main()`), so both paths share one implementation.
 
 ### 4.2 Source Datasets
 
@@ -256,9 +278,19 @@ flowchart LR
 
 ### 4.4 NLP Extraction Methodology
 
-**Entry point:** `p1_full_pipeline.py::extract_entities()`
+There are two extractors. Both emit the same 15-key record (§4.6).
 
-The NLP pipeline uses **deterministic keyword matching** against a canonical 18-class event vocabulary (`EVENT_VOCAB`):
+| | Corpus path (offline, default) | Live-upload path (hybrid) |
+|---|---|---|
+| Entry point | `module1/nlp_rules.py::extract_entities()` (called by `p1_full_pipeline.py --nlp keyword`) | `module1/nlp_engine.py::HybridEngine.extract_document()` (called by `nlp_worker.py`; also `p1 --nlp hybrid`) |
+| Event typing | Keyword scan, one event per report | Keyword scan per sentence, **plus** MiniLM semantic typing for sentences the keywords miss |
+| Fields | Regex, metres only; SG stored unconverted; first depth in the report | Unit-aware parsers (`units.py`): ft→m, SG/pcf/kg·m⁻³→ppg, m³/L→bbl, NPT statements; depth taken from the event's own sentence, then its neighbours, then the report header MD |
+| Confidence | Constant 0.85 / 0.95 | keyword 0.85 · keyword+semantic agree 0.92 · semantic-only 0.55–0.80 (scaled by margin) · routine 0.95 |
+| Writes to | committed `results/module1_outputs/` | git-ignored `results/module1_outputs/uploads/` (or `results/module1_outputs_hybrid/` for `p1 --nlp hybrid`) |
+
+#### 4.4.1 Deterministic keyword/regex extractor (corpus path, unchanged)
+
+The corpus pipeline uses **deterministic keyword matching** against a canonical 18-class event vocabulary (`EVENT_VOCAB`):
 
 ```mermaid
 flowchart TD
@@ -287,6 +319,29 @@ flowchart TD
 | `cementing` | EVT_CEMENTING_FAILURE, EVT_WOC |
 | `none` | EVT_ROUTINE_DRILLING |
 
+#### 4.4.2 Hybrid engine (live-upload path)
+
+`nlp_engine.py` **augments** the keyword/regex rules; it never overrides a keyword hit with a different class.
+
+```mermaid
+flowchart TD
+    PAGES["OCR text per page"] --> SEG["segment_document()\ngroup pages by 'Report For DATE' header\n(no header -> one unit per page)"]
+    SEG --> HDR["parse_header()\nwell id/name, operator, field, rig,\nreport date, spud date, MD (ft->m), MW"]
+    SEG --> CLEAN["drop template lines recurring on >=30% of pages,\nheadings ('Label:'), table-header rows"]
+    CLEAN --> SPLIT["rule-based sentence splitter\n(time-log prefixes stripped)"]
+    SPLIT --> KW{"Keyword pass\nnlp_rules.KEYWORD_EVT\n+ negation ('no tight spots')\n+ trap filters ('fishing neck',\n'kick off plug', 'torqued')"}
+    SPLIT --> SEM["Semantic pass\nabbreviation expansion (FIT, POOH, CBU...)\nall-MiniLM-L6-v2 cosine vs class prototypes\n(event_prototypes.py, routine has its own)"]
+    KW -->|hit| EVT["event_type_id"]
+    SEM -->|"no keyword hit AND\nbest hazard - routine >= 0.19"| EVT
+    EVT --> FLD["units.py fields from the event's sentence\n-> neighbours -> header"]
+    FLD --> REC["one record per (report, event type)\nsame 15 keys as extract_entities()"]
+    SEG -->|"no event in report"| ROUT["EVT_ROUTINE_DRILLING record\nraw_text = 'Current Operations' narrative\nnpt_hours = sum of NPT statements"]
+```
+
+Provenance (`method` = keyword / semantic / both / routine, matched keyword, cosine, margin) is returned in a parallel `evidence` list and in `<job>_meta.json`. It is **not** added to the record, so the schema is unchanged. If the semantic model cannot load, the engine falls back to keyword-only and reports `mode: "keyword"`.
+
+**Status:** implemented and tested on real OCR output (Utah FORGE 78B-32, 93 pages). Planned, not implemented: a 300–500-sentence gold set with two annotators, then fine-tuning (§4.8).
+
 ### 4.5 Synthetic DDR Generation
 
 `mk_synth()` generates realistic DDR text by filling parameterized templates with controlled random values (`random.seed(42)` ensures full reproducibility). Each synthetic event is explicitly tagged `is_synthetic: True`.
@@ -302,8 +357,14 @@ results/module1_outputs/
 ├── events_summary.csv         ← Tabular view (no raw_text)
 ├── event_type_vocabulary.json ← 18 canonical event types v1.0
 ├── flagged_real_incidents.json← Real documented hazard events
-└── telemetry/15_9-F-9A.csv   ← 16,670 rows, 15 sensor channels
+├── telemetry/15_9-F-9A.csv   ← 16,670 rows, 15 sensor channels
+└── uploads/                   ← git-ignored: <job>.jsonl + <job>_meta.json per live upload
+results/module1_outputs_hybrid/ ← git-ignored: `p1_full_pipeline.py --nlp hybrid` corpus run
+data/runtime/module1/uploads/   ← git-ignored: uploaded PDFs (<job>.pdf)
+module1/outputs/model_selection.json ← committed: zero-shot model-selection results (§4.8)
 ```
+
+Downstream modules read only the committed files in the first block. Uploads and the hybrid corpus run are kept apart so they cannot change Module 2–5 inputs; `p1 --nlp hybrid` warns if pointed at the canonical directory.
 
 **Per-event record schema:**
 ```json
@@ -325,6 +386,90 @@ results/module1_outputs/
   "raw_text": "..."
 }
 ```
+
+Live uploads use the same keys in the same order (`nlp_rules.EVENT_RECORD_KEYS`), with `source: "uploaded_pdf_ocr"` and `is_synthetic: false`.
+
+### 4.7 Live DDR Ingestion: Real OCR Backend
+
+```mermaid
+sequenceDiagram
+    participant UI as module1.html
+    participant GW as gateway :5000
+    participant S as module1/server.py :15006
+    participant O as ocr_worker.py (Paddle, GPU if available)
+    participant N as nlp_worker.py (torch, MiniLM)
+    UI->>GW: POST /module1/upload (PDF)
+    GW->>S: proxy
+    S-->>UI: {job_id, pages}
+    S->>O: {"cmd":"ocr", path, dpi:200}  (stdin JSON line)
+    loop every page
+        O-->>S: {"type":"page", text, chars, mean_conf, ms}
+        UI->>GW: GET /module1/jobs/{id}?log_since&tok_since&ent_since (300 ms poll)
+        GW->>S: proxy
+        S-->>UI: stage, pct, pages_done/total, new log lines, OCR tokens, entities
+    end
+    S->>N: {"cmd":"extract", pages}
+    N-->>S: per-report entities, then {records, evidence, well}
+    S->>S: schema guard, write uploads/<job>.jsonl + _meta.json
+    S-->>UI: status=done, result
+```
+
+- **Engine choice.** PaddleOCR 2.7.3 (PP-OCRv4 det/rec + angle classifier) on the GPU. In this environment `paddle.utils.run_check()` passes on an RTX 4060 (CUDA 11.8, cuDNN 8.9). Tesseract is not installed, and EasyOCR would need a CUDA build of torch in the server env, so PaddleOCR was kept as the engine. Without a GPU it runs on the CPU (slower).
+  - Fallback: if PaddleOCR cannot load at all, the job uses the PDF text layer and the UI flags this loudly as "NOT OCR". (A RapidOCR/ONNX CPU fallback was tried and removed: about 60–90 s per page, confidence ~0.83, and its OpenCV pin conflicts with PaddleOCR's.)
+- **Every page is OCR'd** at 200 dpi, even when the PDF has a text layer. The worker reports the text-layer character count next to its own as a sanity check: on the 93-page Utah FORGE PDF, OCR recovered 242,693 characters vs 251,773 in the text layer, with mean confidence 0.984.
+- **Speed.** About 1.2 s per dense page when the GPU is otherwise idle (93 pages in 106 s). With a browser and the other gateway modules running on the same laptop, it measured 1.5 s median and 8 s p90 per page (284 s total).
+- **Why two worker processes.** Paddle and torch cannot be loaded into one process (loading both fails with `_gpuDeviceProperties is already registered`), and a multi-minute OCR job must not block the HTTP server. Both workers run under the **same interpreter as everything else** (the project `.venv`, Python 3.10/3.11, one `requirements.txt`). `NWIS_ML_PYTHON` can optionally point them at another interpreter.
+  - Workers speak JSON lines over stdin/stdout. Their real stdout is reserved for protocol; native library output goes to `logs/module1_*_worker.log`.
+  - Workers exit when the server dies, through a parent-PID watchdog plus a broken-pipe check.
+  - The NLP worker uses the GPU if torch sees one, otherwise the CPU. The default install uses CPU torch, which labels a 93-page report in about 9 s (vs about 0.8 s on GPU), negligible next to OCR time, with identical output.
+- **UI** (`module1.html`):
+  - The original scan animation is unchanged. In live mode it sweeps continuously until the job finishes.
+  - A badge on the document shows real per-page extraction progress ("OCR 37% · page 35/93").
+  - The token stream, log terminal, NLP entities and results panel are filled from the job.
+  - The previous fully simulated page is kept behind a **Show Demo** button. It runs entirely client-side, makes no server calls, and is labelled "DEMO · SIMULATED".
+
+### 4.8 NLP Model Selection (Zero-Shot Screen)
+
+`module1/eval_model_selection.py` is committed, and its results are saved to `module1/outputs/model_selection.json`. It compares candidates **zero-shot**, because no labelled drilling NER/event corpus exists for this project yet.
+
+- **Event set:** 60 sentences covering all 18 classes; 33 are verbatim Volve DDR sentences and 27 are authored paraphrase-heavy edge cases ("packed off", "pit gain", "pulled 40k over").
+- **Entity set:** 20 sentences.
+- **Labels:** assigned by one author. This is a screening set, **not** a gold set with inter-annotator agreement.
+
+| Candidate (zero-shot) | Params | ms/sent (GPU) | Event macro-F1 alone | + keyword hybrid | Notes |
+|---|---|---|---|---|---|
+| Keyword rules (current) | — | 0 | 0.28 | — | Detects 30% of hazard sentences |
+| BERT-base, prototype cosine | 110M | ~2.6 | 0.52 | 0.58 | |
+| RoBERTa-base, prototype cosine | 125M | ~2.6 | 0.45 | 0.54 | 65% routine false alarms |
+| DeBERTa-v3-base, prototype cosine | 184M | ~10 | 0.19 | 0.36 | Raw MLM embeddings are not usable for similarity |
+| GLiNER medium v2.1 (DeBERTa-v3), event labels as spans | 195M | ~41 | 0.43 | 0.46 | Span NER is a poor fit for sentence-level event typing |
+| **all-MiniLM-L6-v2, prototype cosine** | **23M** | **~3.3** | **0.77** | **0.74** | Selected; already used by Modules 4/5 |
+
+**Entity fields** (depth, mud weight, volume, formation; 20 sentences):
+
+| Extractor | Field accuracy |
+|---|---|
+| Original regex | 0.75 |
+| Unit-aware regex (`units.py`) | 1.00 |
+| Unit-aware regex + GLiNER gap-filling | 0.96, at ~40 ms per sentence |
+
+GLiNER added nothing and made the formation field worse. The entity set was written by the same author as the parsers, so the 1.00 is optimistic.
+
+**Decision:**
+- MiniLM is used for semantic event typing; unit-aware regex is used for fields.
+- BERT, RoBERTa, DeBERTa-v3 and GLiNER are **excluded from the current implementation**. Each needs labelled fine-tuning to be competitive, which depends on the planned gold set. A GLiNER fine-tune is the first candidate once that exists, since its span output avoids the invalid-BIO problem that Masked CRF addresses in Cao et al. GLiNER is **not** installed by `requirements.txt`; the evaluation script skips it (and DeBERTa) unless `gliner==0.2.30 sentencepiece==0.2.0` are installed separately.
+
+**Operating point:**
+
+| Margin | Hazard recall | Routine false alarms | Firing rate on 6,802 Volve sentences |
+|---|---|---|---|
+| 0.13 (dev-half, ≤10% routine FA) | 0.70 | 0.06 | 5.1% |
+| **0.19 (deployed)** | **0.61** | **0** | **2.3%** |
+
+- 0.19 was chosen to favour precision, because real reports are mostly routine lines. This curve was inspected with the whole screening set visible, so these are not unbiased estimates.
+- On a 20-sentence jargon smoke set in `test_nlp_engine.py`: keywords 2/20, hybrid 15/20, with 0/10 routine false alarms.
+- On the real 93-page Utah FORGE 78B-32 report, the engine produced 14 hazard events. On the author's manual review (not a drilling engineer's), 11 are plausible: tight hole, stuck pipe, take-weight, overpull, WOC ×4, high motor torque and junk recovered. 3 are false positives: two junk-basket equipment mentions, and a keyword "torque" hit on a long trip line. 7 of the 14 came from the semantic layer.
+- Known false-positive patterns: equipment mentions, and rig-repair NPT, which is outside the 18-class vocabulary.
 
 ---
 
@@ -1065,36 +1210,41 @@ The `analog_wells.json` file is the **single most shared artifact**, consumed by
 
 The gateway is a **FastAPI process supervisor and reverse proxy**:
 1. Starts each module as a `subprocess.Popen` with its own log file
-2. Waits in parallel using `threading.Thread` for each internal port to become reachable (120s timeout for most, longer for Module 3 Anomaly which loads a ~37MB JSONL)
+2. Waits in parallel using `threading.Thread` for each internal port to become reachable (90s timeout for most, 180s for Module 3 Anomaly which loads a ~37MB JSONL; Module 1's port opens immediately and its OCR/NLP models warm up afterwards, as reported by `/module1/health`)
 3. Accepts external traffic only after all modules are confirmed UP
 4. Handles WebSocket proxying bidirectionally via `websockets.connect()`
 5. Handles HTTP proxying via `httpx.AsyncClient`
 6. Reads `PORT` environment variable for PaaS compatibility (e.g., Render.com)
 
-### 10.2 Alternative Launcher: `run_all_modules.py`
+### 10.2 Environment: one interpreter, one requirements file
 
-A legacy multi-process launcher that starts each module on its original port (5001–5005) is still present as `run_all_modules.py`. This is a fallback for development and does **not** provide the unified gateway or WebSocket bridging. **`gateway.py` is the recommended entry point.**
+The whole prototype runs in **one Python 3.10/3.11 environment** installed from the root `requirements.txt` (`pip install -r requirements.txt`). The gateway starts every module with its own interpreter (`sys.executable`), and Module 1's server starts its OCR/NLP workers the same way. Python 3.11 is required because `paddlepaddle 2.6.2` (PaddleOCR) has no wheels for 3.13+. On Windows `paddlepaddle-gpu` is installed; it uses the GPU when one is present and falls back to the CPU otherwise. Its CUDA 11.8 runtime libraries (cuDNN 8.9, cuBLAS 11, NVRTC) come from the pip wheels `nvidia-cudnn-cu11`, `nvidia-cublas-cu11` and `nvidia-cuda-nvrtc-cu11`, so no system CUDA install is needed. `ocr_worker.py` adds their `bin/` folders to the DLL search path before importing Paddle; only an NVIDIA driver is required. On Linux (devcontainer) the CPU `paddlepaddle` build is installed. Torch comes in through `sentence-transformers`; the CPU build is sufficient.
 
-### 10.3 Windows 1-Click Launchers
+### 10.3 One-Click Launchers
 
 ```
-start_all.bat    ← Launches gateway.py via cmd.exe
-start_all.ps1   ← Launches gateway.py via PowerShell
+start_all.bat    ← Windows cmd
+start_all.ps1    ← Windows PowerShell
+start.sh         ← Linux / Codespaces (uses the container's Python 3.11)
 ```
 
-Both files exist at both the repo root and `NLP/nlp_task_ddr/`.
+The Windows launchers:
+1. Create `<repo>/.venv` with Python 3.11 (or 3.10). They recreate it if it was built with another version.
+2. Run `pip install -r requirements.txt` only when the file differs from the copy stored in `.venv/requirements.installed`.
+3. Start `gateway.py` with the venv's interpreter, so every module and worker uses it.
 
 ### 10.4 Module Framework Choices
 
 | Module | Framework | Why |
 |--------|-----------|-----|
 | Gateway | FastAPI + uvicorn | asyncio required for concurrent HTTP proxying + WebSocket bridging |
-| Dashboard | Flask | Static file serving only; no async required |
+| Dashboard | (served by the gateway) | Single static HTML page; no separate process |
 | Module 2 | Flask | Simple WSGI; data loaded at startup, all serving is fast in-memory |
 | Module 3 Simulator | FastAPI + uvicorn | asyncio required for WebSocket broadcast loop |
 | Module 3 Anomaly | FastAPI + uvicorn | asyncio required for simultaneous WebSocket consumer + broadcaster |
 | Module 4 | Flask | Synchronous serving; graph is pre-loaded, RAG queries are fast |
 | Module 5 | Flask | Simple WSGI; ChromaDB and HF/Gemini calls are synchronous |
+| Module 1 Ingestion | FastAPI + uvicorn, plus 2 JSON-lines worker processes | Long GPU jobs run off the request path; the UI polls job state |
 
 ### 10.5 Offline Fallbacks
 
@@ -1103,11 +1253,17 @@ Both files exist at both the repo root and `NLP/nlp_task_ddr/`.
 | Module 4 | No Gemini API key | Graph, search, and RAG features fully work; briefings use Local Evidence Synthesis |
 | Module 5 | No HF_TOKEN and no GEMINI_API_KEY | Local Evidence Synthesis Engine activates: structured markdown synthesized directly from ChromaDB EvidenceItems |
 | Module 5 | HF_TOKEN set but HF call fails | Gemini fallback attempted; then local synthesis |
+| Module 1 | No GPU | PaddleOCR runs on the CPU (slower, same output) |
+| Module 1 | PaddleOCR cannot load | The job uses the PDF text layer and the UI says "NOT OCR" |
+| Module 1 | MiniLM / torch unavailable | Hybrid engine runs keyword/regex only and reports `mode: "keyword"` |
 
 ### 10.6 Log Files
 
 ```
 NLP/nlp_task_ddr/logs/
+├── module1.log              ← Module 1 ingestion server (job log lines)
+├── module1_ocr_worker.log   ← PaddleOCR worker stderr / native output
+├── module1_nlp_worker.log   ← NLP worker stderr
 ├── module2.log
 ├── module3_sim.log
 ├── module3_anomaly.log
@@ -1127,6 +1283,8 @@ NLP/nlp_task_ddr/logs/
 |---|---|---|
 | **Gateway & Reverse Proxy** | `FastAPI`, `Uvicorn`, `httpx`, `websockets` | Single-port 5000 reverse-proxy, WebSocket forwarding, process orchestration |
 | **Microservice Web Engines** | `Flask`, `Flask-CORS`, `Jinja2` | Serving Modules 2, 4, and 5 UI consoles and REST APIs |
+| **OCR (Module 1 live ingestion)** | `PaddleOCR 2.7.3` (PP-OCRv4) on `paddlepaddle-gpu 2.6.2` (Windows, CUDA 11.8 build; CPU fallback) / `paddlepaddle 2.6.2` (Linux); `PyMuPDF` page rendering at 200 dpi | Real OCR of uploaded DDR/WCR PDFs; runs in its own worker process |
+| **NLP event extraction (Module 1)** | Keyword/regex rules (`nlp_rules.py`) + `sentence-transformers/all-MiniLM-L6-v2` prototype classifier (`nlp_engine.py`, CPU or GPU) + unit-aware parsers (`units.py`) | Hybrid 18-class event typing; MiniLM chosen over BERT, RoBERTa, DeBERTa-v3 and GLiNER by `eval_model_selection.py` |
 | **Real-Time Streaming** | `FastAPI`, `WebSockets`, `asyncio` | High-frequency WITSML sensor replay and anomaly broadcast |
 | **Primary LLM** | `Qwen/Qwen2.5-72B-Instruct` (Hugging Face) | Deep engineering reasoning and historical evidence synthesis in Module 5 |
 | **AI Briefing LLM** | `Google Gemini 2.5 / 2.0 / 1.5 Flash` | Rapid, verifiable pre-spud briefing synthesis in Module 4 |
@@ -1259,19 +1417,32 @@ NLP/nlp_task_ddr/logs/
 ```
 SIH_2026_PLANNS/
 ├── README.md
+├── Walkthrough.md                          ← Plain-language guide to the whole system
 ├── ARCHITECTURE.md
-├── start_all.bat / start_all.ps1          ← Windows 1-click launchers (run gateway.py)
+├── requirements.txt                        ← The single dependency file (Python 3.10/3.11)
+├── start_all.bat / start_all.ps1 / start.sh ← 1-click launchers (create .venv, install, run gateway.py)
 │
 └── NLP/nlp_task_ddr/                       ← ALL code lives here
     ├── gateway.py                          ← UNIFIED GATEWAY (primary entry point)
-    ├── run_all_modules.py                  ← Legacy multi-port launcher (dev use)
-    ├── requirements.txt
-    ├── p1_full_pipeline.py                 ← Module 1 offline pipeline
+    ├── run_all_modules.py                  ← Thin wrapper that runs gateway.py (IDE-terminal launcher; forwards flags)
+    ├── p1_full_pipeline.py                 ← Module 1 offline pipeline (main(); --nlp keyword|hybrid)
     ├── check_setup.py                      ← Data integrity verifier
     │
-    ├── dashboard/                          ← Central Operations Portal
-    │   ├── app.py                          ← Flask (served at / by gateway)
-    │   └── templates/dashboard.html
+    ├── module1/                            ← Port 15006 internal (FastAPI) + ML workers
+    │   ├── module1.html                    ← Upload UI (live OCR) + "Show Demo" simulation
+    │   ├── server.py                       ← Upload/jobs/health API, spawns workers
+    │   ├── ocr_worker.py                   ← PaddleOCR worker process (GPU if available)
+    │   ├── nlp_worker.py                   ← Hybrid NLP worker process (MiniLM)
+    │   ├── worker_common.py                ← JSON-lines channel + parent watchdog
+    │   ├── nlp_rules.py                    ← EVENT_VOCAB, KEYWORD_EVT, extract_entities()
+    │   ├── nlp_engine.py                   ← Hybrid engine (segmentation, keyword + MiniLM)
+    │   ├── event_prototypes.py             ← Class prototype phrases + abbreviation map
+    │   ├── units.py                        ← Unit-aware field parsers
+    │   ├── eval_model_selection.py         ← Zero-shot model-selection screen
+    │   ├── outputs/model_selection.json    ← Its results
+    │   └── test_nlp_engine.py              ← Module 1 tests (pytest)
+    │
+    ├── dashboard/templates/dashboard.html  ← Central Operations Portal (served at / by gateway)
     │
     ├── results/module1_outputs/            ← Module 1 artifacts (shared by all)
     │   ├── wells_metadata.json             ← 159 wells

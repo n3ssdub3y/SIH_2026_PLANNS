@@ -147,18 +147,23 @@ def run_regression_safety_tests():
     print("RUNNING PART 3: Module 1 & Module 2 Regression Verification")
     print("=" * 65)
 
-    # Check Module 1 contracts
-    import subprocess
-    cmd_m1 = [sys.executable, str(BASE_DIR / "check_module1.py")]
-    res_m1 = subprocess.run(cmd_m1, capture_output=True, text=True, cwd=str(BASE_DIR))
-    assert res_m1.returncode == 0, f"Module 1 check failed: {res_m1.stderr}"
-    print("  [PASS] Module 1 data contracts 100% verified intact")
+    # Check Module 1 contracts (the scripts this used to call no longer exist;
+    # the same checks are done inline here).
+    m1 = BASE_DIR / "results" / "module1_outputs"
+    events = [json.loads(l) for l in open(m1 / "events.jsonl", encoding="utf-8") if l.strip()]
+    assert len(events) > 0 and all("event_type_id" in e and "well_id" in e for e in events)
+    vocab = json.load(open(m1 / "event_type_vocabulary.json", encoding="utf-8"))
+    assert len(vocab["event_types"]) == 18
+    assert (m1 / "telemetry" / "15_9-F-9A.csv").exists()
+    print(f"  [PASS] Module 1 data contracts intact ({len(events)} events, 18 event types)")
 
     # Check Module 2 outputs
-    cmd_m2 = [sys.executable, str(BASE_DIR / "final_verify_m2.py")]
-    res_m2 = subprocess.run(cmd_m2, capture_output=True, text=True, cwd=str(BASE_DIR))
-    assert res_m2.returncode == 0, f"Module 2 verification failed: {res_m2.stderr}"
-    print("  [PASS] Module 2 similarity engine 100% verified intact")
+    m2 = BASE_DIR / "module2" / "outputs"
+    analogs = json.load(open(m2 / "analog_wells.json", encoding="utf-8"))
+    assert len(analogs) > 0
+    for f in ("ahp_weights.json", "formation_correlation.json"):
+        json.load(open(m2 / f, encoding="utf-8"))
+    print(f"  [PASS] Module 2 similarity outputs intact ({len(analogs)} wells)")
 
     print("PART 3: Regression safety check PASSED!\n")
 

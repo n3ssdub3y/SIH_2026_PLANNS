@@ -1,41 +1,59 @@
-# NWIS-Sentinel | SIH 2026 | Unified Project Dependencies (All Modules + Gateway)
-# Install from project root: pip install -r requirements.txt
+# NWIS-Sentinel | SIH 2026 | ONE requirements file for the whole prototype
+#
+#   Python 3.10 or 3.11 (3.11 recommended).  PaddleOCR 2.6.x has no build for 3.13+.
+#   start_all.bat / start_all.ps1 / start.sh create the venv and install this for you:
+#       pip install -r requirements.txt
+#
+# Notes on the few version constraints (everything else floats):
+#   * numpy <2       - paddlepaddle 2.6 is compiled against numpy 1.x.
+#   * nvidia-*-cu11  - the cuDNN 8 / cuBLAS 11 DLLs that GPU Paddle loads (Windows only).
+#   * protobuf       - not listed: paddlepaddle pins it (<=3.20.2 on Windows) and pip
+#                      resolves chromadb / google libs to compatible versions.
+#   * torch          - comes in via sentence-transformers. The CPU build is enough:
+#                      MiniLM labels a 93-page report in ~9 s on CPU (OCR takes minutes).
+#   * Paddle + torch are never imported into the same process (OCR and NLP run as
+#     separate worker processes), which is why they can share one environment.
 
-# ── Core & Data Processing ────────────────────────────────────────────────────
+# ── Core & data processing ──────────────────────────────────────────────────
 pandas>=2.0.0
-numpy>=1.24.0
-scipy>=1.10.0
-scikit-learn>=1.2.0
-python-dotenv>=1.0.0
-requests>=2.28.0
-pyarrow>=14.0.0
+numpy>=1.24.0,<2
+scipy>=1.10.0                  # Module 2 DTW distance
+openpyxl>=3.1.0                # p1_full_pipeline.py reads the FORCE 2020 .xlsx files
+python-dotenv>=1.0.0           # Module 5 .env
 
-# ── Web Servers & APIs (Flask microservices + FastAPI Gateway) ────────────────
-python-multipart>=0.0.32
-Flask>=2.3.0
-flask-cors>=4.0.0
-Jinja2>=3.1.0
+# ── Web servers (FastAPI gateway + modules 1/3, Flask modules 2/4/5) ─────────
 fastapi>=0.100.0
 uvicorn[standard]>=0.22.0
+python-multipart>=0.0.32       # PDF upload (Module 1)
 websockets>=11.0
 httpx>=0.24.0
 pydantic>=2.0.0
+Flask>=2.3.0
+flask-cors>=4.0.0
 
-# ── Module 3: Real-Time Telemetry & Anomaly Detection ────────────────────────
+# ── Module 1: real OCR + hybrid NLP ─────────────────────────────────────────
+pymupdf>=1.24                  # PDF rendering + upload validation
+paddlepaddle-gpu==2.6.2; sys_platform == "win32"    # GPU OCR on Windows (falls back to CPU if no GPU)
+# CUDA 11.8 runtime DLLs paddlepaddle-gpu needs, as pip wheels (no system CUDA install).
+# ocr_worker.py adds their bin/ folders to the DLL search path.
+nvidia-cudnn-cu11==8.9.4.25; sys_platform == "win32"
+nvidia-cublas-cu11==11.11.3.6; sys_platform == "win32"
+nvidia-cuda-nvrtc-cu11==11.8.89; sys_platform == "win32"
+paddlepaddle==2.6.2; sys_platform != "win32"        # CPU build on Linux/macOS (devcontainer)
+paddleocr==2.7.3               # PP-OCRv4 detection + recognition
+sentence-transformers>=2.2.0   # all-MiniLM-L6-v2: Module 1 event typing, Module 4 GraphRAG, Module 5 retrieval
+
+# ── Module 3: telemetry & anomaly detection ─────────────────────────────────
 fastdtw>=0.3.4
 matplotlib>=3.7.0
 statsmodels>=0.14.0
 
-# ── Module 4 & 5: Knowledge Graph, LLM Briefing & Engineering Agent ──────────
+# ── Modules 4 & 5: knowledge graph, RAG, LLMs ───────────────────────────────
 networkx>=3.0
-sentence-transformers>=2.2.0
-chromadb>=0.5.0
-huggingface-hub>=0.20.0
+chromadb>=1.0.0                # must stay 1.x: the committed vector-store seed is a 1.x database
+huggingface-hub>=0.20.0        # Qwen2.5-72B via HF Inference API (Module 5)
+google-genai>=1.0.0            # Gemini (Modules 4 & 5)
+google-generativeai>=0.8.0     # legacy Gemini SDK, used as Module 4 fallback import
 
-# ── LLM Providers ────────────────────────────────────────────────────────────
-google-generativeai>=0.8.0
-google-genai>=2.0.0
-openai>=1.0.0
-
-# ── Testing (Module 4 test suite; Module 3 tests also run under pytest) ───────
+# ── Tests ───────────────────────────────────────────────────────────────────
 pytest>=7.0.0

@@ -15,27 +15,28 @@ Docs are split by concern — read the right one before large changes:
 
 ## Commands
 
-All real code lives in `NLP/nlp_task_ddr/`; run commands from there unless noted. Dependencies are in the **root** `requirements.txt` (Python 3.10/3.11).
+All real code lives in `NLP/nlp_task_ddr/`; run commands from there unless noted. All dependencies are in the **single root** `requirements.txt`. **Python 3.10/3.11 only**, because PaddleOCR 2.6.x has no wheels for 3.13+. The launchers manage `<repo>/.venv`; there is no other requirements file. A `NLP/nlp_task_ddr/venv` built with Python 3.14 is a leftover and is not used.
 
 ```bash
-pip install -r ../../requirements.txt
+pip install -r ../../requirements.txt         # into a Python 3.11 venv
 python check_setup.py                         # verify Module 1 data outputs are present
 python gateway.py                             # start everything on :5000
+python run_all_modules.py                     # same thing: thin wrapper around gateway.py for IDE terminals (forwards all flags)
 python gateway.py --port 5000 --speed 5.0 --no-browser   # --speed = telemetry replay multiplier
 ```
 
-Root launchers: `start_all.bat` / `start_all.ps1` (Windows), `start.sh` (devcontainer/Codespaces). All launchers and the devcontainer install from the root `requirements.txt` (there is none inside `NLP/nlp_task_ddr/`).
+Root launchers: `start_all.bat` / `start_all.ps1` (Windows: create `.venv` with `py -3.11`, reinstall only when `requirements.txt` changes, run the gateway with the venv interpreter), and `start.sh` (devcontainer/Codespaces, Python 3.11 image). Plain-language system guide: `Walkthrough.md`.
 
 Tests (no pytest config; `pytest` is in the root `requirements.txt`; run from `NLP/nlp_task_ddr/`):
 ```bash
-python -m pytest module3/ module4/                              # all unit tests
+python -m pytest module1/ module3/ module4/                     # all unit tests
 python -m pytest module3/test_leakage.py                        # zero-future-data-leakage regression suite
 python -m pytest module3/test_sequence_matcher.py::TestWilsonCI # single class
 python -m pytest module4/test_module4.py::test_graph_rag_retrieval
 ```
 Module 3 tests are `unittest` (also runnable as `python module3/test_x.py`); Module 4 uses pytest and imports `module4.*`, so the cwd must be `NLP/nlp_task_ddr`. Root-level `test_api.py`, `test_page_load.py`, `test_slash_wellids.py` are smoke scripts that hit a **running** gateway (`python test_api.py [base_url]`).
 
-Running a single module standalone: each accepts `--port`, e.g. `python module2/app.py --port 15001`, `python module3/simulator_server.py --port 15002 --speed 5`, `python module3/anomaly_server.py --port 15003 --simulator-url ws://localhost:15002/ws/telemetry`. `run_all_modules.py` is an older launcher using direct ports 5000–5005 without the gateway; prefer `gateway.py`.
+Running a single module standalone: each accepts `--port`, e.g. `python module1/server.py --port 15006`, `python module2/app.py --port 15001`, `python module3/simulator_server.py --port 15002 --speed 5`, `python module3/anomaly_server.py --port 15003 --simulator-url ws://localhost:15002/ws/telemetry`.
 
 ## Architecture
 
@@ -45,7 +46,8 @@ Running a single module standalone: each accepts `--port`, e.g. `python module2/
 | Gateway path | Backend |
 |---|---|
 | `/` | `dashboard/templates/dashboard.html` (served directly) |
-| `/module1`, `/module1/upload` | `module1/module1.html` — served directly; OCR is a **client-side simulation** |
+| `/module1` | `module1/module1.html` — served directly (live upload UI + client-side "Show Demo" simulation) |
+| `/module1/upload`, `/module1/jobs/{id}`, `/module1/health` | Module 1 ingestion server (FastAPI) :15006 — real OCR + hybrid NLP |
 | `/module2/*` | Module 2 Flask :15001 |
 | `/module3/monitor`, `/module3/anomaly/*`, `/module3/outputs/*`, `WS /ws/anomaly` | Module 3 anomaly server (FastAPI) :15003 |
 | `/module3/sim/*`, `WS /ws/telemetry` | Module 3 telemetry simulator (FastAPI) :15002 |
@@ -70,6 +72,13 @@ Gotchas:
 - Running the system must not dirty tracked files: live risk data and the Chroma runtime copy are git-ignored. If `git status` shows `chroma.sqlite3` or a risk file modified after a run, something is writing to the wrong path.
 - Path resolution is `Path(__file__)`-relative throughout; Module 4 inserts the project root on `sys.path` and imports `module4.*`, Module 3/5 insert their own directory.
 
+### Module 1 live ingestion (real OCR + hybrid NLP)
+- `module1/server.py` spawns two long-lived JSON-lines workers, `ocr_worker.py` (PaddleOCR; GPU if Paddle sees one) and `nlp_worker.py` (MiniLM; CPU is fine). Both use the **same interpreter** as the server; `NWIS_ML_PYTHON` is an optional override. They are separate processes because Paddle and torch must never be imported into one process. Keep `numpy<2` (paddle 2.6) and chromadb 1.x (the committed Chroma seed). The NLP pipeline uses **MiniLM only**; GLiNER and DeBERTa are optional candidates in the eval script and are not installed.
+- The rules live in `module1/nlp_rules.py`, moved verbatim out of `p1_full_pipeline.py` (which now runs behind `main()`). `module1/test_nlp_engine.py` asserts they still reproduce the committed `events.jsonl` exactly. The hybrid engine (`nlp_engine.py`) only augments them, and records keep the 15-key schema (`nlp_rules.EVENT_RECORD_KEYS`).
+- Uploads go to the git-ignored `results/module1_outputs/uploads/` and are **not** consumed by Modules 2–5. `p1_full_pipeline.py --nlp hybrid` writes to `results/module1_outputs_hybrid/`.
+- Model choice and the semantic margin (0.19) come from `module1/eval_model_selection.py`. Re-run it after editing `event_prototypes.py`. Without gliner/sentencepiece installed it skips those rows and writes `model_selection_partial.json`, so the committed full table is kept.
+- Tests: `python -m pytest module1/` (cwd `NLP/nlp_task_ddr`).
+
 ### Module 3 causal-safety invariant
 The headline result (+106.48 m early warning on 15/9-F-9A) depends on strict causality: detectors (Z-score + recursive CUSUM in `anomaly_detector.py`) and Smith-Waterman sequence matching with Wilson CIs (`sequence_matcher.py`) must only use data at or before the current row/depth, must exclude the target well from its own analog set, and must filter offset events deeper/later than the current point. `test_leakage.py` enforces this — run it after any change to Module 3.
 
@@ -78,6 +87,5 @@ The headline result (+106.48 m early warning on 15/9-F-9A) depends on strict cau
 - Module 5 agent (`agent/agent.py`): fallback chain Qwen2.5-72B via Hugging Face (`HF_TOKEN`) → Gemini (`GEMINI_API_KEY`) → deterministic local evidence synthesis (works fully offline). All paths return the same schema with citations. Config/env loaded from `module5_engineering_agent/.env` via `config.py`.
 
 ### Other directories
-- `NLP/nwis-sentinel/backend/` — early standalone FastAPI prototype with demo data; not launched by the gateway.
-- `NLP/volve_*.py`, `extract_10_ddrs.py` — one-off data download/extraction scripts.
-- `*.html.bak` files are stale template backups; edit the non-`.bak` versions.
+- `datasets/` — committed raw inputs (Volve DDR CSVs from HF `bengsoon/volve_alpaca`, FORCE 2020 xlsx, Volve F-9A telemetry) read by `p1_full_pipeline.py`.
+- `dashboard/templates/dashboard.html` is served directly by the gateway (there is no dashboard process).

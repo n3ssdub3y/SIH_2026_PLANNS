@@ -517,6 +517,49 @@
       font-size: 9px; color: var(--dim); letter-spacing: 0.4px;
     }
 
+    /* ── Live OCR percentage badge (on the document) ── */
+    #ocr-pct-badge {
+      position: absolute; top: 8px; right: 8px; z-index: 20;
+      font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+      padding: 4px 9px; border-radius: 10px;
+      color: var(--accent); background: rgba(2,6,16,0.85);
+      border: 1px solid rgba(0,229,255,0.45);
+      box-shadow: 0 0 10px rgba(0,229,255,0.25);
+      display: none;
+    }
+    #ocr-pct-badge.done  { color: var(--green); border-color: rgba(63,185,80,0.5); box-shadow: none; }
+    #ocr-pct-badge.error { color: var(--red);   border-color: rgba(248,81,73,0.5); box-shadow: none; }
+
+    /* ── Upload zone: secondary actions (sample file / demo) ── */
+    .uz-actions {
+      margin-top: 18px; padding-top: 14px;
+      border-top: 1px dashed rgba(0,229,255,0.15);
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center;
+    }
+    .uz-alt-btn {
+      font-family: var(--font); font-size: 10px; font-weight: 600; letter-spacing: 0.4px;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer;
+      background: transparent; color: var(--accent);
+      border: 1px solid rgba(0,229,255,0.35); transition: all 0.15s;
+    }
+    .uz-alt-btn:hover { background: rgba(0,229,255,0.08); border-color: var(--accent); }
+    .uz-alt-btn.demo { color: var(--purple); border-color: rgba(210,168,255,0.35); }
+    .uz-alt-btn.demo:hover { background: rgba(210,168,255,0.08); border-color: var(--purple); }
+    .uz-alt-note { font-size: 9px; color: var(--muted); }
+
+    /* ── Mode badge (LIVE vs DEMO) ── */
+    .mode-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
+      padding: 2px 8px; border-radius: 10px; margin-right: 10px; border: 1px solid;
+    }
+    .mode-badge.live { color: var(--green);  border-color: rgba(63,185,80,0.4);   background: rgba(63,185,80,0.08); }
+    .mode-badge.demo { color: var(--purple); border-color: rgba(210,168,255,0.4); background: rgba(210,168,255,0.08); }
+    .skip-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .skip-btn:disabled:hover { border-color: var(--border); color: var(--dim); }
+    .evt-method { font-size: 9px; color: var(--dim); }
+    .evt-method.semantic { color: var(--purple); }
+    .evt-method.both { color: var(--green); }
+
     /* scroll styling */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -596,8 +639,16 @@
         SELECT PDF FILE
       </button>
       <div class="uz-hint">
-        Demo: <strong style="color:var(--accent)">Utah_FORGE_DDRs.pdf</strong> (47 reports · 2.3 MB)
-        already loaded at <code>/assets/Utah_FORGE_DDRs.pdf</code>
+        Real OCR (PaddleOCR, GPU) → hybrid NLP (keyword/regex + MiniLM semantic typing) → events.jsonl schema
+      </div>
+      <div class="uz-actions">
+        <button class="uz-alt-btn" id="sample-btn" type="button">
+          ▶ Process sample: Utah_FORGE_DDRs.pdf (93 pages)
+        </button>
+        <button class="uz-alt-btn demo" id="demo-btn" type="button">
+          ◇ Show Demo
+        </button>
+        <span class="uz-alt-note">Show Demo = pre-recorded client-side simulation, no OCR is run</span>
       </div>
     </div>
   </div>
@@ -607,7 +658,7 @@
     <!-- Overall progress -->
     <div class="overall-progress">
       <div class="op-label">
-        <span id="stage-label">Stage 1/5 — Uploading</span>
+        <span><span class="mode-badge live" id="mode-badge">LIVE OCR</span><span id="stage-label">Stage 1/5 — Uploading</span></span>
         <span id="pct-label">0%</span>
       </div>
       <div class="op-bar"><div class="op-fill" id="op-fill"></div></div>
@@ -656,6 +707,8 @@
             <div id="ocr-scan-overlay"></div>
             <!-- Scan line -->
             <div id="ocr-scan-line"></div>
+            <!-- Live text-extraction percentage (real OCR mode only) -->
+            <div id="ocr-pct-badge">OCR 0%</div>
           </div>
           <div class="ocr-status">
             <span class="os-page" id="ocr-page-label">Page 1 / 47</span>
@@ -866,15 +919,466 @@
     <button class="rerun-btn" onclick="resetPipeline()">↺ Run Another Document</button>
   </div>
 
+  <!-- Live results panel (real OCR + NLP job) — filled from /module1/jobs/{id} -->
+  <div id="live-results-panel" style="display:none;">
+    <div class="results-header">
+      <div class="rh-icon">✅</div>
+      <div>
+        <div class="rh-title" id="lr-title">Extraction Complete</div>
+        <div class="rh-sub" id="lr-sub"></div>
+      </div>
+      <div class="rh-badge">PIPELINE COMPLETE</div>
+    </div>
+    <div class="stats-row" id="lr-stats"></div>
+    <div class="results-grid">
+      <div class="well-card">
+        <div class="well-card-header">📋 Well Metadata</div>
+        <div id="lr-meta"></div>
+      </div>
+      <div class="events-panel">
+        <div class="events-panel-header">
+          ⚡ Extracted Drilling Events
+          <span class="ecount" id="lr-ecount"></span>
+        </div>
+        <div style="overflow:auto;max-height:520px;">
+          <table class="events-tbl">
+            <thead>
+              <tr>
+                <th>EVENT_TYPE_ID</th><th>HAZARD</th><th>DEPTH</th><th>DATE</th>
+                <th>FORMATION</th><th>NPT</th><th>SEVERITY</th><th>CONF.</th><th>METHOD</th>
+              </tr>
+            </thead>
+            <tbody id="lr-events"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="schema-box">
+      <div class="schema-box-header">
+        <span>📦 Sample Event Record — events.jsonl schema (MODULE 1 OUTPUT FORMAT)</span>
+        <span style="color:var(--muted);font-size:9px;" id="lr-saved"></span>
+      </div>
+      <pre id="lr-json"></pre>
+    </div>
+    <button class="rerun-btn" onclick="resetPipeline()">↺ Run Another Document</button>
+  </div>
+
 </div><!-- /page -->
 
 <script>
 /* ──────────────────────────────────────────────────────────────────────────
-   Module 1 — Simulation Engine
-   Pipeline: Upload → OCR → Extraction → NLP → Structured
-   Total simulated time: ~12 seconds
+   Module 1 — two clearly separated paths share the same visuals:
+
+   LIVE  (upload / sample PDF)  POST /module1/upload -> real OCR (PaddleOCR)
+         + hybrid NLP on the server; the UI polls /module1/jobs/{id} and the
+         scan animation runs until the job finishes.
+   DEMO  ("Show Demo" button)   the original pre-recorded client-side
+         simulation: canned logs/tokens/entities, FORGE-58-32 results,
+         fixed ~12 s timeline, no server calls.
 ────────────────────────────────────────────────────────────────────────── */
 
+let mode = null;        // 'live' | 'demo'
+
+// ═══════════════════════════ SHARED DOM REFS ═════════════════════════════
+const uploadPanel  = document.getElementById('upload-panel');
+const processingPanel = document.getElementById('processing-panel');
+const resultsPanel = document.getElementById('results-panel');            // demo results
+const liveResultsPanel = document.getElementById('live-results-panel');   // live results
+const opFill       = document.getElementById('op-fill');
+const stageLabel   = document.getElementById('stage-label');
+const pctLabel     = document.getElementById('pct-label');
+const ocrScanLine  = document.getElementById('ocr-scan-line');
+const ocrOverlay   = document.getElementById('ocr-scan-overlay');
+const ocrProgressFill = document.getElementById('ocr-progress-fill');
+const ocrPageLabel = document.getElementById('ocr-page-label');
+const ocrChars     = document.getElementById('ocr-chars');
+const ocrPctBadge  = document.getElementById('ocr-pct-badge');
+const tokenStream  = document.getElementById('token-stream');
+const nlpPanel     = document.getElementById('nlp-panel');
+const nlpBox       = document.getElementById('nlp-box');
+const logTerminal  = document.getElementById('log-terminal');
+const timeRemaining = document.getElementById('time-remaining');
+const skipBtn      = document.getElementById('skip-btn');
+const modeBadge    = document.getElementById('mode-badge');
+
+// ── File upload handling (LIVE path) ──────────────────────────────────────
+const fileInput = document.getElementById('file-input');
+const uploadZone = document.getElementById('upload-zone');
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files && e.target.files[0]) startLive(e.target.files[0]);
+});
+uploadZone.addEventListener('click', e => {
+  if (e.target.closest('button')) return;
+  fileInput.click();
+});
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) startLive(f);
+});
+
+// Sample PDF -> same real OCR path
+document.getElementById('sample-btn').addEventListener('click', async e => {
+  e.stopPropagation();
+  try {
+    const r = await fetch('/assets/Utah_FORGE_DDRs.pdf');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    startLive(new File([blob], 'Utah_FORGE_DDRs.pdf', { type: 'application/pdf' }));
+  } catch (err) {
+    alert('Could not load the sample PDF: ' + err.message);
+  }
+});
+
+// Demo -> original client-side simulation, no server calls
+document.getElementById('demo-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  startDemo({ name: 'Utah_FORGE_DDRs.pdf', size: 2398112 });
+});
+
+function setModeBadge(m) {
+  modeBadge.className = 'mode-badge ' + m;
+  modeBadge.textContent = m === 'live' ? 'LIVE OCR' : 'DEMO · SIMULATED';
+}
+
+function setDots(curStage, allDone) {
+  for (let i = 0; i < 5; i++) {
+    const dot   = document.getElementById('dot-' + i);
+    const stage = document.getElementById('stage-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    if (allDone || i < curStage) {
+      dot.className   = 'pipe-dot done';
+      stage.className = 'pipe-stage done';
+      dot.textContent = '✓';
+      if (arrow) arrow.className = 'pipe-arrow done';
+    } else if (i === curStage) {
+      dot.className   = 'pipe-dot active';
+      stage.className = 'pipe-stage active';
+      dot.textContent = i + 1;
+      if (arrow) arrow.className = 'pipe-arrow';
+    } else {
+      dot.className   = 'pipe-dot';
+      stage.className = 'pipe-stage';
+      dot.textContent = i + 1;
+      if (arrow) arrow.className = 'pipe-arrow';
+    }
+  }
+}
+
+function addLog(cls, msg) {
+  const line = document.createElement('div');
+  line.className = `log-line log-${cls}`;
+  line.textContent = msg;
+  logTerminal.appendChild(line);
+  logTerminal.scrollTop = logTerminal.scrollHeight;
+}
+
+function addEntityRow(e) {
+  const row = document.createElement('div');
+  row.className = 'entity-row';
+  const tag = document.createElement('span');
+  tag.className = `entity-tag ${e.cls}`;
+  tag.textContent = e.tag;
+  const val = document.createElement('span');
+  val.className = 'entity-val';
+  val.textContent = e.val;
+  const conf = document.createElement('span');
+  conf.className = 'entity-conf';
+  conf.innerHTML = 'conf: <span></span>';
+  conf.querySelector('span').textContent = (e.conf != null ? Number(e.conf).toFixed(2) : '—');
+  row.append(tag, val, conf);
+  const placeholder = nlpPanel.querySelector('div');
+  if (placeholder && placeholder.textContent.includes('Awaiting')) placeholder.remove();
+  nlpPanel.appendChild(row);
+  while (nlpPanel.children.length > 14) nlpPanel.removeChild(nlpPanel.firstChild);
+}
+
+function appendTokens(list) {
+  const frag = document.createDocumentFragment();
+  for (const [cls, text] of list) {
+    const span = document.createElement('span');
+    span.className = cls;
+    span.textContent = text + ' ';
+    frag.appendChild(span);
+  }
+  tokenStream.insertBefore(frag, tokenStream.querySelector('.stream-fade'));
+  // keep the DOM small; the panel only shows the tail
+  while (tokenStream.children.length > 600) tokenStream.removeChild(tokenStream.firstChild);
+  tokenStream.scrollTop = tokenStream.scrollHeight;
+}
+
+function flashHighlights() {
+  const hl = ['pdf-hl-1', 'pdf-hl-2', 'pdf-hl-3'];
+  const which = hl[Math.floor(Math.random() * hl.length)];
+  const el = document.getElementById(which);
+  if (!el) return;
+  el.style.background = 'rgba(0,229,255,0.35)';
+  setTimeout(() => { el.style.background = 'rgba(0,229,255,0.15)'; }, 400);
+}
+
+// ═══════════════════════════════ LIVE PATH ════════════════════════════════
+const POLL_MS = 300;
+let live = null;   // {jobId, pollTimer, scanRaf, tokTimer, tokQueue, logSince, tokSince, entSince, done, result}
+
+function startLive(file) {
+  mode = 'live';
+  setModeBadge('live');
+  uploadPanel.style.display = 'none';
+  processingPanel.style.display = 'block';
+  skipBtn.disabled = true;
+  skipBtn.textContent = '⏭ Show results';
+  setDots(0, false);
+  stageLabel.textContent = 'Stage 1/5 — Uploading & verifying PDF';
+  ocrPctBadge.style.display = 'block';
+  ocrPctBadge.className = '';
+  ocrPctBadge.textContent = 'OCR 0%';
+  ocrPageLabel.textContent = 'Page 0 / …';
+
+  live = { jobId: null, pollTimer: null, scanRaf: null, tokTimer: null, tokQueue: [],
+           logSince: 0, tokSince: 0, entSince: 0, done: false, result: null,
+           pagesTotal: 0, pagesDone: 0, t0: performance.now() };
+
+  addLog('info', `[INIT]    Uploading ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)...`);
+  startLiveScan();
+  startLiveTokenDrip();
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fetch('/module1/upload', { method: 'POST', body: fd })
+    .then(async r => {
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.detail || ('HTTP ' + r.status));
+      return body;
+    })
+    .then(j => {
+      live.jobId = j.job_id;
+      live.pagesTotal = j.pages;
+      ocrPageLabel.textContent = `Page 0 / ${j.pages}`;
+      pollLive();
+    })
+    .catch(err => liveError('Upload failed: ' + err.message +
+                            ' — is the Module 1 server running? (see /module1/health)'));
+}
+
+// Continuous scan: one sweep per ~0.9 s, repeated until the job completes.
+function startLiveScan() {
+  let lastTs = null, sweep = 0;
+  function frame(ts) {
+    if (!live || live.done) return;
+    if (!lastTs) lastTs = ts;
+    const dt = ts - lastTs; lastTs = ts;
+    sweep += dt / 900;
+    if (sweep >= 1) { sweep = 0; flashHighlights(); }
+    const scanY = sweep * 100;
+    ocrScanLine.style.top = scanY + '%';
+    ocrOverlay.style.height = (100 - scanY) + '%';
+    // smooth remaining-time estimate during OCR
+    live.scanRaf = requestAnimationFrame(frame);
+  }
+  live.scanRaf = requestAnimationFrame(frame);
+}
+
+// Real OCR tokens are dripped into the stream at the same cadence as the demo.
+function startLiveTokenDrip() {
+  live.tokTimer = setInterval(() => {
+    if (!live || !live.tokQueue.length) return;
+    if (live.tokQueue.length > 300) live.tokQueue.splice(0, live.tokQueue.length - 300);
+    appendTokens(live.tokQueue.splice(0, 3));
+  }, 120);
+}
+
+function pollLive() {
+  if (!live || !live.jobId || live.done) return;
+  const q = `?log_since=${live.logSince}&tok_since=${live.tokSince}&ent_since=${live.entSince}`;
+  fetch(`/module1/jobs/${live.jobId}${q}`)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(applyLive)
+    .catch(err => {
+      addLog('warn', `[POLL]    ${err.message} — retrying`);
+      live.pollTimer = setTimeout(pollLive, 1500);
+    });
+}
+
+const STAGE_LABELS = {
+  upload:     'Stage 1/5 — Uploading & queueing PDF',
+  ocr:        'Stage 2/5 — OCR scanning',
+  extract:    'Stage 3/5 — Text segmentation & tokenisation',
+  nlp:        'Stage 4/5 — Hybrid NLP event classification',
+  structured: 'Stage 5/5 — Building structured output',
+  done:       'Complete ✓',
+};
+const STAGE_INDEX = { upload: 0, ocr: 1, extract: 2, nlp: 3, structured: 4, done: 5 };
+
+function applyLive(s) {
+  if (!live) return;
+  // incremental streams
+  s.log.forEach(([cls, msg]) => addLog(cls, msg));
+  live.logSince = s.log_total;
+  live.tokQueue.push(...s.tokens);
+  live.tokSince += s.tokens.length;
+  s.entities.forEach(addEntityRow);
+  live.entSince = s.ent_total;
+
+  // overall progress
+  const pct = Math.round(s.pct);
+  opFill.style.width = pct + '%';
+  pctLabel.textContent = pct + '%';
+  const si = STAGE_INDEX[s.stage] ?? 0;
+  let label = STAGE_LABELS[s.stage] || s.stage;
+  if (s.stage === 'ocr' && s.ocr_engine) label += ` (${s.ocr_engine}, ${s.pages_total} pages)`;
+  stageLabel.textContent = label;
+  setDots(Math.min(si, 4), s.stage === 'done');
+  if (si >= 3) nlpBox.style.opacity = '1';
+
+  // OCR progress on the document
+  const total = s.pages_total || live.pagesTotal || 0;
+  const ocrPct = total ? Math.round(100 * s.pages_done / total) : 0;
+  ocrProgressFill.style.width = ocrPct + '%';
+  ocrPageLabel.textContent = `Page ${s.pages_done} / ${total}`;
+  ocrChars.textContent = (s.chars || 0).toLocaleString() + ' chars';
+  if (s.stage === 'upload' || (s.stage === 'ocr' && s.pages_done === 0)) {
+    ocrPctBadge.textContent = s.status === 'queued' ? 'OCR queued…' : 'OCR 0% · warming up';
+  } else if (si <= 1) {
+    ocrPctBadge.textContent = `OCR ${ocrPct}% · page ${s.pages_done}/${total}`;
+  } else {
+    ocrPctBadge.className = 'done';
+    ocrPctBadge.textContent = `OCR 100% ✓ · ${total} pages`;
+  }
+
+  // remaining-time estimate from observed per-page rate
+  if (s.stage === 'ocr' && s.pages_done > 0 && total) {
+    const perPage = s.elapsed_s / s.pages_done;
+    const rem = Math.round(perPage * (total - s.pages_done));
+    timeRemaining.textContent = rem > 0 ? `~${rem}s OCR remaining` : '';
+  } else if (s.stage === 'nlp' && s.units_total) {
+    timeRemaining.textContent = `NLP: report ${s.units_done}/${s.units_total}`;
+  } else {
+    timeRemaining.textContent = '';
+  }
+
+  if (s.status === 'error') { liveError(s.error || 'job failed'); return; }
+  if (s.status === 'done') {
+    live.done = true;
+    live.result = s.result;
+    if (live.tokQueue.length) appendTokens(live.tokQueue.splice(0, live.tokQueue.length).slice(-120));
+    clearInterval(live.tokTimer);
+    skipBtn.disabled = false;
+    stageLabel.textContent = 'Complete ✓';
+    setTimeout(() => { if (mode === 'live' && live && live.done) showLiveResults(); }, 900);
+    return;
+  }
+  live.pollTimer = setTimeout(pollLive, POLL_MS);
+}
+
+function liveError(msg) {
+  if (!live) return;
+  live.done = true;
+  clearInterval(live.tokTimer);
+  cancelAnimationFrame(live.scanRaf);
+  addLog('warn', '[ERROR]   ' + msg);
+  ocrPctBadge.className = 'error';
+  ocrPctBadge.textContent = 'OCR ERROR';
+  stageLabel.textContent = 'Failed — see log';
+  skipBtn.disabled = false;
+  skipBtn.textContent = '↺ Back to upload';
+  skipBtn.onclick = () => { skipBtn.onclick = () => skipToResults(); resetPipeline(); };
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmtNum(v, d = 1) { return (v == null || v === '') ? '—' : Number(v).toLocaleString(undefined, { maximumFractionDigits: d }); }
+
+function jsonHighlight(obj) {
+  const keys = Object.keys(obj);
+  const pad = Math.max(...keys.map(k => k.length)) + 3;
+  const lines = keys.map((k, i) => {
+    const v = obj[k];
+    let vs;
+    if (v === null) vs = `<span class="json-bool">null</span>`;
+    else if (typeof v === 'number') vs = `<span class="json-num">${v}</span>`;
+    else if (typeof v === 'boolean') vs = `<span class="json-bool">${v}</span>`;
+    else vs = `<span class="json-str">${esc(JSON.stringify(v))}</span>`;
+    const key = `"${k}"`;
+    return `  <span class="json-key">${esc(key)}</span>:${' '.repeat(Math.max(1, pad - key.length))}${vs}${i < keys.length - 1 ? ',' : ''}`;
+  });
+  return `<span class="json-key">{</span>\n${lines.join('\n')}\n<span class="json-key">}</span>`;
+}
+
+function showLiveResults() {
+  const r = live.result;
+  if (!r) return;
+  const st = r.stats || {}, w = r.well || {}, nlp = r.nlp || {};
+  processingPanel.style.display = 'none';
+  liveResultsPanel.style.display = 'block';
+  liveResultsPanel.style.animation = 'fadeIn 0.5s ease both';
+
+  const wellName = w.well_name || w.well_id || 'Unknown well';
+  document.getElementById('lr-title').textContent = `Extraction Complete — ${wellName}`;
+  document.getElementById('lr-sub').textContent =
+    `${st.pages} pages · ${st.reports} reports · ${r.ocr_engine} on ${r.ocr_device} → hybrid NLP (${nlp.mode || 'keyword'}) · ${st.elapsed_s}s`;
+
+  const chips = [
+    [fmtNum(st.pages, 0), 'PAGES OCR\'D'],
+    [fmtNum(st.chars, 0), 'CHARS EXTRACTED'],
+    [fmtNum(st.tokens, 0), 'TOKENS'],
+    [fmtNum(st.reports, 0), 'REPORTS SEGMENTED'],
+    [`${fmtNum(st.hazard_events, 0)} / ${fmtNum(st.events, 0)}`, 'HAZARD / ALL EVENTS'],
+    [st.max_depth_m != null ? fmtNum(st.max_depth_m, 0) + ' m' : '—', 'MAX DEPTH'],
+    [st.avg_confidence != null ? Number(st.avg_confidence).toFixed(2) : '—', 'AVG CONFIDENCE'],
+    [fmtNum(st.total_npt_h, 1) + ' h', 'TOTAL NPT'],
+  ];
+  document.getElementById('lr-stats').innerHTML = chips.map(([v, l]) =>
+    `<div class="stat-chip"><div class="sc-val">${esc(v)}</div><div class="sc-label">${esc(l)}</div></div>`).join('');
+
+  const meta = [
+    ['well_id', w.well_id], ['well_name', w.well_name], ['operator', w.operator],
+    ['field', w.field], ['location', w.location], ['rig', w.rig],
+    ['spud_date', w.spud_date], ['reports_from', w.first_report_date], ['reports_to', w.last_report_date],
+    ['max_md', w.max_md_m != null ? `${fmtNum(w.max_md_m, 1)} m MD${w.max_md_ft != null ? ` (${fmtNum(w.max_md_ft, 0)} ft)` : ''}` : null],
+    ['source', 'uploaded_pdf_ocr'], ['ocr_engine', r.ocr_engine], ['ocr_device', r.ocr_device],
+    ['nlp_semantic', nlp.semantic_model], ['nlp_fields', nlp.field_extraction], ['nlp_device', nlp.device],
+    ['reports_ingested', `${st.reports} (PDF → structured)`], ['file', r.filename],
+  ].filter(([, v]) => v != null && v !== '');
+  document.getElementById('lr-meta').innerHTML = meta.map(([k, v]) =>
+    `<div class="well-meta-row"><div class="wm-key">${esc(k)}</div><div class="wm-val">${esc(v)}</div></div>`).join('');
+
+  const recs = r.records || [], ev = r.evidence || [];
+  const rows = recs.map((rec, i) => ({ rec, ev: ev[i] || {} }));
+  const hazard = rows.filter(x => x.rec.hazard !== 'none');
+  const routine = rows.length - hazard.length;
+  document.getElementById('lr-ecount').textContent =
+    `${hazard.length} hazard events · ${routine} routine reports · events.jsonl schema`;
+  const sevCls = s => s === 'critical' ? 'sev-critical' : (s === 'high' || s === 'medium') ? 'sev-high' : 'sev-low';
+  const show = hazard.length ? hazard : rows.slice(0, 50);
+  document.getElementById('lr-events').innerHTML = show.slice(0, 300).map(({ rec, ev }) => {
+    const c = Math.round(rec.confidence * 100);
+    const m = ev.method || 'keyword';
+    return `<tr title="${esc(rec.raw_text)}">
+      <td><span class="evt-id">${esc(rec.event_type_id)}</span></td>
+      <td>${esc(rec.hazard)}</td>
+      <td>${rec.depth_m ? fmtNum(rec.depth_m, 1) + ' m' : '—'}</td>
+      <td>${esc(rec.report_date)}</td>
+      <td>${esc(rec.formation_id)}</td>
+      <td>${fmtNum(rec.npt_hours, 1)} h</td>
+      <td><span class="${sevCls(rec.severity)}">${esc(String(rec.severity).toUpperCase())}</span></td>
+      <td><div class="conf-bar"><div class="conf-pip"><div class="conf-pip-fill" style="width:${c}%"></div></div>${rec.confidence.toFixed(2)}</div></td>
+      <td><span class="evt-method ${esc(m)}">${esc(m)}</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="9" style="color:var(--dim)">No events extracted.</td></tr>`;
+
+  const sample = (hazard[0] || rows[0] || {}).rec;
+  document.getElementById('lr-json').innerHTML = sample ? jsonHighlight(sample) : '';
+  document.getElementById('lr-saved').textContent = `saved: results/module1_outputs/uploads/${r.job_id}.jsonl`;
+}
+
+// ═══════════════════════════════ DEMO PATH ════════════════════════════════
+// Original simulation, unchanged except that its timers are scheduled when
+// the demo starts (they used to be scheduled at page load).
 const TOTAL_MS = 12000;
 
 // Stage timing (ms from start)
@@ -893,63 +1397,16 @@ let nlpInterval   = null;
 let scanAnimFrame = null;
 let logInterval   = null;
 let skipped       = false;
+let demoTimers    = [];
 
-// DOM refs
-const uploadPanel  = document.getElementById('upload-panel');
-const processingPanel = document.getElementById('processing-panel');
-const resultsPanel = document.getElementById('results-panel');
-const opFill       = document.getElementById('op-fill');
-const stageLabel   = document.getElementById('stage-label');
-const pctLabel     = document.getElementById('pct-label');
-const ocrScanLine  = document.getElementById('ocr-scan-line');
-const ocrOverlay   = document.getElementById('ocr-scan-overlay');
-const ocrProgressFill = document.getElementById('ocr-progress-fill');
-const ocrPageLabel = document.getElementById('ocr-page-label');
-const ocrChars     = document.getElementById('ocr-chars');
-const tokenStream  = document.getElementById('token-stream');
-const nlpPanel     = document.getElementById('nlp-panel');
-const nlpBox       = document.getElementById('nlp-box');
-const logTerminal  = document.getElementById('log-terminal');
-const timeRemaining = document.getElementById('time-remaining');
-
-// ── File upload handling ──────────────────────────────────────────────────
-const fileInput = document.getElementById('file-input');
-const uploadZone = document.getElementById('upload-zone');
-
-fileInput.addEventListener('change', e => {
-  if (e.target.files && e.target.files[0]) startPipeline(e.target.files[0]);
-});
-uploadZone.addEventListener('click', e => {
-  if (e.target.tagName !== 'BUTTON') fileInput.click();
-});
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f) startPipeline(f);
-});
-
-// Also allow clicking the "Utah_FORGE_DDRs.pdf" hint to demo instantly
-document.querySelector('.uz-hint').style.cursor = 'pointer';
-document.querySelector('.uz-hint').addEventListener('click', () => {
-  startPipeline({ name: 'Utah_FORGE_DDRs.pdf', size: 2398112 });
-});
-
-// ── Pipeline start ────────────────────────────────────────────────────────
-async function startPipeline(file) {
+function startDemo(file) {
+  mode = 'demo';
+  setModeBadge('demo');
   uploadPanel.style.display = 'none';
   processingPanel.style.display = 'block';
-
-  // Fire upload to gateway (non-blocking, simulated)
-  try {
-    const fd = new FormData();
-    if (file instanceof File) {
-      fd.append('file', file);
-      fetch('/module1/upload', { method: 'POST', body: fd }).catch(() => {});
-    }
-  } catch(_) {}
+  skipBtn.disabled = false;
+  skipBtn.textContent = '⏭ Skip to results';
+  ocrPctBadge.style.display = 'none';
 
   addLog('info', `[INIT]    PDF received: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`);
   addLog('ok',   '[HASH]    SHA-256: a7f3c9e1b2d84f60... (truncated)');
@@ -961,56 +1418,30 @@ async function startPipeline(file) {
   requestAnimationFrame(simTick);
   startScanAnimation();
   startTokenStream();
-  startLogStream();
+  scheduleDemoTimers();
 }
 
 // ── Main simulation tick ──────────────────────────────────────────────────
 function simTick(now) {
-  if (skipped) return;
+  if (skipped || mode !== 'demo') return;
   const elapsed = now - simStart;
   const progress = Math.min(elapsed / TOTAL_MS, 1.0);
 
-  // Update overall progress bar
   const pct = Math.round(progress * 100);
   opFill.style.width = pct + '%';
   pctLabel.textContent = pct + '%';
 
-  // Remaining time
   const remSec = Math.max(0, Math.round((TOTAL_MS - elapsed) / 1000));
   timeRemaining.textContent = remSec > 0 ? `~${remSec}s remaining` : '';
 
-  // Determine current stage
   const elapsedMs = elapsed;
   let curStage = 0;
   for (let i = 0; i < STAGES.length; i++) {
     if (elapsedMs >= STAGES[i].start) curStage = i;
   }
-
-  // Update stage label
   stageLabel.textContent = STAGES[curStage].label;
+  setDots(curStage, false);
 
-  // Update pipeline dots
-  for (let i = 0; i < 5; i++) {
-    const dot   = document.getElementById('dot-' + i);
-    const stage = document.getElementById('stage-' + i);
-    const arrow = document.getElementById('arrow-' + i);
-    if (i < curStage) {
-      dot.className   = 'pipe-dot done';
-      stage.className = 'pipe-stage done';
-      dot.textContent = '✓';
-      if (arrow) arrow.className = 'pipe-arrow done';
-    } else if (i === curStage) {
-      dot.className   = 'pipe-dot active';
-      stage.className = 'pipe-stage active';
-      dot.textContent = i + 1;
-    } else {
-      dot.className   = 'pipe-dot';
-      stage.className = 'pipe-stage';
-      dot.textContent = i + 1;
-    }
-  }
-
-  // Enable NLP box when stage 4 starts
   if (elapsedMs >= STAGES[3].start) {
     nlpBox.style.opacity = '1';
   }
@@ -1022,7 +1453,7 @@ function simTick(now) {
   }
 }
 
-// ── OCR scan line animation ───────────────────────────────────────────────
+// ── OCR scan line animation (demo) ────────────────────────────────────────
 let scanPage     = 1;
 let scanProgress = 0; // 0→1 per page
 let charCount    = 0;
@@ -1031,10 +1462,9 @@ const wrapEl = document.getElementById('ocr-canvas-wrap');
 
 function startScanAnimation() {
   let lastTs = null;
-  const wrapH = wrapEl.offsetHeight || 340;
 
   function scanFrame(ts) {
-    if (skipped) return;
+    if (skipped || mode !== 'demo') return;
     if (!lastTs) lastTs = ts;
     const dt = ts - lastTs;
     lastTs = ts;
@@ -1044,7 +1474,6 @@ function startScanAnimation() {
     if (scanProgress >= 1) {
       scanProgress = 0;
       scanPage = Math.min(scanPage + 1, 47);
-      // Flash highlights on new page
       flashHighlights();
     }
 
@@ -1066,16 +1495,7 @@ function startScanAnimation() {
   scanAnimFrame = requestAnimationFrame(scanFrame);
 }
 
-function flashHighlights() {
-  const hl = ['pdf-hl-1', 'pdf-hl-2', 'pdf-hl-3'];
-  const which = hl[Math.floor(Math.random() * hl.length)];
-  const el = document.getElementById(which);
-  if (!el) return;
-  el.style.background = 'rgba(0,229,255,0.35)';
-  setTimeout(() => { el.style.background = 'rgba(0,229,255,0.15)'; }, 400);
-}
-
-// ── Token stream ──────────────────────────────────────────────────────────
+// ── Token stream (demo) ───────────────────────────────────────────────────
 const TOKENS = [
   ['tok-date',  '2019-04-18'], ['tok', ' DDR-001 UTAH FORGE '],
   ['tok-depth', '1,482 m'], ['tok', ' Milford Volcanics '],
@@ -1116,7 +1536,7 @@ const TOKENS = [
 let tokIdx = 0;
 function startTokenStream() {
   tokenInterval = setInterval(() => {
-    if (skipped) { clearInterval(tokenInterval); return; }
+    if (skipped || mode !== 'demo') { clearInterval(tokenInterval); return; }
     const frag = document.createDocumentFragment();
     for (let i = 0; i < 3; i++) {
       const [cls, text] = TOKENS[tokIdx % TOKENS.length];
@@ -1131,7 +1551,7 @@ function startTokenStream() {
   }, 120);
 }
 
-// ── NLP entity display ────────────────────────────────────────────────────
+// ── NLP entity display (demo) ─────────────────────────────────────────────
 const NLP_ENTITIES = [
   { tag: 'DEPTH',    cls: 'tag-depth',  val: '1,842 m', conf: 0.97, delay: 8000  },
   { tag: 'EVENT',    cls: 'tag-event',  val: 'EVT_MUD_LOSS_PARTIAL', conf: 0.91, delay: 8300 },
@@ -1146,23 +1566,7 @@ const NLP_ENTITIES = [
   { tag: 'EVENT',    cls: 'tag-event',  val: 'EVT_TORQUE_UP', conf: 0.87, delay: 10300 },
 ];
 
-NLP_ENTITIES.forEach(e => {
-  setTimeout(() => {
-    if (skipped) return;
-    const row = document.createElement('div');
-    row.className = 'entity-row';
-    row.innerHTML = `
-      <span class="entity-tag ${e.cls}">${e.tag}</span>
-      <span class="entity-val">${e.val}</span>
-      <span class="entity-conf">conf: <span>${e.conf.toFixed(2)}</span></span>
-    `;
-    const placeholder = nlpPanel.querySelector('div');
-    if (placeholder && placeholder.textContent.includes('Awaiting')) placeholder.remove();
-    nlpPanel.appendChild(row);
-  }, e.delay);
-});
-
-// ── Log stream ────────────────────────────────────────────────────────────
+// ── Log stream (demo) ─────────────────────────────────────────────────────
 const LOG_LINES = [
   [1400,  'ok',   '[OCR]     PaddleOCR engine initialised (PP-OCRv4, GPU: CUDA)'],
   [1800,  'info', '[OCR]     Processing page 1/47 — 1,024×1,448 px'],
@@ -1189,48 +1593,49 @@ const LOG_LINES = [
   [11500, 'ok',   '[DONE]    Ready for downstream modules (M2–M5 integration pending).'],
 ];
 
-LOG_LINES.forEach(([delay, cls, msg]) => {
-  setTimeout(() => {
-    if (skipped) return;
-    addLog(cls, msg);
-  }, delay);
-});
-
-function addLog(cls, msg) {
-  const line = document.createElement('div');
-  line.className = `log-line log-${cls}`;
-  line.textContent = msg;
-  logTerminal.appendChild(line);
-  logTerminal.scrollTop = logTerminal.scrollHeight;
+function scheduleDemoTimers() {
+  demoTimers.forEach(clearTimeout);
+  demoTimers = [];
+  NLP_ENTITIES.forEach(e => {
+    demoTimers.push(setTimeout(() => {
+      if (skipped || mode !== 'demo') return;
+      addEntityRow(e);
+    }, e.delay));
+  });
+  LOG_LINES.forEach(([delay, cls, msg]) => {
+    demoTimers.push(setTimeout(() => {
+      if (skipped || mode !== 'demo') return;
+      addLog(cls, msg);
+    }, delay));
+  });
 }
 
 // ── Skip to results ───────────────────────────────────────────────────────
 function skipToResults() {
+  if (mode === 'live') {
+    if (live && live.done && live.result) showLiveResults();
+    return;
+  }
   skipped = true;
   cancelAnimationFrame(simRaf);
   cancelAnimationFrame(scanAnimFrame);
   clearInterval(tokenInterval);
   clearInterval(nlpInterval);
   clearInterval(logInterval);
+  demoTimers.forEach(clearTimeout);
   showResults();
 }
 
-// ── Show final results ────────────────────────────────────────────────────
+// ── Show final results (demo) ─────────────────────────────────────────────
 function showResults() {
-  // Mark all stages done
-  for (let i = 0; i < 5; i++) {
-    document.getElementById('dot-' + i).className   = 'pipe-dot done';
-    document.getElementById('stage-' + i).className = 'pipe-stage done';
-    document.getElementById('dot-' + i).textContent = '✓';
-    const arrow = document.getElementById('arrow-' + i);
-    if (arrow) arrow.className = 'pipe-arrow done';
-  }
+  setDots(5, true);
   opFill.style.width = '100%';
   pctLabel.textContent = '100%';
   stageLabel.textContent = 'Complete ✓';
   timeRemaining.textContent = '';
 
   setTimeout(() => {
+    if (mode !== 'demo') return;
     processingPanel.style.display = 'none';
     resultsPanel.style.display    = 'block';
     resultsPanel.style.animation  = 'fadeIn 0.5s ease both';
@@ -1238,20 +1643,27 @@ function showResults() {
 }
 
 function resetPipeline() {
+  // stop whichever path was running
+  skipped = true;
+  cancelAnimationFrame(simRaf);
+  cancelAnimationFrame(scanAnimFrame);
+  clearInterval(tokenInterval);
+  demoTimers.forEach(clearTimeout);
+  if (live) {
+    live.done = true;
+    clearTimeout(live.pollTimer);
+    clearInterval(live.tokTimer);
+    cancelAnimationFrame(live.scanRaf);
+    live = null;
+  }
+  mode = null;
+
   resultsPanel.style.display    = 'none';
+  liveResultsPanel.style.display = 'none';
   processingPanel.style.display = 'none';
   uploadPanel.style.display     = 'block';
 
-  // Reset pipeline UI
-  for (let i = 0; i < 5; i++) {
-    const dot   = document.getElementById('dot-' + i);
-    const stage = document.getElementById('stage-' + i);
-    const arrow = document.getElementById('arrow-' + i);
-    dot.className   = i === 0 ? 'pipe-dot active' : 'pipe-dot';
-    stage.className = i === 0 ? 'pipe-stage active' : 'pipe-stage';
-    dot.textContent = i + 1;
-    if (arrow) arrow.className = 'pipe-arrow';
-  }
+  setDots(0, false);
   opFill.style.width = '0%';
   pctLabel.textContent = '0%';
   stageLabel.textContent = 'Stage 1/5 — Uploading';
@@ -1264,6 +1676,11 @@ function resetPipeline() {
   ocrProgressFill.style.width = '0%';
   ocrPageLabel.textContent = 'Page 1 / 47';
   ocrChars.textContent = '0 chars';
+  ocrPctBadge.style.display = 'none';
+  ocrPctBadge.className = '';
+  timeRemaining.textContent = '';
+  skipBtn.disabled = false;
+  skipBtn.textContent = '⏭ Skip to results';
   fileInput.value = '';
   tokIdx = 0;
   scanPage = 1;
