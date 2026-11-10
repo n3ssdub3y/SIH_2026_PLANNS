@@ -171,8 +171,13 @@ module5_engineering_agent/
 ├── schemas/
 │   └── models.py              # Pydantic schemas (AskRequest, EvidenceItem, etc.)
 └── vector_store/
-    └── chroma_db/             # Pre-computed ChromaDB vector collection (2,022 events)
+    └── chroma_db/             # Tracked READ-ONLY seed: pre-computed ChromaDB collection (2,022 events)
 ```
+
+> **Seed vs. runtime copy:** the app never opens `vector_store/chroma_db/` directly (Chroma rewrites
+> `chroma.sqlite3` just by opening it, which would dirty the tracked file). On first start it copies
+> the seed to `NLP/nlp_task_ddr/data/runtime/chroma/` (git-ignored) and opens that copy. This needs no
+> network and no re-embedding, so a fresh clone works offline immediately.
 
 ### Offline & Fallback Chain
 
@@ -194,6 +199,7 @@ All three paths return the same response schema with citations and evidence item
   ```
 - **Verify vector database count**:
   Run `curl http://localhost:5000/module5/api/health` and verify `"events_in_store": 2022`.
+- **Reset the vector store to the shipped state**: stop the app, delete `NLP/nlp_task_ddr/data/runtime/chroma/`, and restart — it is re-copied from the tracked seed.
 - **LLM responses are generic / not using real model:**
   Set `HF_TOKEN` in `.env` or as an env var (see *Set API Tokens* section above).
 - **Gemini key configuration:**

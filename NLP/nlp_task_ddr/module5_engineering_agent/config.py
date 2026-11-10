@@ -35,12 +35,21 @@ M1_WELLS_METADATA     = NWIS_DATA_ROOT / "results" / "module1_outputs" / "wells_
 M1_FLAGGED_INCIDENTS  = NWIS_DATA_ROOT / "results" / "module1_outputs" / "flagged_real_incidents.json"
 M2_ANALOG_WELLS       = NWIS_DATA_ROOT / "module2" / "outputs" / "analog_wells.json"
 M2_AHP_WEIGHTS        = NWIS_DATA_ROOT / "module2" / "outputs" / "ahp_weights.json"
-M3_RISK_PREDICTIONS   = NWIS_DATA_ROOT / "results" / "module3_outputs" / "risk_predictions.jsonl"
-M3_SEQUENCE_MATCHES   = NWIS_DATA_ROOT / "results" / "module3_outputs" / "sequence_matches.json"
+# Module 3 outputs: single canonical location shared with Modules 3 and 4
+# (module3/outputs/). Do not point at results/module3_outputs/ — that copy drifts.
+M3_OUTPUTS_DIR        = NWIS_DATA_ROOT / "module3" / "outputs"
+M3_RISK_PREDICTIONS   = M3_OUTPUTS_DIR / "risk_predictions.jsonl"
+M3_SEQUENCE_MATCHES   = M3_OUTPUTS_DIR / "sequence_matches.json"
 
 # ── Chroma vector store ───────────────────────────────────────────────────────
+# Two locations on purpose:
+#   CHROMA_SEED_DIR    - git-tracked, read-only seed (2,022 pre-embedded events). Never opened
+#                        by the app, so runtime never dirties the tracked chroma.sqlite3.
+#   CHROMA_PERSIST_DIR - git-ignored runtime copy the app actually opens. Created from the
+#                        seed on first start (see retrieval/vector_store.py). Delete it to reset.
+CHROMA_SEED_DIR: str = str(_THIS_DIR / "vector_store" / "chroma_db")
 CHROMA_PERSIST_DIR: str = os.environ.get(
-    "CHROMA_PERSIST_DIR", str(_THIS_DIR / "vector_store" / "chroma_db")
+    "CHROMA_PERSIST_DIR", str(_REPO_ROOT / "data" / "runtime" / "chroma")
 )
 CHROMA_COLLECTION: str = "nwis_events"
 

@@ -17,8 +17,11 @@ Executes the definitive time-travel backtest of NWIS-Sentinel Module 3:
   6. Produces all Module 3 Step 5 deliverables:
        - backtest_result.json
        - backtest_plot.png
-       - risk_predictions.jsonl
+       - risk_predictions_backtest.jsonl   (committed seed; the live server writes
+                                            the separate, git-ignored risk_predictions_live.jsonl)
        - sequence_matches.json
+
+All deliverables are written to module3/outputs/ only (single canonical location).
 
 Usage
 -----
@@ -69,7 +72,7 @@ EVENTS_PATH = _PROJECT_ROOT / "results" / "module1_outputs" / "events.jsonl"
 ANALOG_WELLS_PATH = _PROJECT_ROOT / "module2" / "outputs" / "analog_wells.json"
 
 MODULE3_OUTPUTS_DIR = _MODULE3_DIR / "outputs"
-ROOT_OUTPUTS_DIR = _PROJECT_ROOT / "results" / "module3_outputs"
+RISK_PREDICTIONS_BACKTEST_FILENAME = "risk_predictions_backtest.jsonl"
 
 # Target well and confirmed incident configuration
 TARGET_WELL_ID = "15/9-F-9A"
@@ -440,31 +443,29 @@ def run_time_travel_backtest() -> Dict[str, Any]:
         "generated_deliverables": [
             "backtest_result.json",
             "backtest_plot.png",
-            "risk_predictions.jsonl",
+            RISK_PREDICTIONS_BACKTEST_FILENAME,
             "sequence_matches.json",
         ]
     }
 
-    # 7. Write Structured JSON Files to Disk
+    # 7. Write Structured JSON Files to Disk (single canonical location)
     MODULE3_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
-    ROOT_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    def write_payload_both_dirs(filename: str, content: str):
-        for out_dir in (MODULE3_OUTPUTS_DIR, ROOT_OUTPUTS_DIR):
-            p = out_dir / filename
-            with open(p, "w", encoding="utf-8") as f_out:
-                f_out.write(content)
-            logger.info("Saved %s -> %s", filename, p)
+    def write_payload(filename: str, content: str):
+        p = MODULE3_OUTPUTS_DIR / filename
+        with open(p, "w", encoding="utf-8") as f_out:
+            f_out.write(content)
+        logger.info("Saved %s -> %s", filename, p)
 
     # Write backtest_result.json
-    write_payload_both_dirs("backtest_result.json", json.dumps(backtest_result_payload, indent=2))
+    write_payload("backtest_result.json", json.dumps(backtest_result_payload, indent=2))
 
     # Write sequence_matches.json
-    write_payload_both_dirs("sequence_matches.json", json.dumps(sequence_matches_payload, indent=2))
+    write_payload("sequence_matches.json", json.dumps(sequence_matches_payload, indent=2))
 
-    # Write risk_predictions.jsonl
+    # Write risk_predictions_backtest.jsonl (never touched by the live server)
     predictions_jsonl = "\n".join(json.dumps(r) for r in risk_predictions) + "\n"
-    write_payload_both_dirs("risk_predictions.jsonl", predictions_jsonl)
+    write_payload(RISK_PREDICTIONS_BACKTEST_FILENAME, predictions_jsonl)
 
     # 8. Generate Presentation-Ready Visualization (backtest_plot.png)
     logger.info("Generating presentation-ready visualization backtest_plot.png...")
@@ -635,11 +636,9 @@ def generate_backtest_plot(
     ax2.set_ylim(0.0, 1.05)
     ax2.legend(loc="upper left", facecolor="#1E293B", edgecolor="#475569", labelcolor="#F1F5F9", fontsize=8.5)
 
-    # Save to both output paths
-    for out_dir in (MODULE3_OUTPUTS_DIR, ROOT_OUTPUTS_DIR):
-        plot_path = out_dir / "backtest_plot.png"
-        plt.savefig(plot_path, dpi=300, bbox_inches="tight", facecolor=fig.get_facecolor())
-        logger.info("Saved backtest plot -> %s", plot_path)
+    plot_path = MODULE3_OUTPUTS_DIR / "backtest_plot.png"
+    plt.savefig(plot_path, dpi=300, bbox_inches="tight", facecolor=fig.get_facecolor())
+    logger.info("Saved backtest plot -> %s", plot_path)
 
     plt.close(fig)
 

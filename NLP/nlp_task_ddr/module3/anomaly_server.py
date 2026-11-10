@@ -12,7 +12,9 @@ This server:
      (Smith-Waterman + Wilson CI) for each active hazard.
   4. Broadcasts both alerts and sequence-match results to connected UI clients
      via its own WebSocket (/ws/anomaly).
-  5. Writes results to module3/outputs/risk_predictions.jsonl.
+  5. Writes results to module3/outputs/risk_predictions_live.jsonl (git-ignored,
+     truncated on startup). The committed backtest stream lives separately in
+     risk_predictions_backtest.jsonl and is never modified by this server.
 
 Endpoints
 ---------
@@ -37,6 +39,7 @@ IMPORTANT: Start simulator_server.py (port 5002) BEFORE starting this server.
 import asyncio
 import json
 import logging
+import math
 import os
 import sys
 import argparse
@@ -77,7 +80,7 @@ TARGET_WELL_ID: str = "15/9-F-9A"    # current well being drilled
 # Outputs directory — created automatically
 _MODULE3_DIR = Path(__file__).resolve().parent
 OUTPUTS_DIR = _MODULE3_DIR / "outputs"
-RISK_PREDICTIONS_PATH = OUTPUTS_DIR / "risk_predictions.jsonl"
+RISK_PREDICTIONS_PATH = OUTPUTS_DIR / "risk_predictions_live.jsonl"
 
 
 # ── Global State ───────────────────────────────────────────────────────────────
@@ -158,27 +161,51 @@ def ensure_outputs_dir():
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
     logger.info("Outputs directory: %s", OUTPUTS_DIR)
     
-    # Clear the risk predictions log on startup to prevent infinite bloat
+    # Clear the live risk log on startup to prevent infinite bloat.
+    # (Only the live stream is cleared; risk_predictions_backtest.jsonl is untouched.)
     if RISK_PREDICTIONS_PATH.exists():
         try:
             RISK_PREDICTIONS_PATH.unlink()
-            logger.info("Cleared old risk_predictions.jsonl")
+            logger.info("Cleared old %s", RISK_PREDICTIONS_PATH.name)
         except Exception as e:
-            logger.warning("Could not clear risk_predictions.jsonl: %s", e)
+            logger.warning("Could not clear %s: %s", RISK_PREDICTIONS_PATH.name, e)
+
+
+def _current_depth_m() -> Optional[float]:
+    """Measured depth of the newest telemetry row in the rolling buffer, if numeric."""
+    if not telemetry_buffer:
+        return None
+    try:
+        depth = float(telemetry_buffer[-1].get("Measured Depth m"))
+    except (TypeError, ValueError):
+        return None
+    return round(depth, 3) if math.isfinite(depth) else None
 
 
 def append_risk_prediction(result: Dict[str, Any]):
-    """Append a hazard risk result to risk_predictions.jsonl."""
+    """
+    Append a hazard risk result to risk_predictions_live.jsonl.
+
+    The record deliberately mirrors the schema of the backtest stream
+    (risk_predictions_backtest.jsonl) so consumers such as Module 4's
+    get_latest_risk_data() can treat both sources identically:
+    measured_depth_m / row_index / actionable_threshold_crossed are populated here
+    as well. "Actionable" means risk level CRITICAL (Wilson centre >= 0.65),
+    the same boundary backtest_runner.ACTIONABLE_RISK_THRESHOLD uses.
+    """
     try:
         with open(RISK_PREDICTIONS_PATH, "a", encoding="utf-8") as f:
             record = {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "well_id": TARGET_WELL_ID,
+                "measured_depth_m": _current_depth_m(),
+                "row_index": row_count,
+                "actionable_threshold_crossed": result.get("risk_level") == "CRITICAL",
                 **result,
             }
             f.write(json.dumps(record) + "\n")
     except Exception as e:
-        logger.error("Failed to write risk_predictions.jsonl: %s", e)
+        logger.error("Failed to write %s: %s", RISK_PREDICTIONS_PATH.name, e)
 
 
 # ── Core Processing ───────────────────────────────────────────────────────────
@@ -222,7 +249,7 @@ def process_telemetry_row(row: Dict[str, Any]) -> List[Dict[str, Any]]:
 async def run_sequence_matching():
     """
     Run Smith-Waterman + Wilson CI for all hazards present in recent alerts.
-    Updates `latest_sequence_results` and writes to risk_predictions.jsonl.
+    Updates `latest_sequence_results` and writes to risk_predictions_live.jsonl.
     Broadcasts results to connected clients.
     """
     global latest_sequence_results

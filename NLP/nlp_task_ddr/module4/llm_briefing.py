@@ -32,6 +32,15 @@ logger = logging.getLogger("llm_briefing")
 _MODULE4_DIR = Path(__file__).resolve().parent
 OUTPUTS_DIR  = _MODULE4_DIR / "outputs"
 
+# Module 3 risk streams (both live in module3/outputs/):
+#   live     - written by anomaly_server.py while telemetry replays; git-ignored, may not exist
+#   backtest - written by backtest_runner.py; committed seed so a fresh clone works out of the box
+_MODULE3_OUTPUTS_DIR = _MODULE4_DIR.parent / "module3" / "outputs"
+RISK_LIVE_PATH     = _MODULE3_OUTPUTS_DIR / "risk_predictions_live.jsonl"
+RISK_BACKTEST_PATH = _MODULE3_OUTPUTS_DIR / "risk_predictions_backtest.jsonl"
+# A record is only usable as an immutable risk source if it carries all of these.
+RISK_REQUIRED_KEYS = ("risk_score", "risk_level", "wilson_ci")
+
 # Minimum keyword overlap required for a citation to PASS verification
 VERIFY_MIN_KEYWORD_OVERLAP = 1
 
@@ -503,6 +512,7 @@ class LLMBriefing:
             "hazard": hazard,
             "risk_score_from_module3": risk_data.get("risk_score"),
             "risk_level_from_module3": risk_data.get("risk_level"),
+            "risk_source": risk_data.get("risk_source"),
             "measured_depth_m": risk_data.get("measured_depth_m"),
             "wilson_ci": risk_data.get("wilson_ci", {}),
             "actionable_threshold_crossed": risk_data.get("actionable_threshold_crossed", False),
@@ -542,27 +552,43 @@ class LLMBriefing:
         ]
 
 
-def get_latest_risk_data(well_id: str, hazard: str) -> Optional[Dict]:
-    """
-    Read the latest risk prediction from Module 3's risk_predictions.jsonl
-    for the given (well_id, hazard).
-    This is the ONLY source of risk score numbers — the LLM never generates these.
-    """
-    _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-    risk_path = _PROJECT_ROOT / "module3" / "outputs" / "risk_predictions.jsonl"
-    if not risk_path.exists():
+def _latest_risk_record(path: Path, well_id: str, hazard: str) -> Optional[Dict]:
+    """Last complete record in a JSONL risk stream for (well_id, hazard), else None."""
+    if not path.exists():
         return None
 
     best = None
-    with open(risk_path, encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             try:
                 rec = json.loads(line)
-                if rec.get("well_id") == well_id and rec.get("hazard") == hazard:
-                    best = rec
             except Exception:
                 continue
+            if (
+                rec.get("well_id") == well_id
+                and rec.get("hazard") == hazard
+                and all(k in rec for k in RISK_REQUIRED_KEYS)
+            ):
+                best = rec
     return best
+
+
+def get_latest_risk_data(well_id: str, hazard: str) -> Optional[Dict]:
+    """
+    Read the latest Module 3 risk prediction for the given (well_id, hazard).
+
+    Source order: the live stream (risk_predictions_live.jsonl) first; if that file
+    is absent or has no complete record for this well/hazard, fall back to the
+    committed backtest stream (risk_predictions_backtest.jsonl). The returned dict is
+    a copy of the record plus "risk_source" ("live" | "backtest") for provenance.
+
+    This is the ONLY source of risk score numbers — the LLM never generates these.
+    """
+    for source, path in (("live", RISK_LIVE_PATH), ("backtest", RISK_BACKTEST_PATH)):
+        rec = _latest_risk_record(path, well_id, hazard)
+        if rec is not None:
+            return {**rec, "risk_source": source}
+    return None

@@ -36,3 +36,7 @@ winners_ppt.pdf
 .gitignore
 notes/Group_6_College_Authorization_letter-SIH-2026.pdf.docx.pdf
 notes/implementation_plan.md
+
+# Runtime-generated state (never commit)
+NLP/nlp_task_ddr/module3/outputs/risk_predictions_live.jsonl
+NLP/nlp_task_ddr/data/runtime/

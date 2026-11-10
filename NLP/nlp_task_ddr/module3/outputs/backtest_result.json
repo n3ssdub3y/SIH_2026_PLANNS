@@ -100,7 +100,7 @@
   "generated_deliverables": [
     "backtest_result.json",
     "backtest_plot.png",
-    "risk_predictions.jsonl",
+    "risk_predictions_backtest.jsonl",
     "sequence_matches.json"
   ]
 }

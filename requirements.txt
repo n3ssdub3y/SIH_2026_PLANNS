@@ -36,3 +36,6 @@ huggingface-hub>=0.20.0
 google-generativeai>=0.8.0
 google-genai>=2.0.0
 openai>=1.0.0
+
+# ── Testing (Module 4 test suite; Module 3 tests also run under pytest) ───────
+pytest>=7.0.0

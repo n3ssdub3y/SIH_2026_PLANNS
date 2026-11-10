@@ -86,7 +86,7 @@ graph TD
         M3_DET["AnomalyDetector\nanomaly_detector.py\nZ-Score + CUSUM"]
         M3_SEQ["Sequence Matcher\nsequence_matcher.py\nSmith-Waterman + Wilson CI"]
         M3_ANO["Anomaly Server\nanomaly_server.py :15003"]
-        M3_OUT["Module 3 Outputs\nrisk_predictions.jsonl\nbacktest_result.json\nsequence_matches.json"]
+        M3_OUT["Module 3 Outputs (module3/outputs/)\nrisk_predictions_backtest.jsonl (committed)\nrisk_predictions_live.jsonl (git-ignored)\nbacktest_result.json\nsequence_matches.json"]
     end
 
     subgraph "MODULE 4 — Knowledge Graph & AI :15004"
@@ -475,12 +475,23 @@ graph TD
             WCI --> RISK["Risk Level\nLOW/MEDIUM/HIGH/CRITICAL"]
         end
 
-        RISK --> OUT["risk_predictions.jsonl"]
+        RISK --> OUT["risk_predictions_live.jsonl\n(git-ignored, truncated on start)"]
         RISK --> WS_ANO["/ws/anomaly\nbroadcast to UI clients"]
         WS_ANO --> UI["monitor.html\nLive Dashboard"]
         REST_ANO["REST API\n/api/anomaly/status\n/api/anomaly/alerts\n/api/anomaly/buffer/stats\n/api/sequence/match/latest"] --> AH & BUFF
     end
 ```
+
+#### 6.2.1 Risk-prediction streams and output location
+
+All Module 3 deliverables live in **one** directory, `module3/outputs/` (the former duplicate under `results/module3_outputs/` was removed). Risk predictions are split into two JSONL streams with distinct writers:
+
+| Stream | Writer | Tracked in git? | Lifecycle |
+|--------|--------|-----------------|-----------|
+| `risk_predictions_backtest.jsonl` | `backtest_runner.py` (offline replay, 662 causal evaluations of 15/9-F-9A `stuck_pipe`) | **Yes** — committed seed, so the +106.48 m headline data works on a fresh clone | Regenerated only by re-running the backtest |
+| `risk_predictions_live.jsonl` | `anomaly_server.py` (`append_risk_prediction`, every 25 replayed rows) | **No** (`.gitignore`) | Truncated on every anomaly-server start; never touches the backtest stream |
+
+Both streams share one record schema: the live record is a structural superset of the backtest record (`measured_depth_m`, `row_index` and `actionable_threshold_crossed` are populated by the live writer too; "actionable" = risk level `CRITICAL`, i.e. Wilson centre ≥ 0.65). `module3/test_risk_streams.py` enforces this with real `SequenceMatcher` output. Consumers: Module 4 `get_latest_risk_data()` (live first, backtest fallback — see §7.6) and the `monitor.html` backtest table (reads the backtest stream, `outputs/risk_predictions_backtest.jsonl`).
 
 ### 6.3 Anomaly Detection Engine (`anomaly_detector.py`)
 
@@ -630,7 +641,7 @@ graph TD
     subgraph "Inputs from upstream modules"
         M1["wells_metadata.json\nevents.jsonl\nevent_type_vocabulary.json"]
         M2["analog_wells.json"]
-        M3["risk_predictions.jsonl"]
+        M3["risk_predictions_live.jsonl (preferred)\nrisk_predictions_backtest.jsonl (fallback)"]
     end
 
     subgraph "knowledge_graph.py — Part A"
@@ -655,7 +666,7 @@ graph TD
     end
 
     subgraph "llm_briefing.py — Part C (LLM Priority Chain)"
-        M3 --> RD["get_latest_risk_data\nread risk_predictions.jsonl"]
+        M3 --> RD["get_latest_risk_data\nlive stream first, backtest fallback"]
         TOPK --> PROMPT["_build_prompt\nforced-citation prompt\nIMMUTABLE risk values"]
         RD --> PROMPT
         PROMPT --> ATTEMPT1["Attempt 1:\ngoogle.genai Client\ngemini-2.5-flash → 2.0-flash → 1.5-flash"]
@@ -746,7 +757,7 @@ sequenceDiagram
 
 The briefing engine enforces five hard rules, regardless of whether Gemini or the local synthesis engine is used:
 
-1. **LLM never generates the risk score** — injected from `risk_predictions.jsonl` (Module 3) as immutable values
+1. **LLM never generates the risk score** — injected from Module 3's risk streams as immutable values. `get_latest_risk_data(well_id, hazard)` returns the last *complete* record (must carry `risk_score`, `risk_level`, `wilson_ci`) from `risk_predictions_live.jsonl`; if that file is absent or has no complete record for the well/hazard it falls back to the committed `risk_predictions_backtest.jsonl`. The returned record carries `risk_source` (`live` | `backtest`), which is also stored in the saved briefing
 2. **Every factual sentence must cite a [NODE_ID]** from the knowledge graph
 3. **Auto-verification pass** — every cited node_id is checked for keyword overlap with the sentence
 4. **Failed citations are flagged** (not silently removed) in the `verification_details` field
@@ -759,7 +770,7 @@ The briefing engine enforces five hard rules, regardless of whether Gemini or th
 
 ```mermaid
 flowchart LR
-    M3_RISK["risk_predictions.jsonl\nIMMUTABLE risk values"] --> PROMPT
+    M3_RISK["risk_predictions_live / _backtest .jsonl\nIMMUTABLE risk values"] --> PROMPT
     RAG_RESULTS["GraphRAG top-K snippets\n+ analog well AHP scores"] --> PROMPT
     PROMPT["Build Prompt\n_build_prompt"] --> ATTEMPT1["Attempt 1\ngemini-2.5/2.0/1.5-flash"]
     ATTEMPT1 -->|"no key or fail"| ATTEMPT2["Attempt 2\nLegacy gemini"]
@@ -842,7 +853,8 @@ graph TD
 
     subgraph "retrieval/ — VectorStore + Retriever"
         DA --> VS["VectorStore\nchromadb.PersistentClient\nnwis_events collection"]
-        VS -->|"upsert at first launch"| CHROMA[("ChromaDB\nvector_store/chroma_db/\n~2,022 records")]
+        SEED[("Tracked seed (never opened)\nvector_store/chroma_db/\n~2,022 records")] -->|"copied once if runtime store missing\nensure_runtime_store()"| CHROMA[("Runtime store (git-ignored)\ndata/runtime/chroma/")]
+        VS -->|"opens runtime copy;\nupserts only if empty"| CHROMA
         GET_ANALOGS --> FILT["where_filter\nwell_id: $in analog_ids"]
         CHROMA --> SEARCH["collection.query\nquery_texts + where_filter\ntop_k=10"]
         FILT --> SEARCH
@@ -865,6 +877,10 @@ graph TD
         HEALTH["GET /api/health"] --> COUNT["collection.count\n+ model name"]
     end
 ```
+
+#### 8.3.1 Vector store: tracked seed vs. runtime copy
+
+Opening a Chroma store rewrites `chroma.sqlite3` even for read-only use, so the app never opens the tracked store. `config.py` defines two locations: `CHROMA_SEED_DIR` (`module5_engineering_agent/vector_store/chroma_db/`, committed, read-only, 2,022 pre-embedded events — a fresh clone works offline with no embedding step) and `CHROMA_PERSIST_DIR` (`data/runtime/chroma/`, git-ignored; overridable via env var). On first start `retrieval/vector_store.py::ensure_runtime_store()` copies the seed into a temp sibling directory and atomically renames it into place, so an interrupted copy cannot leave a half-populated store. To reset runtime state, delete `data/runtime/chroma/`. If the seed is missing, Chroma starts empty and `Retriever` repopulates it from the Module 1 events (previous behaviour). Covered by `module5_engineering_agent/test_vector_store.py`, including a check that opening the runtime copy leaves the seed's bytes unchanged.
 
 ### 8.4 Request/Response Data Flow
 
@@ -967,8 +983,8 @@ graph TD
     M2 -->|"analog_wells.json"| M5["Module 5\nAgent"]
 
     M3_SIM["M3 Simulator\n:15002"] -->|"WebSocket telemetry rows"| M3_ANO["M3 Anomaly Server\n:15003"]
-    M3_ANO -->|"risk_predictions.jsonl"| M4
-    M3_ANO -->|"backtest_result.json"| M4
+    M3_ANO -->|"risk_predictions_live.jsonl"| M4
+    M3_BT["M3 Backtest Runner\n(offline)"] -->|"risk_predictions_backtest.jsonl\nbacktest_result.json"| M4
 
     M4 -->|"GraphRAG results"| M4_LLM["M4 LLM Briefing"]
     M4_LLM -->|"BRF_*.json briefings"| M4_UI["M4 Browser UI"]
@@ -1281,11 +1297,12 @@ SIH_2026_PLANNS/
     │   ├── anomaly_server.py               ← FastAPI app :15003
     │   ├── backtest_runner.py              ← Time-travel backtest engine
     │   ├── monitor.html                    ← Live dashboard UI
-    │   ├── test_anomaly.py / test_leakage.py / test_sequence_matcher.py / test_simulator.py
-    │   └── outputs/
+    │   ├── test_anomaly.py / test_leakage.py / test_sequence_matcher.py / test_simulator.py / test_risk_streams.py
+    │   └── outputs/                        ← single canonical Module 3 output location
     │       ├── backtest_result.json        ← +106.48 m early warning result
     │       ├── backtest_plot.png           ← Matplotlib risk timeline
-    │       ├── risk_predictions.jsonl      ← Live per-row risk scores (~37 MB)
+    │       ├── risk_predictions_backtest.jsonl ← 662 backtest evaluations (committed seed, ~3.3 MB)
+    │       ├── risk_predictions_live.jsonl ← Live risk scores (git-ignored, reset on server start)
     │       └── sequence_matches.json       ← Historical alignment records
     │
     ├── module4/                            ← Port 15004 internal (Flask)
@@ -1293,7 +1310,7 @@ SIH_2026_PLANNS/
     │   ├── graph_rag.py                    ← GraphRAG two-stage retrieval
     │   ├── llm_briefing.py                 ← Gemini → legacy → local citation-forced briefing
     │   ├── app.py                          ← Flask REST + UI server
-    │   ├── test_module4.py                 ← 14 automated tests
+    │   ├── test_module4.py                 ← automated tests (graph, GraphRAG, briefing, risk-source precedence, REST)
     │   ├── templates/
     │   │   ├── module4.html                ← Vis.js graph UI
     │   │   └── vis-network.min.js          ← Bundled offline (no CDN)
@@ -1310,13 +1327,15 @@ SIH_2026_PLANNS/
         │   └── prompts.py                  ← System prompt + context builder
         ├── retrieval/
         │   ├── retriever.py                ← Analog lookup + ChromaDB vector search
-        │   └── vector_store.py             ← ChromaDB VectorStore wrapper
+        │   └── vector_store.py             ← ChromaDB VectorStore wrapper + seed→runtime copy
         ├── ingestion/
         │   └── data_adapter.py             ← M1/M2 data loader
         ├── schemas/
         │   └── models.py                   ← Pydantic data models
         ├── templates/module5.html          ← Dark console UI
-        └── vector_store/chroma_db/         ← ChromaDB persistent storage (~2,022 records)
+        ├── test_vector_store.py            ← seed→runtime copy tests
+        └── vector_store/chroma_db/         ← Tracked read-only ChromaDB seed (~2,022 records);
+                                              runtime copy lives in ../data/runtime/chroma/ (git-ignored)
 ```
 
 ---

@@ -218,7 +218,8 @@ def api_generate_briefing():
             "wilson_ci": {},
             "measured_depth_m": None,
             "actionable_threshold_crossed": False,
-            "note": "No live risk data found in risk_predictions.jsonl for this well/hazard.",
+            "risk_source": None,
+            "note": "No risk data found in risk_predictions_live.jsonl or risk_predictions_backtest.jsonl for this well/hazard.",
         }
 
     # Step 2: GraphRAG retrieval

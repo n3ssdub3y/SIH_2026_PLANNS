@@ -896,7 +896,7 @@
               </a>
             </div>
             <div class="plot-frame">
-              <img id="backtest-img" src="outputs/backtest_plot.png" alt="NWIS-Sentinel Module 3 Historical Backtest Plot" onerror="this.src='results/module3_outputs/backtest_plot.png'"/>
+              <img id="backtest-img" src="outputs/backtest_plot.png" alt="NWIS-Sentinel Module 3 Historical Backtest Plot" onerror="this.onerror=null; this.src='/module3/outputs/backtest_plot.png'"/>
             </div>
           </div>
 
@@ -1310,7 +1310,7 @@
         status.textContent = "Wilson Score 95% Confidence Intervals";
         container.innerHTML = '<div style="color:var(--text-muted);padding:14px;text-align:center;">Loading risk predictions table...</div>';
 
-        fetch('outputs/risk_predictions.jsonl')
+        fetch('outputs/risk_predictions_backtest.jsonl')
           .then(r => r.text())
           .then(text => {
             const lines = text.trim().split('\n').filter(Boolean);
@@ -1354,7 +1354,7 @@
                 </tbody>
               </table>
               <div style="font-size:10.5px; color:var(--text-muted); margin-top:8px; text-align:right;">
-                Showing representative records from 662 causal evaluations in <code>risk_predictions.jsonl</code>.
+                Showing representative records from 662 causal evaluations in <code>risk_predictions_backtest.jsonl</code>.
               </div>
             `;
           })

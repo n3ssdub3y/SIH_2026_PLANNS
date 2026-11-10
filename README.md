@@ -347,7 +347,7 @@ SIH_2026_PLANNS/
         ├── templates/module5.html     ← Engineering conversational console
         ├── agent/agent.py             ← Qwen 2.5-72B & Gemini fallback agent
         ├── retrieval/retriever.py     ← AHP-constrained vector search
-        └── vector_store/chroma_db/    ← Embedded ChromaDB (2,022 records)
+        └── vector_store/chroma_db/    ← Read-only ChromaDB seed (2,022 records); runtime copy in data/runtime/chroma/
 ```
 
 ---

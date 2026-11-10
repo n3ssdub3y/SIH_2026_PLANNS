@@ -7,6 +7,7 @@ import json
 import pytest
 from pathlib import Path
 
+from module4 import llm_briefing
 from module4.knowledge_graph import load_graph, get_well_subgraph, get_graph_stats
 from module4.graph_rag import GraphRAG
 from module4.llm_briefing import (
@@ -135,14 +136,94 @@ def test_citation_keyword_verification(graph):
 # ── 4. Risk Data Integration (PS Rules) ──────────────────────────────────────
 
 def test_latest_risk_data_retrieval():
-    """Verify Module 3 risk data is accurately loaded and contains Wilson CI."""
+    """
+    Module 3 risk data must load on a fresh clone (no live file) via the committed
+    backtest stream, and must carry the Wilson CI whichever source served it.
+    """
     risk = get_latest_risk_data("15/9-F-9A", "stuck_pipe")
-    if risk is not None:
-        assert "risk_score" in risk
-        assert "risk_level" in risk
-        assert "wilson_ci" in risk
-        assert "lower" in risk["wilson_ci"]
-        assert "upper" in risk["wilson_ci"]
+    assert risk is not None, (
+        "No risk data for 15/9-F-9A/stuck_pipe: neither risk_predictions_live.jsonl nor the "
+        "committed risk_predictions_backtest.jsonl yielded a complete record"
+    )
+    assert risk["risk_source"] in ("live", "backtest")
+    for key in llm_briefing.RISK_REQUIRED_KEYS:
+        assert key in risk
+    assert "lower" in risk["wilson_ci"]
+    assert "upper" in risk["wilson_ci"]
+
+
+# Risk-source precedence: live stream first, backtest stream as fallback.
+
+def _risk_rec(**overrides):
+    rec = {
+        "well_id": "W-TEST", "hazard": "stuck_pipe",
+        "risk_score": 0.5, "risk_level": "HIGH",
+        "wilson_ci": {"lower": 0.2, "center": 0.5, "upper": 0.8},
+    }
+    rec.update(overrides)
+    return rec
+
+
+def _write_jsonl(path, records):
+    path.write_text("\n".join(json.dumps(r) for r in records) + "\n", encoding="utf-8")
+
+
+@pytest.fixture
+def risk_paths(tmp_path, monkeypatch):
+    live, backtest = tmp_path / "live.jsonl", tmp_path / "backtest.jsonl"
+    monkeypatch.setattr(llm_briefing, "RISK_LIVE_PATH", live)
+    monkeypatch.setattr(llm_briefing, "RISK_BACKTEST_PATH", backtest)
+    return live, backtest
+
+
+def test_risk_reader_prefers_live_stream(risk_paths):
+    live, backtest = risk_paths
+    _write_jsonl(live, [_risk_rec(risk_score=0.9, risk_level="CRITICAL")])
+    _write_jsonl(backtest, [_risk_rec(risk_score=0.1, risk_level="LOW")])
+    risk = get_latest_risk_data("W-TEST", "stuck_pipe")
+    assert risk["risk_source"] == "live"
+    assert risk["risk_score"] == 0.9
+
+
+def test_risk_reader_falls_back_when_live_file_missing(risk_paths):
+    _, backtest = risk_paths
+    _write_jsonl(backtest, [_risk_rec(risk_score=0.1, risk_level="LOW")])
+    risk = get_latest_risk_data("W-TEST", "stuck_pipe")
+    assert risk["risk_source"] == "backtest"
+    assert risk["risk_score"] == 0.1
+
+
+def test_risk_reader_falls_back_when_live_lacks_well_or_hazard(risk_paths):
+    live, backtest = risk_paths
+    _write_jsonl(live, [_risk_rec(hazard="torque_spike"), _risk_rec(well_id="OTHER")])
+    _write_jsonl(backtest, [_risk_rec(risk_score=0.3)])
+    risk = get_latest_risk_data("W-TEST", "stuck_pipe")
+    assert risk["risk_source"] == "backtest"
+    # ...while a hazard that only the live stream has is still served live
+    assert get_latest_risk_data("W-TEST", "torque_spike")["risk_source"] == "live"
+
+
+def test_risk_reader_skips_incomplete_live_record(risk_paths):
+    live, backtest = risk_paths
+    incomplete = _risk_rec()
+    del incomplete["wilson_ci"]
+    _write_jsonl(live, [incomplete])
+    _write_jsonl(backtest, [_risk_rec(risk_score=0.3)])
+    assert get_latest_risk_data("W-TEST", "stuck_pipe")["risk_source"] == "backtest"
+
+
+def test_risk_reader_returns_last_matching_record_and_tolerates_bad_lines(risk_paths):
+    live, _ = risk_paths
+    live.write_text(
+        json.dumps(_risk_rec(risk_score=0.2)) + "\nnot-json\n\n"
+        + json.dumps(_risk_rec(risk_score=0.7)) + "\n",
+        encoding="utf-8",
+    )
+    assert get_latest_risk_data("W-TEST", "stuck_pipe")["risk_score"] == 0.7
+
+
+def test_risk_reader_returns_none_when_no_stream_matches(risk_paths):
+    assert get_latest_risk_data("W-TEST", "stuck_pipe") is None
 
 
 def test_briefing_prompt_generation():
