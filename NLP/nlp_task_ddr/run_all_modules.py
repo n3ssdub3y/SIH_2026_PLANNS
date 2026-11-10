@@ -22,6 +22,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent              # NLP/nlp_task_ddr
 REPO_DIR = BASE_DIR.parent.parent
 
+# ANSI helpers (minimal, same palette as gateway.py)
+def _c(code: str, text: str) -> str:
+    return f"\033[{code}m{text}\033[0m"
+
 
 def _has_deps(python):
     r = subprocess.run([str(python), "-c", "import fastapi, uvicorn, flask"],
@@ -34,11 +38,16 @@ def pick_python():
         return sys.executable
     venv_py = REPO_DIR / (".venv/Scripts/python.exe" if sys.platform == "win32" else ".venv/bin/python")
     if venv_py.exists() and _has_deps(venv_py):
-        print(f"[run_all_modules] {sys.executable} lacks the dependencies; using {venv_py}")
+        print(_c("90", "  ⬡  env  ") +
+              _c("93", "Active interpreter lacks deps") +
+              _c("90", "  →  using .venv"))
         return str(venv_py)
-    sys.exit("Dependencies are missing. Create a Python 3.10/3.11 venv and run:\n"
-             "    pip install -r requirements.txt\n"
-             "(or just double-click start_all.bat, which does this for you)")
+    sys.exit(
+        "\033[91m  ✖  Dependencies missing.\033[0m\n"
+        "     Create a Python 3.10/3.11 venv and run:\n"
+        "       pip install -r requirements.txt\n"
+        "     (or double-click start_all.bat)"
+    )
 
 
 def main():
@@ -50,7 +59,7 @@ def main():
     except KeyboardInterrupt:
         # Ctrl+C is delivered to the whole console group, so the gateway is already
         # shutting its modules down; give it time to finish.
-        print("\n[run_all_modules] Ctrl+C - stopping all modules...")
+        print(_c("93", "\n  ⬡  CTRL+C received — waiting for shutdown …"))
         try:
             proc.wait(timeout=20)
         except (subprocess.TimeoutExpired, KeyboardInterrupt):

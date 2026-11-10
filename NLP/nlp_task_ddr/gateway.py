@@ -24,7 +24,7 @@ Usage:
   python gateway.py
   python gateway.py --port 5000 --speed 5.0 --no-browser
 """
-
+import textwrap
 import argparse
 import asyncio
 import logging
@@ -45,7 +45,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # -- Paths -------------------------------------------------------------------
-BASE_DIR   = Path(__file__).resolve().parent
+BASE_DIR   = Path(__file__).resolve().parent              # NLP/nlp_task_ddr
 PYTHON_EXE = sys.executable
 LOGS_DIR   = BASE_DIR / "logs"
 
@@ -59,12 +59,134 @@ INTERNAL = {
     "module1":         15006,
 }
 
-# -- Logging -----------------------------------------------------------------
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
-logger = logging.getLogger("gateway")
+# ---------------------------------------------------------------------------
+# Silence noisy third-party loggers — only let gateway's own messages through
+# ---------------------------------------------------------------------------
+logging.basicConfig(level=logging.WARNING)
+for _noisy in ("uvicorn", "uvicorn.error", "uvicorn.access",
+               "httpx", "httpcore", "websockets", "fastapi"):
+    logging.getLogger(_noisy).setLevel(logging.CRITICAL)
+_gw_logger = logging.getLogger("gateway")
+_gw_logger.setLevel(logging.WARNING)
+
+# ---------------------------------------------------------------------------
+# ANSI colour helpers
+# ---------------------------------------------------------------------------
+_C = {
+    "reset":   "\033[0m",
+    "bold":    "\033[1m",
+    "dim":     "\033[2m",
+    "cyan":    "\033[96m",
+    "blue":    "\033[94m",
+    "green":   "\033[92m",
+    "yellow":  "\033[93m",
+    "red":     "\033[91m",
+    "white":   "\033[97m",
+    "grey":    "\033[90m",
+    "magenta": "\033[95m",
+}
+
+def _c(color: str, text: str) -> str:
+    return f"{_C.get(color, '')}{text}{_C['reset']}"
+
+W = 90  # inner box width
+
+
+def _banner(port: int, speed: float) -> None:
+    print()
+    print(_c("blue",   "╔" + "═" * W + "╗"))
+    title = "⬡  NWIS-SENTINEL  ·  SIH 2026  ·  PS SIH26121  ·  GATEWAY  ⬡"
+    print(_c("blue",   "║") +
+          _c("cyan", _c("bold", title.center(W))) +
+          _c("blue",   "║"))
+    print(_c("blue",   "╠" + "═" * W + "╣"))
+
+    def row(label: str, value: str, val_color: str = "white") -> None:
+        label_part = f"  {label:<10}"
+        value_width = W - len(label_part)
+
+        # Automatically wrap long values to fit inside the rectangle
+        lines = textwrap.wrap(
+            value,
+            width=value_width,
+            break_long_words=True,
+            break_on_hyphens=False
+        ) or [""]
+
+        for i, line in enumerate(lines):
+            prefix = label_part if i == 0 else " " * len(label_part)
+
+            val_part = _c(val_color, line)
+            pad = max(0, W - len(prefix) - len(line))
+
+            print(
+                _c("blue", "║") +
+                prefix +
+                val_part +
+                " " * pad +
+                _c("blue", "║")
+            )
+
+    row("SYSTEM",   "National Water Informatics System — Sentinel Subsurface Ops", "white")
+    row("MISSION",  "Automated DDR Parsing · Anomaly Detection · Engineering Intel", "white")
+    print(_c("blue",   "╠" + "═" * W + "╣"))
+    row("PORTAL",   f"http://localhost:{port}", "cyan")
+    row("SIM SPEED",f"{speed}x", "yellow")
+    row("LOGS",     str(LOGS_DIR), "dim")
+    print(_c("blue",   "╚" + "═" * W + "╝"))
+    print()
+
+
+# Human-friendly display names for each module
+_MODULE_LABELS = {
+    "module1":         ("MOD-1", "DDR Ingestion / OCR-NLP"),
+    "module2":         ("MOD-2", "Well Analytics"),
+    "module3_sim":     ("MOD-3", "Telemetry Simulator"),
+    "module3_anomaly": ("MOD-3", "Anomaly Detector"),
+    "module4":         ("MOD-4", "Knowledge Graph / RAG"),
+    "module5":         ("MOD-5", "Engineering Agent"),
+}
+
+
+def _launch_msg(name: str) -> None:
+    tag, label = _MODULE_LABELS.get(name, (name, ""))
+    port = INTERNAL[name]
+    print(_c("grey",   "  ├─ ") +
+          _c("cyan",   f"[{tag}]") + " " +
+          _c("white",  f"{label:<35}") + " " +
+          _c("grey",   f"→  :") + _c("yellow", str(port)) + " " +
+          _c("grey",   "LAUNCHING …"))
+
+
+def _status_msg(name: str, ok: bool) -> None:
+    tag, label = _MODULE_LABELS.get(name, (name, ""))
+    port = INTERNAL[name]
+    icon   = _c("green",  "●  ONLINE ") if ok else _c("red",    "○  TIMEOUT")
+    url    = _c("cyan",   f"http://localhost:{port}") if ok else _c("red", "unavailable")
+    print(_c("grey",   "  │  ") +
+          _c("cyan",   f"[{tag}]") + " " +
+          _c("white",  f"{label:<35}") + " " +
+          icon + "  " + url)
+
+
+def _ready_msg(port: int) -> None:
+    print()
+    print(_c("blue",  "  ╔" + "═" * 54 + "╗"))
+    print(_c("blue",  "  ║") +
+          _c("green", _c("bold", "  ✔  ALL SYSTEMS NOMINAL  ·  GATEWAY ONLINE".center(54))) +
+          _c("blue",  "║"))
+    print(_c("blue",  "  ║") +
+          _c("cyan",  f"     Portal  →  http://localhost:{port}".ljust(54)) +
+          _c("blue",  "  ║"))
+    print(_c("blue",  "  ╚" + "═" * 54 + "╝"))
+    print()
+
+
+def _shutdown_msg() -> None:
+    print()
+    print(_c("yellow", "  ⬡  NWIS-SENTINEL GATEWAY — SHUTDOWN SEQUENCE INITIATED"))
+    print(_c("grey",   "  │   Terminating all subsystem processes …"))
+
 
 # -- Process registry --------------------------------------------------------
 _processes = []
@@ -78,7 +200,7 @@ _sim_speed = 5.0
 def _start_module(name, cmd, log_file):
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOGS_DIR / log_file
-    logger.info("Starting %-20s -> %s", name, " ".join(cmd))
+    _launch_msg(name)
     with open(log_path, "w") as lf:
         p = subprocess.Popen(cmd, stdout=lf, stderr=lf, cwd=str(BASE_DIR))
     return p
@@ -150,11 +272,14 @@ def start_all_modules():
         },
     ]
 
+    print(_c("grey", "  ┌─ SUBSYSTEM BOOT SEQUENCE ─────────────────────────────────────"))
     for m in modules:
         p = _start_module(m["name"], m["cmd"], m["log"])
         _processes.append(p)
+    print(_c("grey", "  │"))
+    print(_c("grey", "  ├─ HEALTH CHECK  ·  awaiting port bindings …"))
+    print(_c("grey", "  │"))
 
-    logger.info("Waiting for all modules to come online (parallel check)...")
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     def check_module(m):
@@ -167,14 +292,14 @@ def start_all_modules():
         futures = {pool.submit(check_module, m): m for m in modules}
         for fut in as_completed(futures):
             name, port, ok = fut.result()
-            logger.info("  %-20s port:%d  %s", name, port, "UP" if ok else "TIMEOUT")
+            _status_msg(name, ok)
 
-
-    logger.info("All modules started. Gateway ready -> http://localhost:5000")
-
+    print(_c("grey", "  │"))
+    print(_c("grey", "  └─────────────────────────────────────────────────────────────"))
 
 
 def stop_all_modules():
+    _shutdown_msg()
     for p in _processes:
         try:
             p.terminate()
@@ -185,7 +310,7 @@ def stop_all_modules():
             p.wait(timeout=5)
         except Exception:
             pass
-    logger.info("All module processes terminated.")
+    print(_c("green", "  ✔  All subsystems offline. Goodbye.\n"))
 
 
 # -- HTTP Client State -------------------------------------------------------
@@ -293,7 +418,7 @@ async def proxy_websocket(client_ws, backend_ws_url):
             await asyncio.gather(browser_to_backend(), backend_to_browser())
 
     except Exception as e:
-        logger.warning("WebSocket proxy error: %s", e)
+        _gw_logger.warning("WebSocket proxy error: %s", e)
     finally:
         try:
             await client_ws.close()
@@ -440,21 +565,25 @@ def main():
 
     _sim_speed = args.speed
 
-    print("\n" + "=" * 70)
-    print("     NWIS-Sentinel | SIH 2026 | PS SIH26121 | Single-Port Gateway")
-    print("=" * 70)
-    print(f"\n  Portal  ->  http://localhost:{args.port}")
-    print(f"  Speed   ->  {args.speed}x simulation")
-    print(f"  Logs    ->  {LOGS_DIR}\n")
+    _banner(args.port, args.speed)
 
     if not args.no_browser:
-        import threading
         def _open():
             time.sleep(5)
             webbrowser.open(f"http://localhost:{args.port}")
         threading.Thread(target=_open, daemon=True).start()
 
-    uvicorn.run(app, host="0.0.0.0", port=args.port, log_level="info")
+    # Run uvicorn with access logs suppressed — the dashboard already shows
+    # what matters. Only genuine errors will surface.
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=args.port,
+        log_level="critical",          # suppress uvicorn startup/access spam
+        access_log=False,
+    )
+
+    _ready_msg(args.port)
 
 
 if __name__ == "__main__":
