@@ -215,6 +215,8 @@ The `/api/*` route intelligently dispatches by path prefix:
 
 ### 3.4 Module Startup Protocol
 
+> Startup behaviour (gateway.py): `main()` first refuses to start (exit 1) if the gateway port or any internal port (15001–15006) is already listening, i.e. a stale previous run. Modules are then spawned from a background thread in the lifespan hook, so port 5000 binds immediately; the terminal shows one progress bar and a single module table (Modules 1–5 with gateway URLs such as `/module1`, `/module3/monitor`).
+
 ```mermaid
 sequenceDiagram
     participant GW as "gateway.py (FastAPI)"

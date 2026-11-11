@@ -131,61 +131,59 @@ def _banner(port: int, speed: float) -> None:
     row("MISSION",  "Automated DDR Parsing · Anomaly Detection · Engineering Intel", "white")
     print(_c("blue",   "╠" + "═" * W + "╣"))
     row("PORTAL",   f"http://localhost:{port}", "cyan")
-    row("SIM SPEED",f"{speed}x", "yellow")
     row("LOGS",     str(LOGS_DIR), "dim")
     print(_c("blue",   "╚" + "═" * W + "╝"))
     print()
 
 
-# Human-friendly display names for each module
-_MODULE_LABELS = {
-    "module1":         ("MOD-1", "DDR Ingestion / OCR-NLP"),
-    "module2":         ("MOD-2", "Well Analytics"),
-    "module3_sim":     ("MOD-3", "Telemetry Simulator"),
-    "module3_anomaly": ("MOD-3", "Anomaly Detector"),
-    "module4":         ("MOD-4", "Knowledge Graph / RAG"),
-    "module5":         ("MOD-5", "Engineering Agent"),
-}
+# User-facing modules (Module 3 = simulator + anomaly detector, shown as one row).
+# (label, gateway path, internal services that must be up)
+_DISPLAY = [
+    ("MOD-1", "DDR Ingestion / OCR-NLP",   "/module1",         ["module1"]),
+    ("MOD-2", "Well Analytics",            "/module2",         ["module2"]),
+    ("MOD-3", "Telemetry & Anomaly Monitor", "/module3/monitor", ["module3_sim", "module3_anomaly"]),
+    ("MOD-4", "Knowledge Graph / RAG",     "/module4",         ["module4"]),
+    ("MOD-5", "Engineering Agent",         "/module5",         ["module5"]),
+]
 
 
-def _launch_msg(name: str) -> None:
-    tag, label = _MODULE_LABELS.get(name, (name, ""))
-    port = INTERNAL[name]
-    print(_c("grey",   "  ├─ ") +
-          _c("cyan",   f"[{tag}]") + " " +
-          _c("white",  f"{label:<35}") + " " +
-          _c("grey",   f"→  :") + _c("yellow", str(port)) + " " +
-          _c("grey",   "LAUNCHING …"))
+def _port_up(port: int) -> bool:
+    import socket
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=0.3):
+            return True
+    except OSError:
+        return False
 
 
-def _status_msg(name: str, ok: bool) -> None:
-    tag, label = _MODULE_LABELS.get(name, (name, ""))
-    port = INTERNAL[name]
-    icon   = _c("green",  "●  ONLINE ") if ok else _c("red",    "○  TIMEOUT")
-    url    = _c("cyan",   f"http://localhost:{port}") if ok else _c("red", "unavailable")
-    print(_c("grey",   "  │  ") +
-          _c("cyan",   f"[{tag}]") + " " +
-          _c("white",  f"{label:<35}") + " " +
-          icon + "  " + url)
+def _progress_bar(done: int, total: int, width: int = 40) -> str:
+    filled = int(width * done / total) if total else width
+    bar = _c("green", "█" * filled) + _c("grey", "░" * (width - filled))
+    return f"  {bar} {_c('white', f'{done}/{total}')} services up"
 
 
-def _ready_msg(port: int) -> None:
+def _modules_table(port: int, failed: set) -> None:
     print()
-    print(_c("blue",  "  ╔" + "═" * 54 + "╗"))
-    print(_c("blue",  "  ║") +
-          _c("green", _c("bold", "  ✔  ALL SYSTEMS NOMINAL  ·  GATEWAY ONLINE".center(54))) +
-          _c("blue",  "║"))
-    print(_c("blue",  "  ║") +
-          _c("cyan",  f"     Portal  →  http://localhost:{port}".ljust(54)) +
-          _c("blue",  "  ║"))
-    print(_c("blue",  "  ╚" + "═" * 54 + "╝"))
+    print(_c("grey", "  ┌─ MODULES ─────────────────────────────────────────────────────"))
+    for tag, label, path, services in _DISPLAY:
+        ok = not any(s in failed for s in services)
+        icon = _c("green", "●") if ok else _c("red", "○")
+        url = _c("cyan", f"http://localhost:{port}{path}") if ok else _c("red", "unavailable - see logs")
+        print(_c("grey", "  │ ") + icon + " " + _c("cyan", f"[{tag}]") + " " +
+              _c("white", f"{label:<28}") + " " + url)
+    print(_c("grey", "  └─────────────────────────────────────────────────────────────"))
     print()
+    if failed:
+        print(_c("yellow", f"  ⚠  Some services failed to start. Logs: {LOGS_DIR}"))
+    else:
+        print(_c("green", _c("bold", "  ✔  ALL SYSTEMS NOMINAL")) +
+              _c("grey", f"  ·  Dashboard: http://localhost:{port}"))
+    print(_c("grey", "     Press Ctrl+C to stop.\n"))
 
 
 def _shutdown_msg() -> None:
     print()
-    print(_c("yellow", "  ⬡  NWIS-SENTINEL GATEWAY — SHUTDOWN SEQUENCE INITIATED"))
-    print(_c("grey",   "  │   Terminating all subsystem processes …"))
+    print(_c("yellow", "  ⬡  Gateway shutting down — terminating subsystems …"))
 
 
 # -- Process registry --------------------------------------------------------
@@ -193,6 +191,7 @@ _processes = []
 
 # -- Simulation speed (set via CLI) ------------------------------------------
 _sim_speed = 5.0
+_boot_state = {"stop": False, "port": 5000, "total": 0}
 
 
 # -- Subprocess management ---------------------------------------------------
@@ -200,7 +199,6 @@ _sim_speed = 5.0
 def _start_module(name, cmd, log_file):
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOGS_DIR / log_file
-    _launch_msg(name)
     with open(log_path, "w") as lf:
         p = subprocess.Popen(cmd, stdout=lf, stderr=lf, cwd=str(BASE_DIR))
     return p
@@ -272,30 +270,27 @@ def start_all_modules():
         },
     ]
 
-    print(_c("grey", "  ┌─ SUBSYSTEM BOOT SEQUENCE ─────────────────────────────────────"))
+    _boot_state["total"] = len(modules)
     for m in modules:
-        p = _start_module(m["name"], m["cmd"], m["log"])
-        _processes.append(p)
-    print(_c("grey", "  │"))
-    print(_c("grey", "  ├─ HEALTH CHECK  ·  awaiting port bindings …"))
-    print(_c("grey", "  │"))
+        _processes.append(_start_module(m["name"], m["cmd"], m["log"]))
 
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    def check_module(m):
-        # module3_anomaly loads a 78MB JSON — give it more time, others 90s
-        timeout = 180 if m["name"] == "module3_anomaly" else 90
-        ok = _wait_for_port(m["port"], timeout=timeout)
-        return m["name"], m["port"], ok
-
-    with ThreadPoolExecutor(max_workers=len(modules)) as pool:
-        futures = {pool.submit(check_module, m): m for m in modules}
-        for fut in as_completed(futures):
-            name, port, ok = fut.result()
-            _status_msg(name, ok)
-
-    print(_c("grey", "  │"))
-    print(_c("grey", "  └─────────────────────────────────────────────────────────────"))
+    # Poll ports, redraw one progress bar, then print the module list once.
+    deadlines = {m["name"]: time.time() + (180 if m["name"] == "module3_anomaly" else 90)
+                 for m in modules}
+    pending = {m["name"]: (m["port"], p) for m, p in zip(modules, _processes)}
+    up, failed = set(), set()
+    while pending and not _boot_state["stop"]:
+        for name, (port, proc) in list(pending.items()):
+            if _port_up(port):
+                up.add(name); del pending[name]
+            elif proc.poll() is not None or time.time() > deadlines[name]:
+                failed.add(name); del pending[name]
+        sys.stdout.write("\r" + _progress_bar(len(up) + len(failed), len(modules)))
+        sys.stdout.flush()
+        time.sleep(0.3)
+    sys.stdout.write("\n")
+    if not _boot_state["stop"]:
+        _modules_table(_boot_state["port"], failed)
 
 
 def stop_all_modules():
@@ -324,9 +319,9 @@ _http_client: httpx.AsyncClient | None = None
 async def lifespan(app):
     global _http_client
     _http_client = httpx.AsyncClient(timeout=600.0, follow_redirects=True)
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, start_all_modules)
+    threading.Thread(target=start_all_modules, daemon=True).start()
     yield
+    _boot_state["stop"] = True
     stop_all_modules()
     if _http_client is not None:
         await _http_client.aclose()
@@ -554,6 +549,12 @@ async def gateway_health():
 def main():
     global _sim_speed
 
+    for _s in (sys.stdout, sys.stderr):      # box/bar glyphs on legacy Windows codepages
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description="NWIS-Sentinel Single-Port Gateway")
     # Render.com (and other PaaS) inject $PORT — fall back to 5000 for local dev
     import os
@@ -564,6 +565,20 @@ def main():
     args = parser.parse_args()
 
     _sim_speed = args.speed
+    _boot_state["port"] = args.port
+
+    # Refuse to start if a previous gateway/module is still holding a port.
+    busy = [(n, p) for n, p in [("gateway", args.port), *INTERNAL.items()] if _port_up(p)]
+    if busy:
+        print()
+        print(_c("red", "  ✖  Ports already in use (a previous run is probably still alive):"))
+        for n, p in busy:
+            print(_c("red", f"       {n:<16} :{p}"))
+        print(_c("yellow", "     Stop the old process (Ctrl+C in its terminal, or "
+                           "`Get-NetTCPConnection -LocalPort 5000 | % { Stop-Process -Id $_.OwningProcess }`)"
+                           " and retry."))
+        print()
+        sys.exit(1)
 
     _banner(args.port, args.speed)
 
@@ -579,11 +594,9 @@ def main():
         app,
         host="0.0.0.0",
         port=args.port,
-        log_level="critical",          # suppress uvicorn startup/access spam
+        log_level="error",             # hide access spam but surface bind errors
         access_log=False,
     )
-
-    _ready_msg(args.port)
 
 
 if __name__ == "__main__":
