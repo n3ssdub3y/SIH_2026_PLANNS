@@ -429,6 +429,7 @@ sequenceDiagram
   - A badge on the document shows real per-page extraction progress ("OCR 37% · page 35/93").
   - The token stream, log terminal, NLP entities and results panel are filled from the job.
   - The previous fully simulated page is kept behind a **Show Demo** button. It runs entirely client-side, makes no server calls, and is labelled "DEMO · SIMULATED".
+  - Under the extracted events (live and demo), two collapsible sections (closed by default) explain MiniLM: a one-glance left-to-right **architecture overview**, and a detailed **semantic-layer explainer** that walks one sentence through tokens → 6-layer encoder (last-layer attention links) → 384-d embedding → cosine vs the 80 prototypes → margin gate → event. Its six example sentences from `Utah_FORGE_DDRs.pdf` are real `nlp_engine.py` outputs embedded as static data (no server call); the "this document" strip uses the live job's `evidence`, or the recorded FORGE run in demo mode.
 
 ### 4.8 NLP Model Selection (Zero-Shot Screen)
 

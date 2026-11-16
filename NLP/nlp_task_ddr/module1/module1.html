@@ -565,6 +565,205 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+    /* ══ MiniLM semantic-layer explainer (shown under the extracted events) ══ */
+    .mlm {
+      margin-top: 20px;
+      background: rgba(13,17,23,0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      --sem: var(--purple); --kw: var(--blue); --haz: var(--orange); --rt: var(--green);
+    }
+    .mlm-head {
+      padding: 10px 16px;
+      background: rgba(22,27,34,0.8);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .mlm-head .mh-title { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.4px; }
+    .mlm-head .mh-sub { font-size: 10px; color: var(--dim); }
+    .mlm-specs { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+    .mlm-spec {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 10px;
+      color: var(--accent); border: 1px solid rgba(0,229,255,0.25); background: rgba(0,229,255,0.05);
+    }
+    .mlm-body { padding: 16px; }
+
+    /* sentence picker */
+    .mlm-pick-label { font-size: 9px; color: var(--muted); letter-spacing: 0.6px; margin-bottom: 8px; }
+    .mlm-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .mlm-chip {
+      font-family: var(--font); font-size: 10px; color: var(--text);
+      background: rgba(2,6,16,0.6); border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 10px; cursor: pointer; text-align: left; max-width: 280px;
+      display: flex; flex-direction: column; gap: 3px; transition: all 0.15s;
+    }
+    .mlm-chip:hover { border-color: rgba(0,229,255,0.4); }
+    .mlm-chip.on { border-color: var(--accent); background: rgba(0,229,255,0.07); box-shadow: 0 0 0 1px rgba(0,229,255,0.15); }
+    .mlm-chip .mc-s { color: var(--text-hi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mlm-chip .mc-o { font-size: 8.5px; font-weight: 700; letter-spacing: 0.6px; }
+    .mc-o.semantic { color: var(--sem); } .mc-o.keyword { color: var(--kw); }
+    .mc-o.both { color: var(--green); } .mc-o.routine { color: var(--dim); }
+
+    /* flow grid */
+    .mlm-row { display: grid; align-items: stretch; }
+    .mlm-row.r1 { grid-template-columns: minmax(0,0.95fr) 30px minmax(0,2.1fr) 30px minmax(0,0.9fr); }
+    .mlm-row.r2 { grid-template-columns: minmax(0,1.45fr) 30px minmax(0,1.15fr) 30px minmax(0,0.95fr); }
+    .mlm-card {
+      background: rgba(2,6,16,0.75);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; min-width: 0; position: relative;
+    }
+    .mlm-card.model { border-color: rgba(0,229,255,0.28); box-shadow: inset 0 0 40px rgba(0,229,255,0.03); }
+    .mlm-step { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: var(--accent); margin-bottom: 2px; }
+    .mlm-step span { color: var(--muted); font-weight: 500; }
+    .mlm-ttl { font-size: 11px; font-weight: 600; color: var(--text-hi); margin-bottom: 10px; }
+    .mlm-note { font-size: 9px; color: var(--dim); line-height: 1.55; margin-top: 8px; }
+    .mlm-note b { color: var(--text); font-weight: 600; }
+
+    /* animated connectors */
+    .mlm-link { position: relative; display: flex; align-items: center; justify-content: center; }
+    .mlm-link::before {
+      content: ''; position: absolute; left: 3px; right: 7px; top: 50%; height: 2px; transform: translateY(-50%);
+      background: repeating-linear-gradient(90deg, var(--accent) 0 5px, transparent 5px 10px);
+      background-size: 20px 2px; opacity: 0.75; animation: mlmMarch 0.8s linear infinite;
+    }
+    .mlm-link::after {
+      content: ''; position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+      border-left: 7px solid var(--accent); border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+    }
+    @keyframes mlmMarch { from { background-position: 0 0; } to { background-position: 20px 0; } }
+    .mlm-elbow { height: 44px; position: relative; }
+    .mlm-elbow svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .mlm-elbow .eh { position: absolute; left: calc(19% - 6px); bottom: -1px;
+      border-top: 7px solid var(--accent); border-left: 6px solid transparent; border-right: 6px solid transparent; }
+    .mlm-elbow .elabel { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      font-size: 9px; color: var(--dim); background: var(--card); padding: 1px 10px; letter-spacing: 0.5px;
+      border: 1px solid var(--border); border-radius: 10px; white-space: nowrap; }
+
+    /* svg shared */
+    .mlm svg text { font-family: var(--font); }
+    .mlm-flow { stroke-dasharray: 3 5; animation: mlmUp 1.1s linear infinite; }
+    @keyframes mlmUp { to { stroke-dashoffset: -16; } }
+    .mlm-arc { fill: none; stroke: var(--accent); stroke-linecap: round; }
+
+    /* 01 input */
+    .mlm-quote {
+      font-size: 11px; color: var(--text-hi); line-height: 1.55;
+      border-left: 2px solid var(--accent); padding: 6px 10px; background: rgba(0,229,255,0.04);
+      border-radius: 0 4px 4px 0; word-break: break-word;
+    }
+    .mlm-quote.exp { border-left-color: var(--purple); background: rgba(210,168,255,0.04); }
+    .mlm-quote mark { background: rgba(210,168,255,0.18); color: var(--purple); border-radius: 3px; padding: 0 2px; }
+    .mlm-mini { font-size: 9px; color: var(--muted); letter-spacing: 0.5px; margin: 10px 0 5px; }
+    .mlm-par {
+      margin-top: 12px; padding: 7px 9px; border: 1px dashed rgba(88,166,255,0.35); border-radius: 6px;
+      font-size: 9.5px; color: var(--dim); line-height: 1.5;
+    }
+    .mlm-par b { color: var(--kw); }
+
+    /* 04 vector */
+    .mlm-vec { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin: 4px 0 6px; }
+    .mlm-vec div { aspect-ratio: 1; border-radius: 2px; border: 1px solid rgba(255,255,255,0.03); }
+    .mlm-vec-more { font-size: 9px; color: var(--muted); text-align: center; letter-spacing: 1px; }
+    .mlm-math { font-size: 10px; color: var(--text); margin-top: 8px; line-height: 1.7; }
+    .mlm-math i { color: var(--accent); font-style: normal; }
+    .mlm-legend { display: flex; justify-content: space-between; font-size: 8.5px; color: var(--muted); margin-top: 4px; }
+    .mlm-legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+    .mlm-legend .neg::before { background: rgba(255,166,87,0.85); }
+    .mlm-legend .pos::before { background: rgba(0,229,255,0.85); }
+
+    /* 05 similarity bars */
+    .mlm-bars { display: flex; flex-direction: column; gap: 3px; }
+    .mlm-bar { display: grid; grid-template-columns: 118px 1fr 40px; align-items: center; gap: 8px; font-size: 9.5px; }
+    .mlm-bar .bl { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mlm-bar .bt { height: 9px; background: rgba(33,38,45,0.6); border-radius: 2px; position: relative; overflow: hidden; }
+    .mlm-bar .bf { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: rgba(0,229,255,0.35);
+      width: 0; transition: width 0.7s cubic-bezier(.2,.8,.2,1); }
+    .mlm-bar .bv { color: var(--dim); text-align: right; font-variant-numeric: tabular-nums; }
+    .mlm-bar.top .bl, .mlm-bar.top .bv { color: var(--haz); font-weight: 700; }
+    .mlm-bar.top .bf { background: var(--haz); box-shadow: 0 0 10px rgba(255,166,87,0.5); }
+    .mlm-bar.rt .bl, .mlm-bar.rt .bv { color: var(--rt); font-weight: 700; }
+    .mlm-bar.rt .bf { background: var(--rt); }
+    .mlm-protos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .mlm-proto { font-size: 9px; color: var(--dim); border: 1px solid var(--border); border-radius: 5px; padding: 6px 8px; line-height: 1.45; }
+    .mlm-proto .pk { font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
+    .mlm-proto.h .pk { color: var(--haz); } .mlm-proto.r .pk { color: var(--rt); }
+    .mlm-proto q { color: var(--text); }
+
+    /* 06 decision gate */
+    .mlm-lane { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+    .mlm-lane .lh { display: flex; justify-content: space-between; align-items: center; font-size: 9px; font-weight: 700; letter-spacing: 0.6px; }
+    .mlm-lane.kw .lh { color: var(--kw); } .mlm-lane.sm .lh { color: var(--sem); }
+    .mlm-lane .lv { font-size: 10px; color: var(--text); margin-top: 5px; line-height: 1.5; }
+    .mlm-pill { font-size: 8.5px; font-weight: 700; padding: 1px 7px; border-radius: 8px; border: 1px solid; letter-spacing: 0.5px; }
+    .mlm-pill.ok { color: var(--green); border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.08); }
+    .mlm-pill.no { color: var(--muted); border-color: var(--border); }
+    .mlm-rules { width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 4px; }
+    .mlm-rules td { padding: 4px 6px; border-bottom: 1px solid rgba(33,38,45,0.6); color: var(--muted); transition: all 0.3s; }
+    .mlm-rules tr.on td { color: var(--text-hi); background: rgba(0,229,255,0.07); }
+    .mlm-rules tr.on td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+    .mlm-rules td:last-child { text-align: right; white-space: nowrap; }
+
+    /* 07 output */
+    .mlm-out-evt { font-size: 13px; font-weight: 700; color: var(--haz); word-break: break-all; margin: 2px 0 8px; }
+    .mlm-out-evt.rt { color: var(--rt); }
+    .mlm-kv { display: flex; justify-content: space-between; gap: 8px; font-size: 9.5px; padding: 4px 0; border-bottom: 1px solid rgba(33,38,45,0.6); }
+    .mlm-kv span:first-child { color: var(--dim); }
+    .mlm-kv span:last-child { color: var(--text-hi); text-align: right; }
+    .mlm-meth { font-weight: 700; }
+    .mlm-meth.semantic { color: var(--sem); } .mlm-meth.keyword { color: var(--kw); }
+    .mlm-meth.both { color: var(--green); } .mlm-meth.routine { color: var(--dim); }
+    .mlm-conf { margin-top: 10px; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+    .mlm-conf div { height: 100%; background: var(--accent); width: 0; transition: width 0.8s ease; }
+    .mlm-formula { font-size: 9px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+    /* run strip */
+    .mlm-run { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .mlm-stack { display: flex; height: 14px; border-radius: 3px; overflow: hidden; margin: 8px 0 6px; background: var(--border); }
+    .mlm-stack div { height: 100%; transition: flex-grow 0.8s ease; }
+    .mlm-stack-leg { display: flex; gap: 14px; flex-wrap: wrap; font-size: 9.5px; color: var(--dim); }
+    .mlm-stack-leg b { color: var(--text-hi); }
+    .mlm-stack-leg i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+    .mlm-catch { display: grid; grid-template-columns: 150px minmax(0,1fr) 150px; gap: 12px; align-items: center;
+      padding: 6px 8px; border-bottom: 1px solid rgba(33,38,45,0.6); font-size: 9.5px; border-radius: 4px; }
+    .mlm-catch.click { cursor: pointer; }
+    .mlm-catch.click:hover { background: rgba(210,168,255,0.06); }
+    .mlm-catch .ce { color: var(--sem); font-weight: 700; font-size: 9px; }
+    .mlm-catch .cs { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mlm-mg { position: relative; height: 8px; background: rgba(33,38,45,0.7); border-radius: 2px; }
+    .mlm-mg .mf { position: absolute; left: 0; top: 0; bottom: 0; background: var(--sem); border-radius: 2px; opacity: 0.8; }
+    .mlm-mg .mt { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text-hi); }
+    .mlm-mgv { font-size: 8.5px; color: var(--dim); margin-top: 2px; display: flex; justify-content: space-between; }
+
+    /* collapsible sections (both closed by default) */
+    summary.mlm-head { cursor: pointer; list-style: none; user-select: none; }
+    summary.mlm-head::-webkit-details-marker { display: none; }
+    summary.mlm-head::before { content: '▸'; color: var(--accent); font-size: 12px; transition: transform 0.2s; display: inline-block; }
+    details.mlm[open] > summary.mlm-head::before { transform: rotate(90deg); }
+    details.mlm:not([open]) > summary.mlm-head { border-bottom: none; }
+    summary.mlm-head:hover .mh-title { text-decoration: underline; text-underline-offset: 3px; }
+    .mlm-simple .mlm-body > svg { display: block; max-width: 1000px; margin: 0 auto; }
+
+    /* staged reveal */
+    .mlm.play .mlm-card, .mlm.play .mlm-link, .mlm.play .mlm-elbow { animation: mlmIn 0.45s ease both; animation-delay: calc(var(--i, 0) * 0.16s); }
+    @keyframes mlmIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 980px) {
+      .mlm-row.r1, .mlm-row.r2 { grid-template-columns: minmax(0,1fr); }
+      .mlm-link { height: 26px; }
+      .mlm-link::before { left: 50%; right: auto; top: 2px; bottom: 7px; height: auto; width: 2px; transform: translateX(-50%);
+        background: repeating-linear-gradient(180deg, var(--accent) 0 5px, transparent 5px 10px); background-size: 2px 20px; }
+      .mlm-link::after { right: auto; left: 50%; top: auto; bottom: 1px; transform: translateX(-50%);
+        border-top: 7px solid var(--accent); border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 0; }
+      .mlm-elbow { height: 26px; }
+      .mlm-elbow svg, .mlm-elbow .elabel { display: none; }
+      .mlm-elbow .eh { left: calc(50% - 6px); }
+      .mlm-elbow::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 6px; width: 2px; background: var(--accent); opacity: 0.6; }
+      .mlm-catch { grid-template-columns: 1fr; gap: 4px; }
+      .mlm-protos { grid-template-columns: 1fr; }
+      .mlm-specs { margin-left: 0; }
+    }
   </style>
 </head>
 <body>
@@ -890,31 +1089,9 @@
       </div>
     </div>
 
-    <!-- Sample JSON record -->
-    <div class="schema-box">
-      <div class="schema-box-header">
-        <span>📦 Sample Event Record — events.jsonl schema (MODULE 1 OUTPUT FORMAT)</span>
-        <span style="color:var(--muted);font-size:9px;">based on ARCHITECTURE.md §4.6</span>
-      </div>
-      <pre><span class="json-key">{</span>
-  <span class="json-key">"well_id"</span>:          <span class="json-str">"FORGE-58-32"</span>,
-  <span class="json-key">"event_id"</span>:         <span class="json-str">"FORGE-58-32_2019-06-14_EVT_MUD_LOSS_PARTIAL"</span>,
-  <span class="json-key">"report_date"</span>:      <span class="json-str">"2019-06-14"</span>,
-  <span class="json-key">"depth_m"</span>:          <span class="json-num">1842.0</span>,
-  <span class="json-key">"formation_id"</span>:     <span class="json-str">"Precambrian Granite"</span>,
-  <span class="json-key">"mud_weight_ppg"</span>:   <span class="json-num">9.8</span>,
-  <span class="json-key">"npt_hours"</span>:        <span class="json-num">8.5</span>,
-  <span class="json-key">"volume_lost_bbl"</span>:  <span class="json-num">45.0</span>,
-  <span class="json-key">"event_type_id"</span>:    <span class="json-str">"EVT_MUD_LOSS_PARTIAL"</span>,
-  <span class="json-key">"hazard"</span>:           <span class="json-str">"mud_loss"</span>,
-  <span class="json-key">"severity"</span>:         <span class="json-str">"critical"</span>,
-  <span class="json-key">"source"</span>:           <span class="json-str">"real_utah_forge_ocr"</span>,
-  <span class="json-key">"is_synthetic"</span>:     <span class="json-bool">false</span>,
-  <span class="json-key">"ocr_engine"</span>:       <span class="json-str">"PaddleOCR v2.7 (PP-OCRv4)"</span>,
-  <span class="json-key">"confidence"</span>:       <span class="json-num">0.91</span>,
-  <span class="json-key">"raw_text"</span>:         <span class="json-str">"LOST CIRCULATION: Severe lost circulation event at 1842 m in Precambrian granite fracture zone. LCM pill applied (45 bbl lost). NPT: 8.5 hrs..."</span>
-<span class="json-key">}</span></pre>
-    </div>
+    <!-- MiniLM semantic-layer explainer -->
+    <div id="mlm-host-demo"></div>
+
 
     <button class="rerun-btn" onclick="resetPipeline()">↺ Run Another Document</button>
   </div>
@@ -953,13 +1130,7 @@
         </div>
       </div>
     </div>
-    <div class="schema-box">
-      <div class="schema-box-header">
-        <span>📦 Sample Event Record — events.jsonl schema (MODULE 1 OUTPUT FORMAT)</span>
-        <span style="color:var(--muted);font-size:9px;" id="lr-saved"></span>
-      </div>
-      <pre id="lr-json"></pre>
-    </div>
+    <!-- MiniLM semantic-layer explainer (real model outputs + this job's evidence) -->
     <button class="rerun-btn" onclick="resetPipeline()">↺ Run Another Document</button>
   </div>
 
@@ -1374,6 +1545,7 @@ function showLiveResults() {
   const sample = (hazard[0] || rows[0] || {}).rec;
   document.getElementById('lr-json').innerHTML = sample ? jsonHighlight(sample) : '';
   document.getElementById('lr-saved').textContent = `saved: results/module1_outputs/uploads/${r.job_id}.jsonl`;
+  MLM.render('mlm-host-live', { records: recs, evidence: ev, filename: r.filename, nlp });
 }
 
 // ═══════════════════════════════ DEMO PATH ════════════════════════════════
@@ -1639,6 +1811,7 @@ function showResults() {
     processingPanel.style.display = 'none';
     resultsPanel.style.display    = 'block';
     resultsPanel.style.animation  = 'fadeIn 0.5s ease both';
+    MLM.render('mlm-host-demo', null);
   }, skipped ? 100 : 600);
 }
 
@@ -1698,6 +1871,404 @@ function setStageActive(n) {
 const style = document.createElement('style');
 style.textContent = '@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }';
 document.head.appendChild(style);
+</script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   MiniLM semantic-layer explainer.
+   MLM_SHOWCASE  real outputs of all-MiniLM-L6-v2 (via module1/nlp_engine.py)
+                 for six sentences from Utah_FORGE_DDRs.pdf: WordPiece tokens,
+                 strongest last-layer attention links (mean of 12 heads), the
+                 first 48 of 384 embedding dims, best cosine per class against
+                 the event_prototypes.py bank, keyword hit and final decision.
+   MLM_FORGE_RUN per-record evidence of the recorded live run on the same PDF
+                 [event, method, sentence, keyword, sim, margin, confidence];
+                 used by the demo path. The live path uses the job's evidence.
+────────────────────────────────────────────────────────────────────────── */
+const MLM_SHOWCASE = [{"sentence":"Took weight at 7,072'.","expanded":"Took weight at 7,072'.","tokens":["[CLS]","took","weight","at","7",",","07","##2","'",".","[SEP]"],"links":[[3,2,0.126],[7,6,0.117],[1,2,0.114],[4,6,0.11],[8,2,0.108],[5,2,0.101],[4,8,0.089]],"vec":[0.02,0.057,0.057,0.133,-0.056,-0.014,-0.049,0.1,-0.134,0.009,0.028,-0.077,-0.037,0.039,-0.066,-0.046,0.048,-0.044,-0.017,0.002,0.043,0.018,0.044,0.066,0.081,-0.001,-0.045,0.092,0.029,-0.027,-0.006,-0.033,-0.01,0.011,-0.048,0.027,0.09,-0.036,-0.048,-0.021,0.031,0.018,0.04,0.015,-0.037,-0.006,0.005,0.024],"scores":{"EVT_MUD_LOSS_PARTIAL":[0.1539,"lost circulation, partial returns at the shakers"],"EVT_MUD_LOSS_TOTAL":[0.1434,"complete loss of circulation, well taking all the mud"],"EVT_LCM_APPLIED":[0.1332,"spotted LCM pill across the loss zone"],"EVT_CIRC_RESTORED":[0.1774,"well static with full returns after pill"],"EVT_STUCK_PIPE":[0.1668,"string became stuck and could not be freed with maximum pull"],"EVT_DIFF_STICKING":[0.124,"differential sticking during survey, spotted pipe freeing pill"],"EVT_TIGHT_HOLE":[0.5085,"took weight running in, reamed through tight section"],"EVT_JARRING":[0.0887,"fired the drilling jar several times"],"EVT_FISHING":[0.2341,"washed over and recovered the fish"],"EVT_KICK":[0.1665,"took an influx while drilling"],"EVT_GAS_INFLUX":[0.1972,"elevated gas readings in the returns"],"EVT_BOP_SHUTIN":[0.0319,"well control, circulated out influx through the choke with kill mud"],"EVT_OVERPRESSURE_DETECTED":[0.1522,"abnormal pore pressure encountered, increased mud weight"],"EVT_TORQUE_UP":[0.1794,"torque increasing, reduced weight on bit"],"EVT_TORQUE_SPIKE":[0.1903,"string torqued up suddenly and stopped rotating"],"EVT_CEMENTING_FAILURE":[0.13,"cement job aborted due to equipment failure"],"EVT_WOC":[0.1374,"WOC before drilling out the shoe track"],"EVT_ROUTINE_DRILLING":[0.2447,"pulled out of hole and laid down tools"]},"keyword":null,"keyword_evt":null,"semantic":{"top":"EVT_TIGHT_HOLE","sim":0.5085,"margin":0.2638},"decision":"EVT_TIGHT_HOLE","method":"semantic","confidence":0.64,"depth_m":2155.5},{"sentence":"Work string free with 90k in over-pull.","expanded":"Work string free with 90k in over-pull.","tokens":["[CLS]","work","string","free","with","90","##k","in","over","-","pull",".","[SEP]"],"links":[[1,2,0.141],[3,2,0.117],[7,2,0.113],[9,2,0.111],[4,2,0.107],[11,2,0.098],[8,5,0.094]],"vec":[-0.119,0.097,-0.041,-0.015,-0.123,-0.025,0.001,0.086,-0.044,-0.025,0.009,0.028,-0.037,-0.073,0.012,0.081,0.028,0.021,-0.057,-0.04,-0.013,-0.009,0.005,0.015,0.032,-0.011,-0.021,0.088,0.053,-0.013,-0.034,0.019,-0.056,-0.009,0.038,0.092,-0.063,0.013,-0.061,-0.004,-0.003,-0.039,-0.014,0.042,-0.047,0.008,-0.02,0.033],"scores":{"EVT_MUD_LOSS_PARTIAL":[0.1528,"dynamic losses observed, reduced pump rate to control loss rate"],"EVT_MUD_LOSS_TOTAL":[0.1662,"total losses, no returns to surface"],"EVT_LCM_APPLIED":[0.1023,"pumped lost circulation material pill to cure losses"],"EVT_CIRC_RESTORED":[0.1546,"full returns regained after treatment"],"EVT_STUCK_PIPE":[0.5607,"string became stuck and could not be freed with maximum pull"],"EVT_DIFF_STICKING":[0.1525,"differential sticking during survey, spotted pipe freeing pill"],"EVT_TIGHT_HOLE":[0.4986,"overpull above string weight on trip, backreamed"],"EVT_JARRING":[0.5133,"jarred up and down to free the string"],"EVT_FISHING":[0.2493,"fishing operation to recover lost equipment from the hole"],"EVT_KICK":[0.1539,"took an influx while drilling"],"EVT_GAS_INFLUX":[0.1414,"elevated gas readings in the returns"],"EVT_BOP_SHUTIN":[0.1375,"well control, circulated out influx through the choke with kill mud"],"EVT_OVERPRESSURE_DETECTED":[0.0318,"overpressured zone indicated by rising gas and cavings"],"EVT_TORQUE_UP":[0.2783,"torque increasing, reduced weight on bit"],"EVT_TORQUE_SPIKE":[0.3772,"string torqued up suddenly and stopped rotating"],"EVT_CEMENTING_FAILURE":[0.195,"cement job problem, losses during cement displacement"],"EVT_WOC":[0.2002,"WOC before drilling out the shoe track"],"EVT_ROUTINE_DRILLING":[0.2528,"reduced pump rate as per the drilling program"]},"keyword":null,"keyword_evt":null,"semantic":{"top":"EVT_STUCK_PIPE","sim":0.5607,"margin":0.3079},"decision":"EVT_STUCK_PIPE","method":"semantic","confidence":0.7,"depth_m":null},{"sentence":"Tight hole encountered from 2,351' to 1,799'","expanded":"Tight hole encountered from 2,351' to 1,799'","tokens":["[CLS]","tight","hole","encountered","from","2",",","351","'","to","1",",","79","##9","'","[SEP]"],"links":[[8,2,0.16],[5,7,0.154],[12,7,0.151],[3,2,0.15],[5,2,0.147],[4,2,0.133],[9,2,0.132]],"vec":[-0.005,0.032,0.006,0.107,-0.026,-0.085,-0.025,0.059,-0.014,-0.032,-0.067,-0.044,-0.003,-0.09,-0.05,-0.054,-0.053,-0.06,0.031,-0.0,-0.045,0.05,-0.02,-0.011,0.016,0.008,-0.013,0.061,0.004,-0.023,0.0,-0.021,-0.081,0.011,0.112,-0.031,-0.089,0.053,-0.045,-0.015,-0.022,0.043,0.073,0.042,-0.037,0.043,-0.073,0.051],"scores":{"EVT_MUD_LOSS_PARTIAL":[0.344,"partial losses to formation while drilling"],"EVT_MUD_LOSS_TOTAL":[0.4634,"unable to keep the hole full, no fluid level"],"EVT_LCM_APPLIED":[0.1063,"spotted LCM pill across the loss zone"],"EVT_CIRC_RESTORED":[0.2796,"losses stopped, resumed drilling with full circulation"],"EVT_STUCK_PIPE":[0.4967,"hole packed off around the BHA"],"EVT_DIFF_STICKING":[0.2263,"differentially stuck against permeable formation"],"EVT_TIGHT_HOLE":[0.6347,"tight hole while tripping out, worked through restriction"],"EVT_JARRING":[0.3202,"fired the drilling jar several times"],"EVT_FISHING":[0.3405,"fishing operation to recover lost equipment from the hole"],"EVT_KICK":[0.3841,"took an influx while drilling"],"EVT_GAS_INFLUX":[0.2356,"high background gas and connection gas peaks"],"EVT_BOP_SHUTIN":[0.2716,"closed annular preventer and recorded shut in pressures"],"EVT_OVERPRESSURE_DETECTED":[0.3137,"overpressured zone indicated by rising gas and cavings"],"EVT_TORQUE_UP":[0.2846,"erratic and fluctuating rotary torque while drilling"],"EVT_TORQUE_SPIKE":[0.1713,"torque exceeded the limit and the rotary stalled out"],"EVT_CEMENTING_FAILURE":[0.2271,"poor cement bond and low top of cement on the log"],"EVT_WOC":[0.2877,"WOC before drilling out the shoe track"],"EVT_ROUTINE_DRILLING":[0.4538,"pulled out of hole and laid down tools"]},"keyword":"tight hole","keyword_evt":"EVT_TIGHT_HOLE","semantic":{"top":"EVT_TIGHT_HOLE","sim":0.6347,"margin":0.181},"decision":"EVT_TIGHT_HOLE","method":"keyword","confidence":0.85,"depth_m":716.6},{"sentence":"Planned Operations: Wait on cement.","expanded":"Planned Operations: Wait on cement.","tokens":["[CLS]","planned","operations",":","wait","on","cement",".","[SEP]"],"links":[[5,6,0.212],[7,6,0.169],[3,6,0.152],[2,6,0.143],[1,2,0.105],[4,6,0.096],[1,6,0.093]],"vec":[-0.036,0.0,0.07,-0.002,-0.066,-0.032,-0.0,-0.007,-0.026,0.053,0.026,0.026,-0.039,0.02,0.012,-0.013,0.013,-0.05,-0.07,-0.006,-0.008,-0.032,-0.029,0.003,0.048,0.088,-0.082,-0.006,0.068,0.017,-0.022,0.014,0.086,-0.069,0.045,0.096,-0.014,-0.03,0.052,-0.019,0.022,-0.112,-0.017,0.042,0.022,0.027,0.048,-0.076],"scores":{"EVT_MUD_LOSS_PARTIAL":[0.2513,"partial losses to formation while drilling"],"EVT_MUD_LOSS_TOTAL":[0.2339,"lost all returns while drilling into fractured zone"],"EVT_LCM_APPLIED":[0.2482,"added calcium carbonate and fibre bridging material to the mud system"],"EVT_CIRC_RESTORED":[0.249,"losses stopped, resumed drilling with full circulation"],"EVT_STUCK_PIPE":[0.2916,"hole packed off around the BHA"],"EVT_DIFF_STICKING":[0.1845,"differential sticking during survey, spotted pipe freeing pill"],"EVT_TIGHT_HOLE":[0.183,"took weight running in, reamed through tight section"],"EVT_JARRING":[0.2377,"fired the drilling jar several times"],"EVT_FISHING":[0.2315,"fishing operation to recover lost equipment from the hole"],"EVT_KICK":[0.3813,"took an influx while drilling"],"EVT_GAS_INFLUX":[0.1379,"gas cut mud at the shakers, mud weight out reduced"],"EVT_BOP_SHUTIN":[0.2029,"well control, circulated out influx through the choke with kill mud"],"EVT_OVERPRESSURE_DETECTED":[0.1853,"pore pressure higher than prognosed"],"EVT_TORQUE_UP":[0.0728,"high surface torque during reaming"],"EVT_TORQUE_SPIKE":[0.0973,"torque exceeded the limit and the rotary stalled out"],"EVT_CEMENTING_FAILURE":[0.5206,"cement job aborted due to equipment failure"],"EVT_WOC":[0.7995,"waiting on cement to set"],"EVT_ROUTINE_DRILLING":[0.5408,"cement job completed with good cement returns to surface"]},"keyword":null,"keyword_evt":null,"semantic":{"top":"EVT_WOC","sim":0.7995,"margin":0.2586},"decision":"EVT_WOC","method":"semantic","confidence":0.64,"depth_m":null},{"sentence":"Nipple down 7-1/16\" 10K BOP's.","expanded":"Nipple down 7-1/16\" 10K blowout preventer's.","tokens":["[CLS]","nipple","down","7","-","1","/","16","\"","10","##k","blow","##out","prevent","##er","'","s",".","[SEP]"],"links":[[16,1,0.194],[12,11,0.158],[14,11,0.157],[4,1,0.153],[8,1,0.149],[14,1,0.146],[5,13,0.139]],"vec":[-0.048,0.098,0.01,0.007,-0.085,-0.025,0.038,0.098,-0.049,-0.071,-0.016,0.001,-0.066,0.033,-0.062,0.057,0.039,0.032,0.005,-0.064,0.031,0.044,0.034,0.079,-0.021,-0.058,0.001,0.052,0.007,-0.043,-0.01,-0.078,-0.043,-0.022,0.004,-0.073,-0.016,-0.003,0.011,0.013,0.05,0.017,0.052,-0.055,-0.038,0.086,0.04,0.088],"scores":{"EVT_MUD_LOSS_PARTIAL":[0.2064,"dynamic losses observed, reduced pump rate to control loss rate"],"EVT_MUD_LOSS_TOTAL":[0.2346,"unable to keep the hole full, no fluid level"],"EVT_LCM_APPLIED":[0.1486,"mixed and pumped a loss control pill"],"EVT_CIRC_RESTORED":[0.1361,"losses stopped, resumed drilling with full circulation"],"EVT_STUCK_PIPE":[0.2679,"hole packed off around the BHA"],"EVT_DIFF_STICKING":[0.163,"differential sticking during survey, spotted pipe freeing pill"],"EVT_TIGHT_HOLE":[0.3198,"tight hole while tripping out, worked through restriction"],"EVT_JARRING":[0.3141,"worked pipe with jar blows"],"EVT_FISHING":[0.2097,"junk left in hole, ran junk basket and magnet"],"EVT_KICK":[0.2257,"trip tank gain, well flowing on connection"],"EVT_GAS_INFLUX":[0.2401,"gas cut mud at the shakers, mud weight out reduced"],"EVT_BOP_SHUTIN":[0.3367,"closed annular preventer and recorded shut in pressures"],"EVT_OVERPRESSURE_DETECTED":[0.1746,"pore pressure higher than prognosed"],"EVT_TORQUE_UP":[0.186,"high surface torque during reaming"],"EVT_TORQUE_SPIKE":[0.1325,"torque exceeded the limit and the rotary stalled out"],"EVT_CEMENTING_FAILURE":[0.0973,"plug did not bump, remedial squeeze cement required"],"EVT_WOC":[0.2071,"WOC before drilling out the shoe track"],"EVT_ROUTINE_DRILLING":[0.7597,"nippled up or nippled down the blowout preventer stack"]},"keyword":null,"keyword_evt":null,"semantic":{"top":"EVT_BOP_SHUTIN","sim":0.3367,"margin":-0.4231},"decision":"EVT_ROUTINE_DRILLING","method":"routine","confidence":0.95,"depth_m":null},{"sentence":"Waiting on SCR technician to arrive.","expanded":"Waiting on SCR technician to arrive.","tokens":["[CLS]","waiting","on","sc","##r","technician","to","arrive",".","[SEP]"],"links":[[2,5,0.145],[6,5,0.135],[4,3,0.121],[3,5,0.119],[7,1,0.113],[2,1,0.109],[7,5,0.108]],"vec":[-0.064,-0.049,0.002,0.023,0.051,-0.016,0.001,-0.031,-0.007,-0.039,0.076,-0.023,0.035,0.013,-0.075,-0.077,0.009,-0.163,0.051,-0.032,-0.093,0.036,-0.075,0.04,0.015,-0.038,-0.039,-0.02,-0.006,0.027,-0.026,0.008,-0.028,0.03,0.011,-0.0,0.069,0.052,0.059,-0.075,0.029,-0.124,-0.057,0.056,0.036,-0.007,0.035,-0.073],"scores":{"EVT_MUD_LOSS_PARTIAL":[0.1408,"lost circulation, partial returns at the shakers"],"EVT_MUD_LOSS_TOTAL":[0.1048,"lost all returns while drilling into fractured zone"],"EVT_LCM_APPLIED":[0.0894,"spotted LCM pill across the loss zone"],"EVT_CIRC_RESTORED":[0.1256,"losses stopped, resumed drilling with full circulation"],"EVT_STUCK_PIPE":[0.1642,"hole packed off around the BHA"],"EVT_DIFF_STICKING":[0.1018,"differential sticking during survey, spotted pipe freeing pill"],"EVT_TIGHT_HOLE":[0.1154,"tight hole while tripping out, worked through restriction"],"EVT_JARRING":[0.2054,"fired the drilling jar several times"],"EVT_FISHING":[0.204,"junk left in hole, ran junk basket and magnet"],"EVT_KICK":[0.2571,"took an influx while drilling"],"EVT_GAS_INFLUX":[0.1526,"elevated gas readings in the returns"],"EVT_BOP_SHUTIN":[0.0943,"shut the well in on the BOP for well control"],"EVT_OVERPRESSURE_DETECTED":[0.0751,"pore pressure higher than prognosed"],"EVT_TORQUE_UP":[0.0651,"high surface torque during reaming"],"EVT_TORQUE_SPIKE":[0.1251,"sudden torque spike stalled the top drive"],"EVT_CEMENTING_FAILURE":[0.1416,"cement job aborted due to equipment failure"],"EVT_WOC":[0.309,"waiting on cement to set"],"EVT_ROUTINE_DRILLING":[0.4234,"rig repair, electrician troubleshooting drawworks motor or SCR system"]},"keyword":null,"keyword_evt":null,"semantic":{"top":"EVT_WOC","sim":0.309,"margin":-0.1145},"decision":"EVT_ROUTINE_DRILLING","method":"routine","confidence":0.95,"depth_m":null}];
+const MLM_FORGE_RUN = [["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_WOC","semantic","Decision was made to test choke manifold while allowing more time for cement to set.",null,0.5861,0.2591,0.64],["EVT_TIGHT_HOLE","keyword","Tight hole encountered from 2,351' to 1,799'","tight hole",0.6347,0.181,0.85],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_TORQUE_UP","keyword","3-34-2 RIH with 5 stands of 5\" HWDP and 20 stands of 5\" DP / POH laying down DP and transporting to 16A for inspection / excessive over torq","torque",0.355,-0.1173,0.85],["EVT_FISHING","semantic","8 1/8\" Junk Basket.",null,0.409,0.2433,0.62],["EVT_FISHING","semantic","Junk basket had nine pieces of metal, small in size 0.5\" by .5\"",null,0.5118,0.3262,0.72],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_STUCK_PIPE","keyword","Once on bottom when filling pipe got pipe stuck.","stuck",0.6187,0.0363,0.85],["EVT_TIGHT_HOLE","semantic","Work loose shortly afterwards",null,0.5483,0.1981,0.56],["EVT_TORQUE_UP","keyword","Motor took a high amount of torque to drain 45 kft/lbs.","torque",0.5055,0.1684,0.85],["EVT_TIGHT_HOLE","semantic","Took weight at 7,072'.",null,0.5085,0.2638,0.64],["EVT_STUCK_PIPE","semantic","Work string free with 90k in over-pull.",null,0.5607,0.3079,0.7],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_WOC","semantic","Planned Operations: Wait on cement.",null,0.7995,0.2586,0.64],["EVT_WOC","keyword","Monitored cement samples while waiting on cement.","waiting on cement",0.6467,0.1879,0.85],["EVT_WOC","keyword","Monitored cement samples while waiting on cement..","waiting on cement",0.6409,0.1644,0.85],["EVT_FISHING","semantic","Transport: Received 5-3/4\" mill, junk basket,5-3/4\" magnet.",null,0.5555,0.3758,0.78],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95],["EVT_ROUTINE_DRILLING","routine","",null,null,null,0.95]];
+const MLM_MARGIN = 0.19;
+const MLM_N_PROTOS = 80;
+const MLM_NAMES = {
+  EVT_MUD_LOSS_PARTIAL: 'Partial mud loss', EVT_MUD_LOSS_TOTAL: 'Total mud loss', EVT_LCM_APPLIED: 'LCM applied',
+  EVT_CIRC_RESTORED: 'Circ. restored', EVT_STUCK_PIPE: 'Stuck pipe', EVT_DIFF_STICKING: 'Diff. sticking',
+  EVT_TIGHT_HOLE: 'Tight hole', EVT_JARRING: 'Jarring', EVT_FISHING: 'Fishing', EVT_KICK: 'Kick',
+  EVT_GAS_INFLUX: 'Gas influx', EVT_BOP_SHUTIN: 'BOP shut-in', EVT_OVERPRESSURE_DETECTED: 'Overpressure',
+  EVT_TORQUE_UP: 'Torque up', EVT_TORQUE_SPIKE: 'Torque spike', EVT_CEMENTING_FAILURE: 'Cementing failure',
+  EVT_WOC: 'Waiting on cement', EVT_ROUTINE_DRILLING: 'Routine operations',
+};
+const MLM_VOCAB = {
+  EVT_MUD_LOSS_PARTIAL: ['mud_loss', 'medium'], EVT_MUD_LOSS_TOTAL: ['mud_loss', 'critical'], EVT_LCM_APPLIED: ['mud_loss', 'low'],
+  EVT_CIRC_RESTORED: ['mud_loss', 'low'], EVT_STUCK_PIPE: ['stuck_pipe', 'critical'], EVT_DIFF_STICKING: ['stuck_pipe', 'high'],
+  EVT_TIGHT_HOLE: ['stuck_pipe', 'medium'], EVT_JARRING: ['stuck_pipe', 'medium'], EVT_FISHING: ['stuck_pipe', 'high'],
+  EVT_KICK: ['kick', 'critical'], EVT_GAS_INFLUX: ['kick', 'high'], EVT_BOP_SHUTIN: ['kick', 'critical'],
+  EVT_OVERPRESSURE_DETECTED: ['overpressure', 'high'], EVT_TORQUE_UP: ['torque_spike', 'medium'], EVT_TORQUE_SPIKE: ['torque_spike', 'high'],
+  EVT_CEMENTING_FAILURE: ['cementing', 'high'], EVT_WOC: ['cementing', 'none'], EVT_ROUTINE_DRILLING: ['none', 'none'],
+};
+const MLM_OUTCOME = {
+  semantic: 'MINILM CATCH · KEYWORDS MISSED', keyword: 'KEYWORD · MINILM BELOW MARGIN',
+  both: 'KEYWORD + MINILM AGREE', routine: 'REJECTED → ROUTINE',
+};
+
+const MLM = (() => {
+  let host = null, cur = 0, run = null;
+  const e = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const f3 = v => (v >= 0 ? '' : '−') + Math.abs(v).toFixed(3);
+
+  // ── 02+03: tokens → 6 transformer layers → L6 attention → mean pool ──
+  function encoderSvg(d) {
+    const toks = d.tokens, CW = 6.1, PAD = 12, LM = 40, W0 = 600;
+    const ws = toks.map(t => t.length * CW + PAD);
+    const sumW = ws.reduce((a, b) => a + b, 0);
+    // spread short sentences across the stack, keep long ones tight
+    const GAP = Math.max(4, Math.min(26, (W0 - LM - 30 - sumW) / Math.max(1, toks.length - 1)));
+    const total = sumW + GAP * (toks.length - 1);
+    const W = Math.max(W0, LM + total + 16);
+    let x = LM + (W - LM - 16 - total) / 2;
+    const cx = [], xs = [];
+    ws.forEach(w => { xs.push(x); cx.push(x + w / 2); x += w + GAP; });
+    const left = xs[0] - 8, right = xs[xs.length - 1] + ws[ws.length - 1] + 8;
+    const nodeY = 24, bandTop = 74, bandBot = 152, tokY = 246, H = 296;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="MiniLM encoder: tokens through 6 transformer layers to a mean-pooled sentence vector">`;
+    s += `<defs><linearGradient id="mlmL6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00e5ff" stop-opacity="0.13"/><stop offset="1" stop-color="#00e5ff" stop-opacity="0.03"/></linearGradient>
+          <marker id="mlmAr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#00e5ff"/></marker></defs>`;
+    // mean-pool funnel
+    const nx = (left + right) / 2;
+    cx.forEach(c => { s += `<path d="M${c} ${bandTop} C ${c} ${bandTop - 26}, ${nx} ${nodeY + 30}, ${nx} ${nodeY + 9}" fill="none" stroke="#00e5ff" stroke-opacity="0.22" stroke-width="1"/>`; });
+    s += `<circle cx="${nx}" cy="${nodeY}" r="9" fill="#020610" stroke="#00e5ff" stroke-width="1.5"/><text x="${nx}" y="${nodeY + 3.5}" text-anchor="middle" font-size="10" fill="#00e5ff" font-weight="700">u</text>`;
+    s += `<text x="${nx + 16}" y="${nodeY - 2}" font-size="9.5" fill="#e6edf3" font-weight="600">mean pool + L2 normalise</text>`;
+    s += `<text x="${nx + 16}" y="${nodeY + 10}" font-size="8.5" fill="#6e7681">average of all ${toks.length} token vectors → u ∈ ℝ³⁸⁴</text>`;
+    // token streams through the stack
+    cx.forEach(c => { s += `<line x1="${c}" y1="${tokY - 2}" x2="${c}" y2="${bandTop}" stroke="#00e5ff" stroke-opacity="0.4" stroke-width="1" class="mlm-flow"/>`; });
+    // L6 band (attention)
+    s += `<rect x="${left}" y="${bandTop}" width="${right - left}" height="${bandBot - bandTop}" rx="5" fill="url(#mlmL6)" stroke="#00e5ff" stroke-opacity="0.45"/>`;
+    s += `<text x="${LM - 6}" y="${bandTop + 14}" text-anchor="end" font-size="9" fill="#00e5ff" font-weight="700">L6</text>`;
+    s += `<text x="${left + 8}" y="${bandTop + 13}" font-size="8.5" fill="#6e7681">self-attention · strongest token→token links (mean of 12 heads)</text>`;
+    const wv = d.links.map(l => l[2]), wmin = Math.min(...wv), wmax = Math.max(...wv);
+    d.links.forEach(([i, j, w], k) => {
+      const a = Math.min(cx[i], cx[j]), b = Math.max(cx[i], cx[j]);
+      const base = bandBot - 6, h = Math.min(bandBot - bandTop - 24, 10 + (b - a) * 0.32);
+      const t = wmax > wmin ? (w - wmin) / (wmax - wmin) : 1;
+      s += `<path class="mlm-arc" d="M${a} ${base} Q ${(a + b) / 2} ${base - 2 * h} ${b} ${base}" stroke-opacity="${(0.35 + 0.6 * t).toFixed(2)}" stroke-width="${(1 + 1.6 * t).toFixed(2)}"><title>${e(toks[i])} → ${e(toks[j])}: ${w}</title></path>`;
+      [a, b].forEach(p => { s += `<circle cx="${p}" cy="${base}" r="2" fill="#00e5ff"/>`; });
+    });
+    // L5..L1
+    for (let L = 5; L >= 1; L--) {
+      const y = bandBot + 6 + (5 - L) * 17;
+      s += `<rect x="${left}" y="${y}" width="${right - left}" height="11" rx="3" fill="#00e5ff" fill-opacity="${(0.025 + L * 0.012).toFixed(3)}" stroke="#00e5ff" stroke-opacity="${(0.12 + L * 0.04).toFixed(2)}"/>`;
+      s += `<text x="${LM - 6}" y="${y + 9}" text-anchor="end" font-size="9" fill="#6e7681">L${L}</text>`;
+    }
+    // tokens
+    toks.forEach((t, i) => {
+      const sp = t === '[CLS]' || t === '[SEP]', sub = t.startsWith('##');
+      s += `<rect x="${xs[i]}" y="${tokY}" width="${ws[i]}" height="19" rx="4" fill="${sp ? '#0d1117' : 'rgba(0,229,255,0.08)'}" stroke="${sp ? '#30363d' : sub ? '#d2a8ff' : 'rgba(0,229,255,0.5)'}" ${sub ? 'stroke-dasharray="2 2"' : ''}/>`;
+      s += `<text x="${cx[i]}" y="${tokY + 13}" text-anchor="middle" font-size="10" fill="${sp ? '#6e7681' : sub ? '#d2a8ff' : '#e6edf3'}">${e(t)}</text>`;
+    });
+    s += `<text x="${LM - 6}" y="${tokY + 13}" text-anchor="end" font-size="8.5" fill="#6e7681">in</text>`;
+    s += `<text x="${left}" y="${tokY + 34}" font-size="8.5" fill="#6e7681">WordPiece tokens · uncased vocab 30,522 · <tspan fill="#d2a8ff">## = sub-word piece</tspan> · ${toks.length} tokens</text>`;
+    s += `<text x="${left}" y="${tokY + 47}" font-size="8.5" fill="#484f58">each layer L1–L6: 12-head self-attention + feed-forward, every token carries a 384-d vector upward</text>`;
+    return s + '</svg>';
+  }
+
+  function gaugeSvg(m) {
+    const W = 260, H = 50, x0 = 10, x1 = 250, lo = -0.5, hi = 0.5;
+    const X = v => x0 + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (x1 - x0);
+    const pass = m >= MLM_MARGIN, col = pass ? '#d2a8ff' : '#6e7681';
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="margin-top:6px">`;
+    s += `<rect x="${x0}" y="18" width="${x1 - x0}" height="6" rx="3" fill="#21262d"/>`;
+    s += `<rect x="${X(MLM_MARGIN)}" y="18" width="${x1 - X(MLM_MARGIN)}" height="6" rx="3" fill="#d2a8ff" fill-opacity="0.25"/>`;
+    s += `<line x1="${X(MLM_MARGIN)}" y1="12" x2="${X(MLM_MARGIN)}" y2="30" stroke="#e6edf3" stroke-width="1.5"/>`;
+    s += `<text x="${X(MLM_MARGIN)}" y="40" text-anchor="middle" font-size="8.5" fill="#e6edf3">0.19</text>`;
+    s += `<text x="${x0}" y="40" font-size="8" fill="#484f58">−0.5</text><text x="${X(0)}" y="40" text-anchor="middle" font-size="8" fill="#484f58">0</text><text x="${x1}" y="40" text-anchor="end" font-size="8" fill="#484f58">+0.5</text>`;
+    s += `<path d="M${X(m)} 16 l-5 -8 h10 z" fill="${col}"/><text x="${X(m)}" y="6" text-anchor="middle" font-size="8.5" font-weight="700" fill="${col}">${f3(m)}</text>`;
+    return s + '</svg>';
+  }
+
+  function highlightExpansion(raw, exp) {
+    if (raw === exp) return e(exp);
+    let a = 0; while (a < raw.length && raw[a] === exp[a]) a++;
+    let b = 0; while (b < raw.length - a && raw[raw.length - 1 - b] === exp[exp.length - 1 - b]) b++;
+    return e(exp.slice(0, a)) + '<mark>' + e(exp.slice(a, exp.length - b)) + '</mark>' + e(exp.slice(exp.length - b));
+  }
+
+  function vecCells(v) {
+    const mx = Math.max(...v.map(Math.abs)) || 1;
+    return v.map((x, i) => {
+      const t = Math.min(1, Math.abs(x) / mx), c = x >= 0 ? '0,229,255' : '255,166,87';
+      return `<div style="background:rgba(${c},${(0.08 + 0.85 * t).toFixed(2)})" title="dim ${i}: ${x}"></div>`;
+    }).join('');
+  }
+
+  function renderSentence() {
+    const d = MLM_SHOWCASE[cur];
+    const sc = Object.entries(d.scores).map(([k, [v, p]]) => ({ k, v, p })).sort((a, b) => b.v - a.v);
+    const rt = d.scores.EVT_ROUTINE_DRILLING, topK = d.semantic.top, top = d.scores[topK];
+    const margin = d.semantic.margin, pass = margin >= MLM_MARGIN;
+    const isEvt = d.decision !== 'EVT_ROUTINE_DRILLING';
+    const scale = v => Math.max(0, v) / 0.85 * 100;
+
+    host.querySelectorAll('.mlm-chip').forEach((c, i) => c.classList.toggle('on', i === cur));
+    const flow = host.querySelector('.mlm-flowwrap');
+    const kwLane = d.keyword
+      ? `<span class="mlm-pill ok">MATCH</span></div><div class="lv">phrase <b style="color:var(--kw)">"${e(d.keyword)}"</b> → ${e(d.keyword_evt)}</div>`
+      : `<span class="mlm-pill no">NO MATCH</span></div><div class="lv">none of the listed phrases appear in this sentence</div>`;
+    const semVerdict = pass
+      ? (d.keyword ? (topK === d.keyword_evt ? 'clears margin and agrees with keyword' : 'clears margin but disagrees') : `clears margin → <b style="color:var(--sem)">${e(MLM_NAMES[topK])}</b>`)
+      : (margin < 0 ? 'routine prototypes match better → no event' : 'below margin → not confident enough on its own');
+    const rows = [
+      ['both', 'keyword fires · MiniLM agrees (≥ margin)', '0.92'],
+      ['keyword', 'keyword fires · MiniLM unsure / disagrees', '0.85'],
+      ['semantic', 'no keyword · margin ≥ 0.19 · not negated', '0.55–0.80'],
+      ['routine', 'neither', '0.95'],
+    ];
+    const conf = isEvt ? d.confidence : 0.95;
+    const formula = d.method === 'semantic'
+      ? `conf = min(0.80, 0.55 + (${margin.toFixed(3)} − 0.19) × 1.25) = ${conf.toFixed(2)}`
+      : d.method === 'keyword' ? 'conf = 0.85 (rule hit; MiniLM did not confirm above margin)'
+      : d.method === 'both' ? 'conf = 0.92 (rule hit confirmed by MiniLM)' : 'no hazard → report keeps one routine record (0.95)';
+    const [hz, sev] = MLM_VOCAB[d.decision];
+
+    flow.innerHTML = `
+    <div class="mlm-row r1">
+      <div class="mlm-card" style="--i:0">
+        <div class="mlm-step">01 <span>· INPUT</span></div>
+        <div class="mlm-ttl">OCR'd sentence</div>
+        <div class="mlm-quote">${e(d.sentence)}</div>
+        <div class="mlm-mini">↓ ABBREVIATION EXPANSION (before embedding)</div>
+        <div class="mlm-quote exp">${highlightExpansion(d.sentence, d.expanded)}</div>
+        <div class="mlm-note">${d.sentence === d.expanded ? 'No DDR abbreviation here, so the text goes in unchanged.' : 'A general-domain model does not know DDR shorthand, so <b>30+ abbreviations</b> (BOP, POOH, WOC, FIT…) are spelled out first.'}</div>
+        <div class="mlm-par"><b>Parallel lane:</b> the original keyword rules read the raw sentence at the same time (see step 06).</div>
+      </div>
+      <div class="mlm-link" style="--i:1"></div>
+      <div class="mlm-card model" style="--i:2">
+        <div class="mlm-step">02 → 03 <span>· all-MiniLM-L6-v2 ENCODER (read bottom → top)</span></div>
+        <div class="mlm-ttl">Tokenise, contextualise through 6 transformer layers, pool to one vector</div>
+        ${encoderSvg(d)}
+      </div>
+      <div class="mlm-link" style="--i:3"></div>
+      <div class="mlm-card" style="--i:4">
+        <div class="mlm-step">04 <span>· SENTENCE EMBEDDING</span></div>
+        <div class="mlm-ttl">u — the sentence's meaning as 384 numbers</div>
+        <div class="mlm-vec">${vecCells(d.vec)}</div>
+        <div class="mlm-vec-more">· · · 336 more dims · · ·</div>
+        <div class="mlm-legend"><span class="neg">negative</span><span class="pos">positive</span></div>
+        <div class="mlm-math">‖u‖ = 1, so similarity is a dot product:<br><i>cos(u, p) = u · p</i></div>
+        <div class="mlm-note">Sentences that <b>mean</b> the same land close together, even with no shared words. That is what MiniLM was trained for.</div>
+      </div>
+    </div>
+    <div class="mlm-elbow" style="--i:5">
+      <svg viewBox="0 0 100 44" preserveAspectRatio="none"><path d="M 89 0 V 22 H 19 V 44" fill="none" stroke="#00e5ff" stroke-opacity="0.6" stroke-width="2" vector-effect="non-scaling-stroke" class="mlm-flow"/></svg>
+      <span class="eh"></span><span class="elabel">u compared with ${MLM_N_PROTOS} pre-embedded prototype phrases</span>
+    </div>
+    <div class="mlm-row r2">
+      <div class="mlm-card" style="--i:6">
+        <div class="mlm-step">05 <span>· PROTOTYPE MATCHING</span></div>
+        <div class="mlm-ttl">Best cosine per event class (max over its prototype phrases)</div>
+        <div class="mlm-bars">${sc.map(r => `
+          <div class="mlm-bar ${r.k === topK ? 'top' : ''} ${r.k === 'EVT_ROUTINE_DRILLING' ? 'rt' : ''}" title="closest: ${e(r.p)}">
+            <span class="bl">${e(MLM_NAMES[r.k])}</span><span class="bt"><span class="bf" data-w="${scale(r.v).toFixed(1)}"></span></span><span class="bv">${f3(r.v)}</span>
+          </div>`).join('')}
+        </div>
+        <div class="mlm-protos">
+          <div class="mlm-proto h"><span class="pk">BEST HAZARD · ${top[0].toFixed(3)}</span><q>${e(top[1])}</q></div>
+          <div class="mlm-proto r"><span class="pk">BEST ROUTINE · ${rt[0].toFixed(3)}</span><q>${e(rt[1])}</q></div>
+        </div>
+      </div>
+      <div class="mlm-link" style="--i:7"></div>
+      <div class="mlm-card" style="--i:8">
+        <div class="mlm-step">06 <span>· HYBRID DECISION GATE</span></div>
+        <div class="mlm-ttl">Rules first, MiniLM as a second opinion</div>
+        <div class="mlm-lane kw"><div class="lh">KEYWORD RULES · nlp_rules.py ${kwLane}</div>
+        <div class="mlm-lane sm"><div class="lh">MINILM MARGIN <span class="mlm-pill ${pass ? 'ok' : 'no'}">${pass ? 'PASS' : 'FAIL'}</span></div>
+          <div class="lv">${top[0].toFixed(3)} <span style="color:var(--haz)">hazard</span> − ${rt[0].toFixed(3)} <span style="color:var(--rt)">routine</span> = <b>${f3(margin)}</b></div>
+          ${gaugeSvg(margin)}
+          <div class="lv" style="font-size:9px;color:var(--dim)">${semVerdict}</div>
+        </div>
+        <table class="mlm-rules">${rows.map(([m, t, c]) => `<tr class="${m === d.method ? 'on' : ''}"><td><span class="mlm-meth ${m}">${m}</span> · ${t}</td><td>${c}</td></tr>`).join('')}</table>
+      </div>
+      <div class="mlm-link" style="--i:9"></div>
+      <div class="mlm-card" style="--i:10">
+        <div class="mlm-step">07 <span>· OUTPUT</span></div>
+        <div class="mlm-ttl">Typed event → events.jsonl record</div>
+        <div class="mlm-out-evt ${isEvt ? '' : 'rt'}">${e(d.decision)}</div>
+        <div class="mlm-kv"><span>method</span><span class="mlm-meth ${d.method}">${d.method}</span></div>
+        <div class="mlm-kv"><span>hazard</span><span>${e(hz)}</span></div>
+        <div class="mlm-kv"><span>severity</span><span>${e(sev)}</span></div>
+        <div class="mlm-kv"><span>depth_m</span><span>${d.depth_m != null ? d.depth_m.toLocaleString() + ' m <span style="color:var(--muted)">(ft→m, units.py)</span>' : isEvt ? 'from neighbour / header' : '—'}</span></div>
+        <div class="mlm-kv"><span>confidence</span><span>${conf.toFixed(2)}</span></div>
+        <div class="mlm-conf"><div data-w="${conf * 100}"></div></div>
+        <div class="mlm-formula">${formula}</div>
+        <div class="mlm-note">Same <b>15-field schema</b> as the committed events.jsonl. The reason (keyword, similarity, margin) is kept beside the record as evidence.</div>
+      </div>
+    </div>`;
+    host.classList.remove('play'); void host.offsetWidth; host.classList.add('play');
+    setTimeout(() => {
+      flow.querySelectorAll('[data-w]').forEach(el => { el.style.width = el.dataset.w + '%'; });
+    }, 900);
+  }
+
+  // ── run summary: how each record of this document was decided ──
+  function renderRun() {
+    const el = host.querySelector('.mlm-runwrap');
+    if (!run) { el.innerHTML = ''; return; }
+    const cnt = { keyword: 0, both: 0, semantic: 0, routine: 0 };
+    run.items.forEach(r => { cnt[r.method] = (cnt[r.method] || 0) + 1; });
+    const n = run.items.length || 1;
+    const col = { keyword: 'var(--blue)', both: 'var(--green)', semantic: 'var(--purple)', routine: '#30363d' };
+    const lab = { keyword: 'keyword only', both: 'keyword + MiniLM', semantic: 'MiniLM only', routine: 'routine report' };
+    const sem = run.items.filter(r => r.method === 'semantic' || r.method === 'both');
+    const X = v => Math.max(0, Math.min(1, v / 0.45)) * 100;
+    el.innerHTML = `
+      <div class="mlm-run">
+        <div class="mlm-step">08 <span>· THIS DOCUMENT</span></div>
+        <div class="mlm-ttl">${e(run.title)}</div>
+        ${run.modeNote ? `<div class="mlm-note" style="margin:0 0 8px">${run.modeNote}</div>` : ''}
+        <div class="mlm-stack">${['keyword', 'both', 'semantic', 'routine'].map(k => cnt[k] ? `<div style="flex-grow:${cnt[k]};background:${col[k]}" title="${lab[k]}: ${cnt[k]}"></div>` : '').join('')}</div>
+        <div class="mlm-stack-leg">${['keyword', 'both', 'semantic', 'routine'].map(k => `<span><i style="background:${col[k]}"></i>${lab[k]} <b>${cnt[k] || 0}</b></span>`).join('')}<span>of <b>${run.items.length}</b> records</span></div>
+        ${sem.length ? `
+        <div class="mlm-mini" style="margin-top:14px">HAZARDS MINILM CONTRIBUTED · margin vs the 0.19 gate${run.clickable ? ' · click a row to trace it above' : ''}</div>
+        ${sem.map(r => {
+          const idx = MLM_SHOWCASE.findIndex(s => s.sentence === r.sentence);
+          return `<div class="mlm-catch ${idx >= 0 ? 'click' : ''}" ${idx >= 0 ? `data-idx="${idx}"` : ''}>
+            <span class="ce">${e(r.evt)}${r.method === 'both' ? ' <span style="color:var(--green)">· both</span>' : ''}</span>
+            <span class="cs" title="${e(r.sentence)}">"${e(r.sentence)}"</span>
+            <div><div class="mlm-mg"><div class="mf" style="width:${X(r.margin)}%"></div><div class="mt" style="left:${X(MLM_MARGIN)}%"></div></div>
+            <div class="mlm-mgv"><span>margin ${r.margin != null ? r.margin.toFixed(3) : '—'}</span><span>sim ${r.sim != null ? r.sim.toFixed(3) : '—'}</span></div></div>
+          </div>`;
+        }).join('')}` : ''}
+      </div>`;
+    el.querySelectorAll('.mlm-catch.click').forEach(c => c.addEventListener('click', () => {
+      cur = +c.dataset.idx; renderSentence();
+      host.querySelector('.mlm-picker').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  }
+
+  // Simple left-to-right overview of the whole semantic layer (one example sentence).
+  function archSvg() {
+    const d = MLM_SHOWCASE[0], sc = d.scores, top = sc[d.semantic.top][0], rt = sc.EVT_ROUTINE_DRILLING[0];
+    const box = (x, y, w, hh, c, op = 0.08) => `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="6" fill="${c}" fill-opacity="${op}" stroke="${c}" stroke-opacity="0.55"/>`;
+    const t = (x, y, str, o = {}) => `<text x="${x}" y="${y}" text-anchor="${o.a || 'middle'}" font-size="${o.s || 8.5}" fill="${o.c || '#c9d1d9'}" ${o.b ? 'font-weight="700"' : ''}>${str}</text>`;
+    const arrow = (x1, x2, y) => `<path d="M${x1} ${y} H ${x2}" stroke="#00e5ff" stroke-opacity="0.7" stroke-width="1.5" class="mlm-flow" marker-end="url(#mlmAr3)"/>`;
+    const step = (x, n, label) => t(x, 214, `<tspan fill="#00e5ff" font-weight="700">${n}</tspan> ${label}`, { s: 8.5, c: '#6e7681' });
+    const Y = 128;
+    let s = `<svg viewBox="0 0 1000 224" width="100%" role="img" aria-label="MiniLM semantic layer: sentence, abbreviation expansion, encoder, sentence vector, prototype similarity, margin gate, event">`;
+    s += `<defs><marker id="mlmAr3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#00e5ff"/></marker>
+          <marker id="mlmAr4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#58a6ff"/></marker></defs>`;
+    // 1 sentence
+    s += box(6, 98, 124, 60, '#e6edf3', 0.04);
+    s += t(68, 114, 'DDR SENTENCE', { c: '#6e7681', s: 8 });
+    s += t(68, 132, '“Took weight', { c: '#e6edf3', s: 10 }) + t(68, 146, 'at 7,072\'.”', { c: '#e6edf3', s: 10 });
+    s += arrow(132, 152, Y);
+    // 2 normalise
+    s += box(156, 104, 104, 48, '#d2a8ff');
+    s += t(208, 122, 'expand', { c: '#d2a8ff', b: 1 }) + t(208, 134, 'abbreviations', { c: '#d2a8ff', b: 1 });
+    s += t(208, 146, 'BOP → blowout prev.', { s: 7.5, c: '#6e7681' });
+    s += arrow(262, 282, Y);
+    // 3 encoder: 6 stacked layers
+    s += t(346, 62, 'all-MiniLM-L6-v2', { c: '#00e5ff', b: 1, s: 9.5 });
+    for (let i = 0; i < 6; i++) {
+      const y = 172 - (i + 1) * 17;
+      s += `<rect x="290" y="${y}" width="112" height="13" rx="3" fill="#00e5ff" fill-opacity="${(0.05 + i * 0.025).toFixed(3)}" stroke="#00e5ff" stroke-opacity="${(0.3 + i * 0.08).toFixed(2)}"/>`;
+      s += t(346, y + 9.5, `Layer ${i + 1}`, { s: 8 });
+    }
+    s += t(346, 184, '12-head self-attention', { s: 7.5, c: '#6e7681' }) + t(346, 194, '22.7M params', { s: 7.5, c: '#6e7681' });
+    s += arrow(404, 428, Y);
+    // 4 sentence vector
+    const v = d.vec.slice(0, 16), mx = Math.max(...v.map(Math.abs)) || 1;
+    v.forEach((x, i) => {
+      const c = x >= 0 ? '#00e5ff' : '#ffa657';
+      s += `<rect x="${434 + (i % 4) * 13}" y="${102 + Math.floor(i / 4) * 13}" width="11" height="11" rx="2" fill="${c}" fill-opacity="${(0.12 + 0.8 * Math.abs(x) / mx).toFixed(2)}"/>`;
+    });
+    s += t(459, 168, 'mean pool', { s: 8, c: '#6e7681' }) + t(459, 180, 'u ∈ ℝ³⁸⁴', { c: '#e6edf3', b: 1 });
+    s += arrow(490, 512, Y);
+    // 5 prototype similarity
+    s += box(516, 92, 150, 72, '#00e5ff', 0.04);
+    s += t(591, 106, `cosine vs ${MLM_N_PROTOS} prototypes`, { s: 8, c: '#6e7681' });
+    const bars = [['Tight hole', top, '#ffa657'], ['Routine ops', rt, '#3fb950'], ['Fishing', sc.EVT_FISHING[0], '#00e5ff']];
+    bars.forEach(([n, val, c], i) => {
+      const y = 116 + i * 15;
+      s += t(524, y + 8, n, { a: 'start', s: 8, c: i < 2 ? c : '#6e7681' });
+      s += `<rect x="584" y="${y}" width="48" height="9" rx="2" fill="#21262d"/><rect x="584" y="${y}" width="${(48 * val / 0.6).toFixed(1)}" height="9" rx="2" fill="${c}" fill-opacity="${i < 2 ? 0.9 : 0.4}"/>`;
+      s += t(662, y + 8, val.toFixed(3), { a: 'end', s: 8, c: i < 2 ? c : '#6e7681' });
+    });
+    s += t(591, 180, '18 event classes', { s: 7.5, c: '#6e7681' });
+    s += arrow(668, 690, Y);
+    // 6 margin gate (diamond)
+    s += `<path d="M752 ${Y - 44} L812 ${Y} L752 ${Y + 44} L692 ${Y} Z" fill="#d2a8ff" fill-opacity="0.08" stroke="#d2a8ff" stroke-opacity="0.6"/>`;
+    s += t(752, Y - 10, 'hazard − routine', { s: 8 }) + t(752, Y + 2, '≥ 0.19 ?', { s: 9, c: '#d2a8ff', b: 1 });
+    const ta = top.toFixed(3), ra = rt.toFixed(3);
+    s += t(752, Y + 17, `${ta} − ${ra}`, { s: 7, c: '#6e7681' }) + t(752, Y + 28, `= ${(ta - ra).toFixed(3)} ✓`, { s: 8, c: '#3fb950', b: 1 });
+    s += t(752, Y + 60, 'else → routine', { s: 7.5, c: '#6e7681' });
+    s += arrow(814, 836, Y);
+    // 7 output
+    s += box(840, 96, 154, 64, '#ffa657');
+    s += t(917, 114, 'EVT_TIGHT_HOLE', { c: '#ffa657', b: 1, s: 10 });
+    s += t(917, 130, 'method: semantic', { s: 8, c: '#d2a8ff' });
+    s += t(917, 143, `confidence ${d.confidence.toFixed(2)}`, { s: 8 });
+    s += t(917, 155, 'depth 2,155.5 m', { s: 8, c: '#6e7681' });
+    s += t(917, 178, '→ events.jsonl (15 fields)', { s: 7.5, c: '#6e7681' });
+    // parallel keyword lane
+    s += `<path d="M68 96 V 30 H 752 V ${Y - 48}" fill="none" stroke="#58a6ff" stroke-opacity="0.7" stroke-width="1.3" stroke-dasharray="4 4" marker-end="url(#mlmAr4)"/>`;
+    s += `<rect x="440" y="20" width="260" height="20" rx="10" fill="#020610" stroke="#58a6ff" stroke-opacity="0.6"/>`;
+    s += t(570, 33.5, 'keyword rules (nlp_rules.py) · checked first', { s: 8, c: '#58a6ff' });
+    s += t(570, 52, 'here: no match, so MiniLM decides', { s: 7.5, c: '#6e7681' });
+    // step captions
+    s += step(68, '1', 'OCR text') + step(208, '2', 'clean') + step(346, '3', 'encode') + step(459, '4', 'embed') + step(591, '5', 'compare') + step(752, '6', 'gate') + step(917, '7', 'event');
+    return s + '</svg>';
+  }
+
+  function render(hostId, liveRun) {
+    const slot = document.getElementById(hostId);
+    if (!slot) return;
+    // run summary: live job evidence, or the recorded live run for the demo
+    if (liveRun) {
+      const items = (liveRun.records || []).map((rec, i) => {
+        const ev = (liveRun.evidence || [])[i] || {}, sm = ev.semantic || {};
+        return { evt: rec.event_type_id, method: ev.method || 'keyword', sentence: ev.sentence || '', sim: sm.sim, margin: sm.margin };
+      });
+      const off = liveRun.nlp && liveRun.nlp.mode !== 'hybrid';
+      run = { items, clickable: true,
+        title: `How the ${items.length} records of ${liveRun.filename || 'this upload'} were decided`,
+        modeNote: off ? `⚠ MiniLM was not loaded for this job (${e(liveRun.nlp.load_error || 'keyword-only mode')}); every record came from the keyword rules.` : '' };
+    } else {
+      run = { clickable: true, title: 'How the 38 records of Utah_FORGE_DDRs.pdf were decided (recorded live run, 93 pages)',
+        items: MLM_FORGE_RUN.map(([evt, method, sentence, , sim, margin]) => ({ evt, method, sentence, sim, margin })) };
+    }
+    slot.innerHTML = `
+    <details class="mlm mlm-simple">
+      <summary class="mlm-head">
+        <span class="mh-title">🧩 MiniLM Architecture: how the semantic layer works</span>
+        <span class="mh-sub">one-glance overview</span>
+      </summary>
+      <div class="mlm-body">
+        ${archSvg()}
+        <div class="mlm-note">Each OCR'd sentence is checked by the original keyword rules. In parallel, MiniLM turns it into a 384-number meaning vector and compares it with short descriptions of 18 event classes. If the best hazard class beats the best "routine" description by at least <b>0.19</b>, MiniLM adds the event even when no keyword matched. The output keeps the same 15-field events.jsonl format. MiniLM is a small model distilled from a larger transformer and tuned so that sentences with the same meaning get similar vectors, so it needs no DDR training data.</div>
+      </div>
+    </details>
+    <details class="mlm mlm-deep">
+      <summary class="mlm-head">
+        <span class="mh-title">🧠 Inside the Semantic Layer: how MiniLM types a sentence</span>
+        <span class="mh-sub">real model outputs, step by step</span>
+        <span class="mlm-specs"><span class="mlm-spec">all-MiniLM-L6-v2</span><span class="mlm-spec">22.7M PARAMS</span><span class="mlm-spec">6 LAYERS · 12 HEADS</span><span class="mlm-spec">384-D</span><span class="mlm-spec">MARGIN 0.19</span></span>
+      </summary>
+      <div class="mlm-body">
+        <div class="mlm-pick-label">PICK A SENTENCE FROM Utah_FORGE_DDRs.pdf · values computed by the deployed model (nlp_engine.py)</div>
+        <div class="mlm-picker">${MLM_SHOWCASE.map((d, i) => `
+          <button class="mlm-chip" type="button" data-i="${i}"><span class="mc-s">"${e(d.sentence)}"</span><span class="mc-o ${d.method}">${MLM_OUTCOME[d.method]}</span></button>`).join('')}
+        </div>
+        <div class="mlm-flowwrap"></div>
+        <div class="mlm-runwrap"></div>
+      </div>
+    </details>`;
+    host = slot.querySelector('.mlm-deep');
+    host.querySelectorAll('.mlm-chip').forEach(c => c.addEventListener('click', () => { cur = +c.dataset.i; renderSentence(); }));
+    cur = 0;
+    renderSentence();
+    renderRun();
+    // both sections start closed; replay the staged reveal each time the detailed one opens
+    host.addEventListener('toggle', () => { if (host.open) renderSentence(); });
+  }
+  return { render };
+})();
 </script>
 </body>
 </html>
