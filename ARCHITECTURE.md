@@ -817,7 +817,7 @@ graph TD
         M3 --> RD["get_latest_risk_data\nlive stream first, backtest fallback"]
         TOPK --> PROMPT["_build_prompt\nforced-citation prompt\nIMMUTABLE risk values"]
         RD --> PROMPT
-        PROMPT --> ATTEMPT1["Attempt 1:\ngoogle.genai Client\ngemini-2.5-flash → 2.0-flash → 1.5-flash"]
+        PROMPT --> ATTEMPT1["Attempt 1:\ngoogle.genai Client\nGEMINI_MODELS in order\n(3.5-flash → 3.6-flash → 3.5-flash-lite → 3.1-flash-lite)"]
         ATTEMPT1 -->|"success"| RAW["Raw LLM output"]
         ATTEMPT1 -->|"fail/no key"| ATTEMPT2["Attempt 2:\nLegacy google.generativeai\ngemini-1.5-flash → gemini-pro"]
         ATTEMPT2 -->|"success"| RAW
@@ -912,15 +912,17 @@ The briefing engine enforces five hard rules, regardless of whether Gemini or th
 5. **Analog disagreement must be explicitly stated** if some analogs had the incident and others did not
 
 **LLM Priority Chain (implemented in `llm_briefing.py`):**
-1. `google.genai` SDK → tries `gemini-2.5-flash` → `gemini-2.0-flash` → `gemini-1.5-flash`
-2. Legacy `google.generativeai` → tries `gemini-1.5-flash` → `gemini-pro`
-3. **Local Evidence Synthesis Engine** — deterministic, citation-grounded, always succeeds without any API key
+1. `google.genai` SDK → tries each model in `GEMINI_MODELS` (default `gemini-3.5-flash` → `gemini-3.6-flash` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`; override with a comma-separated `GEMINI_MODEL`). Each call has a 30 s timeout (`LLM_TIMEOUT_S`) and no SDK retries; a 401/403 (revoked or leaked key) stops the loop. `gemini-2.5/2.0/1.5-*` were dropped because they return 404 for new API keys.
+2. Legacy `google.generativeai` → tries `gemini-1.5-flash` → `gemini-pro` (only if the new SDK is not installed)
+3. **Local Evidence Synthesis Engine** — deterministic, citation-grounded, always succeeds without any API key. Saved briefings record `llm_model: "local-evidence-engine"` (older BRF files say `"gemini-2.5-flash (local-synthesis fallback)"`, a mislabel that was fixed).
+
+**Key loading:** `llm_briefing.py` loads `NLP/nlp_task_ddr/.env` (shared with Module 5) at import. Before Nov 2026 it only read the process environment, which the gateway does not populate, so briefings silently used the local engine unless the key was exported in the shell.
 
 ```mermaid
 flowchart LR
     M3_RISK["risk_predictions_live / _backtest .jsonl\nIMMUTABLE risk values"] --> PROMPT
     RAG_RESULTS["GraphRAG top-K snippets\n+ analog well AHP scores"] --> PROMPT
-    PROMPT["Build Prompt\n_build_prompt"] --> ATTEMPT1["Attempt 1\ngemini-2.5/2.0/1.5-flash"]
+    PROMPT["Build Prompt\n_build_prompt"] --> ATTEMPT1["Attempt 1\nGEMINI_MODELS (gemini-3.x flash)"]
     ATTEMPT1 -->|"no key or fail"| ATTEMPT2["Attempt 2\nLegacy gemini"]
     ATTEMPT2 -->|"no key or fail"| LOCAL["Local Evidence Synthesis\n_synthesize_local_briefing"]
     ATTEMPT1 & ATTEMPT2 & LOCAL --> RAW["Raw briefing text\n4-6 citation sentences"]
@@ -968,18 +970,27 @@ Module 5 is the **evidence-grounded engineering decision support layer**. It pro
 
 ### 8.2 LLM Stack (Current Implementation)
 
-**Primary LLM:** `Qwen/Qwen2.5-72B-Instruct` via the **Hugging Face Inference API** (`huggingface_hub.InferenceClient`)  
-**Secondary/Fallback LLM:** `gemini-2.5-flash` via `google.genai.Client` (used if `HF_TOKEN` is not set or HF call fails)  
-**Final fallback:** Local Evidence Synthesis — structures evidence items into a deterministic engineering brief in pure Python
+The agent tries providers in order and uses the first that answers:
 
-This is a **significant change** from the original architecture which used Gemini as the primary LLM for both Modules 4 and 5. Module 5 now prioritizes Qwen 2.5-72B via the Hugging Face API, with Gemini as a secondary option only.
+1. **Qwen** `Qwen/Qwen2.5-72B-Instruct` via the **Hugging Face Inference API** (`huggingface_hub.InferenceClient`, needs `HF_TOKEN`).
+2. **Gemini** via `google.genai.Client` (needs `GEMINI_API_KEY`), trying each model in `GEMINI_MODELS` (default `gemini-3.5-flash` → `gemini-3.6-flash` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`). Transient 503/504s fall through to the next model.
+3. **Local evidence engine** (`agent/local_engine.py`): deterministic and offline, shaped by the question (see 8.3.1).
 
-**Configuration (config.py):**
+Behaviour details (`agent/agent.py::_call_llm`):
+- Every call has a `LLM_TIMEOUT_S` timeout (30 s) and no SDK retries, so an overloaded model cannot stall the UI.
+- **Circuit breaker:** a permanent provider error (401/402/403: unpaid HF credits, revoked or leaked key) disables that provider for the process lifetime, and a 404 (retired model) disables that model, so later questions skip the failed round-trip. `GET /api/health` reports the state under `llm_chain`.
+- *Fixed Nov 2026:* Gemini used to be in an `elif` after HF, so with `HF_TOKEN` set it was never tried, even when HF failed (e.g. `402 Payment Required`). The default `gemini-2.5-flash` also returns 404 for new keys.
+- The response carries `engine` (`"Qwen (...) via Hugging Face"`, `"Gemini (<model>)"`, `"local-evidence-engine"` or `"scope-check"`), which the UI shows as "Answered by". It used to hard-code "Qwen 2.5 72B" on every answer.
+- **Provider picker:** the UI's "Answer with" dropdown sends `llm_provider` (`auto` | `qwen` | `gemini` | `local`) to `POST /api/ask`. `auto` is the chain above. `qwen`/`gemini` call only that provider, even one disabled by an earlier error, and fall back to the local engine (never to the other LLM) with a notice. `local` makes no LLM call. The dropdown labels each option from `GET /api/health` → `llm_chain.providers` (`ready` | `no key` | `failing: <err>`).
+- **Key hot-reload:** before each question and each health check, `EngineeringAgent.refresh_keys()` re-reads `HF_TOKEN`/`GEMINI_API_KEY` from the `.env` files (`config.ENV_FILES`). A changed key rebuilds that client and clears its disabled state, so a new token works without restarting the gateway.
+
+**Configuration (config.py):** `.env` is loaded from `NLP/nlp_task_ddr/.env` (found by `load_dotenv()` searching upward) and from `module5_engineering_agent/.env` if present.
 ```python
-HF_TOKEN   = os.environ.get("HF_TOKEN", "")          # Primary auth
-QWEN_MODEL = os.environ.get("QWEN_MODEL", "Qwen/Qwen2.5-72B-Instruct")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "") # Secondary fallback
-GEMINI_MODEL   = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+HF_TOKEN       = os.environ.get("HF_TOKEN", "")
+QWEN_MODEL     = os.environ.get("QWEN_MODEL", "Qwen/Qwen2.5-72B-Instruct")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
+GEMINI_MODELS  = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash,gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite").split(",")
+LLM_TIMEOUT_S  = float(os.environ.get("LLM_TIMEOUT_S", "30"))
 ```
 
 ### 8.3 Internal Architecture
@@ -993,40 +1004,69 @@ graph TD
     end
 
     subgraph "ingestion/data_adapter.py"
-        M1E --> DA["DataAdapter\nload events + flagged incidents\n+ analog_wells at startup"]
+        M1E --> DA["DataAdapter\nevents + flagged incidents + analog_wells\n+ record_by_text (doc to full record)"]
         M1F --> DA
         M2A --> DA
-        DA --> GET_ANALOGS["get_top_analog_wells\nwell_id × hazard → top-K IDs"]
+        DA --> GET_ANALOGS["get_top_analog_wells\nwell_id x hazard to top-K IDs"]
     end
 
-    subgraph "retrieval/ — VectorStore + Retriever"
+    subgraph "agent/question.py"
+        Q["analyse_question\nhazards named, intents, in_domain, next N m"] --> FOCUS["focus_hazards\nquestion hazards first, then panel hazard\n(kick and overpressure searched together)"]
+    end
+
+    subgraph "retrieval/ (VectorStore + Retriever)"
         DA --> VS["VectorStore\nchromadb.PersistentClient\nnwis_events collection"]
         SEED[("Tracked seed (never opened)\nvector_store/chroma_db/\n~2,022 records")] -->|"copied once if runtime store missing\nensure_runtime_store()"| CHROMA[("Runtime store (git-ignored)\ndata/runtime/chroma/")]
         VS -->|"opens runtime copy;\nupserts only if empty"| CHROMA
-        GET_ANALOGS --> FILT["where_filter\nwell_id: $in analog_ids"]
-        CHROMA --> SEARCH["collection.query\nquery_texts + where_filter\ntop_k=10"]
-        FILT --> SEARCH
-        SEARCH --> EV["EvidenceItem list\ncitation_id, raw_text, metadata"]
+        GET_ANALOGS --> P1["pool 1: analog wells\nwhere well_id in analogs"]
+        FOCUS --> P2["pool 2: focus hazards\nwhere hazard in focus"]
+        CHROMA --> P3["pool 3: unrestricted"]
+        CHROMA --> P1
+        CHROMA --> P2
+        P1 & P2 & P3 --> RANK["merge + re-rank\ncosine + question hazard 0.15 / panel hazard 0.05\n+ analog well 0.10, routine record -0.20\ntop_k=10"]
+        RANK --> EV["EvidenceItem list\ncitation_id, raw_text, similarity_score"]
     end
 
-    subgraph "agent/ — EngineeringAgent"
-        EV --> AGT["agent.ask\nformat situation + sequence + evidence"]
-        AGT --> PROMPT["build_context_prompt\nSituation / EventSequence / Evidence / Question"]
-        PROMPT --> HF["Qwen 2.5-72B (PRIMARY)\nHuggingFace InferenceClient\nmax_tokens=1500, temperature=0.3"]
-        HF -->|"HF_TOKEN missing or error"| GEM["Gemini 2.5 Flash (FALLBACK)\ngoogle.genai.Client"]
-        GEM -->|"GEMINI_API_KEY missing or error"| SYNTH["Local Evidence Synthesis\nStructured markdown from EvidenceItems"]
-        HF & GEM & SYNTH --> ANS["AskResponse\nanswer + citations + uncertainty"]
+    subgraph "agent/ (EngineeringAgent)"
+        Q -->|"off-topic"| SCOPE["scope-check reply\nno retrieval, no LLM"]
+        EV --> FACTS["local_engine.key_facts\nNPT, lost bbl, kill-mud SG,\nWilson base rate, hazard frequency"]
+        EV --> PROMPT["build_context_prompt\nSituation, Sequence, Question focus,\nPre-computed facts, Evidence, Question"]
+        FACTS --> PROMPT
+        PROMPT --> HF["Qwen 2.5-72B\nHF InferenceClient"]
+        HF -->|"missing / error"| GEM["Gemini GEMINI_MODELS\nin order"]
+        GEM -->|"missing / all fail"| LOCAL["local_engine.compose_answer\nquestion-shaped, cited"]
+        HF & GEM & LOCAL & SCOPE --> ANS["AskResponse\nanswer + citations + uncertainty + engine"]
     end
 
-    subgraph "app.py — Flask :15005"
+    subgraph "app.py (Flask :15005)"
         ANS --> API["POST /api/ask"]
         API --> UI["module5.html\nDark console\n5 preset scenarios"]
         SCEN["GET /api/scenarios"] --> UI
-        HEALTH["GET /api/health"] --> COUNT["collection.count\n+ model name"]
+        HEALTH["GET /api/health"] --> COUNT["collection.count\n+ llm_chain state"]
     end
 ```
 
-#### 8.3.1 Vector store: tracked seed vs. runtime copy
+#### 8.3.1 Question handling and the local evidence engine
+
+*Implemented Nov 2026.* Before this change the offline answer ignored the question: it printed the panel hazard as a heading, the top 5 evidence rows and two fixed "guidance" bullets. Retrieval searched only the 5 analog wells (5 synthetic analogs × 5 events ≈ 25 records), so different questions returned mostly the same evidence.
+
+- **`agent/question.py`**: regex-based analysis of the question.
+  - Hazards: `stuck_pipe`, `mud_loss`, `kick`/`overpressure`, `torque_spike`, `cementing`.
+  - Intents: interventions, probability, NPT, volume, mud weight, frequency.
+  - A "next N m" look-ahead.
+  - `in_domain`: a broad drilling-vocabulary check. Embedding distance can't gate scope: "what's the weather?" scores closer than "is there a kick risk?".
+  - A hazard named in the question outranks the panel's hazard.
+- **Out-of-scope questions** get a short scope reply (`engine: "scope-check"`) with no retrieval and no LLM call.
+- **`agent/local_engine.py`** builds the answer only from retrieved records and Module 1 event fields:
+  - the matching evidence;
+  - only the statistics the question asks for (median and range of NPT, lost bbl, kill-mud SG or mud weight; the most frequent hazards in the analog wells, optionally limited to the depth window);
+  - the hazard's base rate among analog-well non-routine events with a Wilson 95% CI, explicitly labelled *not* an escalation probability;
+  - remedial actions and outcomes extracted verbatim from the evidence, each with its citation.
+- **The same facts go to the LLM** as "PRE-COMPUTED FACTS" so it quotes them instead of doing arithmetic. The system prompt tells it to answer the question first, to let the question override the panel hazard, and to flag `SYNTH-*` data.
+- **`uncertainty`** is computed for both paths from how many records match the question's hazard, from how many wells, and what share is synthetic. It used to be a constant.
+- Tests: `module5_engineering_agent/test_agent.py` (offline; the LLM clients are stubbed or disabled).
+
+#### 8.3.2 Vector store: tracked seed vs. runtime copy
 
 Opening a Chroma store rewrites `chroma.sqlite3` even for read-only use, so the app never opens the tracked store. `config.py` defines two locations: `CHROMA_SEED_DIR` (`module5_engineering_agent/vector_store/chroma_db/`, committed, read-only, 2,022 pre-embedded events — a fresh clone works offline with no embedding step) and `CHROMA_PERSIST_DIR` (`data/runtime/chroma/`, git-ignored; overridable via env var). On first start `retrieval/vector_store.py::ensure_runtime_store()` copies the seed into a temp sibling directory and atomically renames it into place, so an interrupted copy cannot leave a half-populated store. To reset runtime state, delete `data/runtime/chroma/`. If the seed is missing, Chroma starts empty and `Retriever` repopulates it from the Module 1 events (previous behaviour). Covered by `module5_engineering_agent/test_vector_store.py`, including a check that opening the runtime copy leaves the seed's bytes unchanged.
 
@@ -1038,30 +1078,35 @@ sequenceDiagram
     participant APP as "Flask :15005"
     participant AGT as "EngineeringAgent"
     participant RET as "Retriever"
-    participant DA as "DataAdapter"
     participant VS as "ChromaDB"
     participant HF as "HF Inference API (Qwen)"
-    participant GEM as "Gemini 2.5 Flash"
+    participant GEM as "Gemini (GEMINI_MODELS)"
 
-    ENG->>APP: POST /api/ask {question, current_situation, event_sequence}
+    ENG->>APP: POST /api/ask {question, current_situation, event_sequence, llm_provider}
     APP->>AGT: agent.ask(AskRequest)
-    AGT->>RET: retrieve(question, situation)
-    RET->>DA: get_top_analog_wells(well_id, hazard, top_k=5)
-    DA-->>RET: [analog_well_ids]
-    RET->>VS: search(query, where_filter={well_id: $in analog_ids}, top_k=10)
-    VS-->>RET: [raw_results with docs + metadata]
-    RET-->>AGT: (analog_wells, [EvidenceItem list])
-    AGT->>HF: chat.completions.create(model=Qwen-2.5-72B, messages)
-    alt HF_TOKEN set and call succeeds
-        HF-->>AGT: answer text
-    else HF_TOKEN missing or HF call fails
-        AGT->>GEM: generate_content(model=gemini-2.5-flash, prompt)
-        GEM-->>AGT: answer text
-    else Gemini also unavailable
-        AGT->>AGT: local evidence synthesis
+    AGT->>AGT: analyse_question: focus hazards, intents, in_domain
+    alt question is off-topic
+        AGT-->>APP: scope-check answer (no retrieval, no LLM)
+    else drilling question
+        AGT->>RET: retrieve(question, situation, focus_hazards, question_hazards)
+        RET->>VS: 3 searches: analog wells, focus hazards, unrestricted
+        VS-->>RET: docs + metadata + distances
+        RET-->>AGT: (analog_wells, re-ranked EvidenceItems)
+        AGT->>AGT: key_facts (computed statistics)
+        AGT->>HF: chat.completions.create (skipped once disabled by 401/402/403)
+        alt HF answers
+            HF-->>AGT: answer text
+        else HF missing or fails
+            loop each model in GEMINI_MODELS
+                AGT->>GEM: generate_content(model, prompt)
+            end
+            GEM-->>AGT: answer text (first model that succeeds)
+        else every provider fails
+            AGT->>AGT: local_engine.compose_answer + System Notice listing the failures
+        end
     end
     AGT-->>APP: AskResponse
-    APP-->>ENG: JSON {answer, historical_wells, citations, uncertainty, evidence[]}
+    APP-->>ENG: JSON {answer, engine, historical_wells, citations, uncertainty, evidence[]}
 ```
 
 ### 8.5 Vector Store Population Strategy
@@ -1084,7 +1129,9 @@ all_events = data_adapter.events + data_adapter.flagged_incidents
 - Only make claims supported by retrieved evidence
 - Explicitly state uncertainty when evidence is insufficient
 - Include citations using `[well_id - event_type - depth]` format
-- Output structured format: **Situation / Historical Evidence / What happened next / Why / Relevant Interventions / Uncertainty / Evidence**
+- The engineer's question outranks the panel hazard. Records that don't bear on the question are ignored, and `SYNTH-*` data is flagged
+- Numbers in PRE-COMPUTED FACTS are quoted, not recomputed. Base rates are never presented as escalation probabilities
+- Output structured format: **Answer / Situation / Historical Evidence / What happened next / Why / Relevant Interventions / Uncertainty / Evidence**. Sections the evidence doesn't cover say so instead of being padded
 
 ### 8.7 Five Pre-configured Demo Scenarios
 
@@ -1254,8 +1301,9 @@ The Windows launchers:
 | Module | Scenario | Behavior |
 |--------|----------|----------|
 | Module 4 | No Gemini API key | Graph, search, and RAG features fully work; briefings use Local Evidence Synthesis |
-| Module 5 | No HF_TOKEN and no GEMINI_API_KEY | Local Evidence Synthesis Engine activates: structured markdown synthesized directly from ChromaDB EvidenceItems |
-| Module 5 | HF_TOKEN set but HF call fails | Gemini fallback attempted; then local synthesis |
+| Module 5 | No HF_TOKEN and no GEMINI_API_KEY | Local evidence engine: question-shaped, cited answer built from the retrieved records (§8.3.1) |
+| Module 5 | HF call fails (e.g. 402 credits exhausted) | Each Gemini model in `GEMINI_MODELS` is tried, then the local engine runs. A 401/402/403 disables that provider until restart |
+| Module 5 | Off-topic question | Scope reply; no retrieval and no LLM call |
 | Module 1 | No GPU | PaddleOCR runs on the CPU (slower, same output) |
 | Module 1 | PaddleOCR cannot load | The job uses the PDF text layer and the UI says "NOT OCR" |
 | Module 1 | MiniLM / torch unavailable | Hybrid engine runs keyword/regex only and reports `mode: "keyword"` |
@@ -1290,7 +1338,7 @@ NLP/nlp_task_ddr/logs/
 | **NLP event extraction (Module 1)** | Keyword/regex rules (`nlp_rules.py`) + `sentence-transformers/all-MiniLM-L6-v2` prototype classifier (`nlp_engine.py`, CPU or GPU) + unit-aware parsers (`units.py`) | Hybrid 18-class event typing; MiniLM chosen over BERT, RoBERTa, DeBERTa-v3 and GLiNER by `eval_model_selection.py` |
 | **Real-Time Streaming** | `FastAPI`, `WebSockets`, `asyncio` | High-frequency WITSML sensor replay and anomaly broadcast |
 | **Primary LLM** | `Qwen/Qwen2.5-72B-Instruct` (Hugging Face) | Deep engineering reasoning and historical evidence synthesis in Module 5 |
-| **AI Briefing LLM** | `Google Gemini 2.5 / 2.0 / 1.5 Flash` | Rapid, verifiable pre-spud briefing synthesis in Module 4 |
+| **AI Briefing LLM** | `Google Gemini 3.x Flash` (`GEMINI_MODELS`, tried in order) | Rapid, verifiable pre-spud briefing synthesis in Module 4; secondary LLM for Module 5 |
 | **Offline Synthesis** | Deterministic Local Rule Engine | Offline zero-dependency synthesis fallback |
 | **Vector Database** | `ChromaDB` | Embedded vector database indexing 2,022 DDR event snippets |
 | **Semantic Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` | Dense vector embeddings for GraphRAG and DDR retrieval |
@@ -1363,10 +1411,11 @@ NLP/nlp_task_ddr/logs/
 
 // Response
 {
-  "answer": "### Operational Assessment...\n...",
+  "answer": "Answer: ...\nSituation: ...",
+  "engine": "Gemini (gemini-3.5-flash)",   // or "Qwen (...) via Hugging Face", "local-evidence-engine", "scope-check"
   "historical_wells": ["16/11-1 ST3", "7/3-1"],
   "citations": ["[16/11-1 ST3 - EVT_STUCK_PIPE - 619.0m]"],
-  "uncertainty": "Low to Medium. Based on historical data...",
+  "uncertainty": "Medium. 4 directly relevant records from 3 wells (2 synthetic).",
   "evidence": [
     {
       "well_id": "16/11-1 ST3",
@@ -1497,10 +1546,12 @@ SIH_2026_PLANNS/
         ├── app.py                          ← Flask app + 5 demo scenarios
         ├── config.py                       ← HF/Qwen + Gemini + ChromaDB config
         ├── agent/
-        │   ├── agent.py                    ← EngineeringAgent (Qwen primary, Gemini fallback)
+        │   ├── agent.py                    ← EngineeringAgent: Qwen → Gemini models → local engine
+        │   ├── question.py                 ← question analysis: hazards, intents, scope check
+        │   ├── local_engine.py             ← offline question-shaped answers + computed facts
         │   └── prompts.py                  ← System prompt + context builder
         ├── retrieval/
-        │   ├── retriever.py                ← Analog lookup + ChromaDB vector search
+        │   ├── retriever.py                ← 3-pool search (analogs / focus hazard / global) + re-rank
         │   └── vector_store.py             ← ChromaDB VectorStore wrapper + seed→runtime copy
         ├── ingestion/
         │   └── data_adapter.py             ← M1/M2 data loader
@@ -1508,6 +1559,7 @@ SIH_2026_PLANNS/
         │   └── models.py                   ← Pydantic data models
         ├── templates/module5.html          ← Dark console UI
         ├── test_vector_store.py            ← seed→runtime copy tests
+        ├── test_agent.py                   ← question handling, retrieval, LLM chain (offline)
         └── vector_store/chroma_db/         ← Tracked read-only ChromaDB seed (~2,022 records);
                                               runtime copy lives in ../data/runtime/chroma/ (git-ignored)
 ```

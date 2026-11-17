@@ -118,12 +118,16 @@ class VectorStore:
         docs = results['documents'][0]
         metas = results['metadatas'][0]
         ids = results['ids'][0]
-        
+        dists = (results.get('distances') or [[None] * len(docs)])[0]
+
         for idx in range(len(docs)):
+            d = dists[idx]
             item = {
                 "id": ids[idx],
                 "document": docs[idx],
-                "metadata": metas[idx]
+                "metadata": metas[idx],
+                # Default Chroma space is squared L2 on unit vectors -> cosine = 1 - d/2
+                "similarity": None if d is None else max(0.0, 1.0 - float(d) / 2.0),
             }
             output.append(item)
             

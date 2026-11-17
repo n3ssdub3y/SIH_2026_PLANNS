@@ -30,6 +30,23 @@ class DataAdapter:
             with open(M2_ANALOG_WELLS, 'r', encoding='utf-8') as f:
                 self.analog_wells = json.load(f)
 
+        # Chroma documents are the events' raw_text, so this maps a retrieved document back to
+        # its full Module 1 record (npt_hours, volume_lost_bbl, mud_weight_ppg, ...).
+        self.record_by_text: Dict[str, Dict[str, Any]] = {}
+        for evt in self.events + self.flagged_incidents:
+            txt = str(evt.get("raw_text") or "")
+            if txt and txt.lower() != "nan":
+                self.record_by_text.setdefault(txt, evt)
+
+    def record_for(self, document: str) -> Dict[str, Any]:
+        """Full Module 1 record for a retrieved Chroma document, or {} if unknown."""
+        return self.record_by_text.get(document, {})
+
+    def events_for_wells(self, well_ids: List[str]) -> List[Dict[str, Any]]:
+        """All Module 1 events (routine included) recorded for the given wells."""
+        wanted = set(well_ids)
+        return [e for e in self.events if e.get("well_id") in wanted]
+
     def get_top_analog_wells(self, well_id: str, hazard: str = None, top_k: int = 5) -> List[str]:
         """Get top analog well IDs for a given target well and hazard."""
         if well_id not in self.analog_wells:

@@ -83,8 +83,16 @@ Gotchas:
 The headline result (+106.48 m early warning on 15/9-F-9A) depends on strict causality: detectors (Z-score + recursive CUSUM in `anomaly_detector.py`) and Smith-Waterman sequence matching with Wilson CIs (`sequence_matcher.py`) must only use data at or before the current row/depth, must exclude the target well from its own analog set, and must filter offset events deeper/later than the current point. `test_leakage.py` enforces this — run it after any change to Module 3.
 
 ### LLMs
-- Module 4 briefings (`llm_briefing.py`): Gemini via `GEMINI_API_KEY` / `GOOGLE_API_KEY` (or key passed in the request); output sentences are verified against cited graph snippet nodes.
-- Module 5 agent (`agent/agent.py`): fallback chain Qwen2.5-72B via Hugging Face (`HF_TOKEN`) → Gemini (`GEMINI_API_KEY`) → deterministic local evidence synthesis (works fully offline). All paths return the same schema with citations. Config/env loaded from `module5_engineering_agent/.env` via `config.py`.
+- Keys live in `NLP/nlp_task_ddr/.env` (git-ignored), and both Modules 4 and 5 load it. The gateway does not export env vars to the modules.
+- Gemini models: `gemini-2.5/2.0/1.5-*` return 404 for new API keys. Both modules try a model list (default `gemini-3.5-flash,gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite`, overridable by a comma-separated `GEMINI_MODEL`), each with a 30 s timeout (`LLM_TIMEOUT_S`). The newest flash models often return 503 under load, and the chain moves on.
+- Module 4 briefings (`llm_briefing.py`): Gemini via `GEMINI_API_KEY` / `GOOGLE_API_KEY` (or a key passed in the request), else the local engine (`llm_model: "local-evidence-engine"`). Output sentences are verified against the cited graph snippet nodes.
+- Module 5 agent (`agent/agent.py`): Qwen2.5-72B via Hugging Face (`HF_TOKEN`) → each Gemini model → `agent/local_engine.py` (deterministic, offline).
+  - A 401/402/403 disables a provider until restart (the HF token currently returns 402: credits exhausted).
+  - `agent/question.py` analyses the question (hazards, intents, scope). Off-topic questions get a scope reply without retrieval.
+  - Retrieval merges analog-well, focus-hazard and global searches.
+  - The response's `engine` field says who answered. The UI's "Answer with" picker sends `llm_provider` (`auto`/`qwen`/`gemini`/`local`). A forced provider that fails falls back to the local engine, never to the other LLM.
+  - Keys are re-read from `.env` before every question (`refresh_keys()`), so a token change needs no restart. HF `402 Payment Required` means the account's inference credits are used up, not a bad token.
+  - Tests: `python -m pytest module5_engineering_agent/` (run separately from the other modules; its `config`/`agent` package names would clash).
 
 ### Other directories
 - `datasets/` — committed raw inputs (Volve DDR CSVs from HF `bengsoon/volve_alpaca`, FORCE 2020 xlsx, Volve F-9A telemetry) read by `p1_full_pipeline.py`.

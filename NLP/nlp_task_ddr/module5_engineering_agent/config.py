@@ -8,6 +8,10 @@ from pathlib import Path
 _THIS_DIR  = Path(__file__).resolve().parent        # module5_engineering_agent/
 _REPO_ROOT = _THIS_DIR.parent                        # nlp_task_ddr/
 
+# .env files, lowest priority first (later ones override). Re-read by the agent before each
+# question, so a token pasted into .env takes effect without restarting the gateway.
+ENV_FILES = [_REPO_ROOT / ".env", _THIS_DIR / ".env", _THIS_DIR / ".config"]
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -23,8 +27,17 @@ HF_TOKEN: str   = os.environ.get("HF_TOKEN", "")
 QWEN_MODEL: str = os.environ.get("QWEN_MODEL", "Qwen/Qwen2.5-72B-Instruct")
 
 # ── Gemini (Optional / Fallback) ──────────────────────────────────────────────
-GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL: str   = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
+# Tried in order until one answers. gemini-2.5-* is retired for new API keys (404), and the newest
+# flash models are often overloaded (503/504), so the default list starts with stable mid-tier ones.
+# Override with a comma-separated GEMINI_MODEL, e.g. GEMINI_MODEL=gemini-3.6-flash,gemini-3.5-flash
+GEMINI_MODELS: list[str] = [m.strip() for m in os.environ.get(
+    "GEMINI_MODEL", "gemini-3.5-flash,gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite"
+).split(",") if m.strip()]
+GEMINI_MODEL: str = GEMINI_MODELS[0]
+
+# Per-call timeout for any LLM provider, so an overloaded model can't stall the UI.
+LLM_TIMEOUT_S: float = float(os.environ.get("LLM_TIMEOUT_S", "30"))
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 

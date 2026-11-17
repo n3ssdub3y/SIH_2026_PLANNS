@@ -14,10 +14,16 @@ class CurrentSituation(BaseModel):
     hazard: Optional[str] = None
     additional_params: Dict[str, Any] = Field(default_factory=dict)
 
+LLM_PROVIDERS = ("auto", "qwen", "gemini", "local")
+
+
 class AskRequest(BaseModel):
     question: str
     current_situation: Optional[CurrentSituation] = None
     event_sequence: Optional[List[str]] = None
+    # "auto" = Qwen -> Gemini -> local; "qwen" / "gemini" = only that LLM (local engine if it fails);
+    # "local" = offline evidence engine only, no LLM call.
+    provider: str = "auto"
 
 class EvidenceItem(BaseModel):
     well_id: str
@@ -35,3 +41,6 @@ class AskResponse(BaseModel):
     evidence: List[EvidenceItem]
     uncertainty: str
     citations: List[str]
+    # Which engine wrote `answer`: "Qwen (...) via Hugging Face", "Gemini (<model>)",
+    # "local-evidence-engine", or "scope-check" (question rejected as off-topic).
+    engine: str = "local-evidence-engine"

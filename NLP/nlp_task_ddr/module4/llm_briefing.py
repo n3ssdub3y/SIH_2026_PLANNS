@@ -32,6 +32,22 @@ logger = logging.getLogger("llm_briefing")
 _MODULE4_DIR = Path(__file__).resolve().parent
 OUTPUTS_DIR  = _MODULE4_DIR / "outputs"
 
+# The Gemini key lives in NLP/nlp_task_ddr/.env (shared with Module 5). The gateway does not
+# export it, so without this Module 4 only saw a key that happened to be set in the shell.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(_MODULE4_DIR.parent / ".env")
+except ImportError:
+    pass
+
+# Tried in order. gemini-2.5/2.0/1.5 are retired for new API keys (404); newest flash models are
+# often overloaded (503), so stable mid-tier models come first. Override: GEMINI_MODEL=a,b,c
+GEMINI_MODELS = [m.strip() for m in os.environ.get(
+    "GEMINI_MODEL", "gemini-3.5-flash,gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite"
+).split(",") if m.strip()]
+LLM_TIMEOUT_S = float(os.environ.get("LLM_TIMEOUT_S", "30"))
+LOCAL_ENGINE_LABEL = "local-evidence-engine"
+
 # Module 3 risk streams (both live in module3/outputs/):
 #   live     - written by anomaly_server.py while telemetry replays; git-ignored, may not exist
 #   backtest - written by backtest_runner.py; committed seed so a fresh clone works out of the box
@@ -161,8 +177,15 @@ class LLMBriefing:
         # Attempt 1: Modern google.genai client (v2 SDK used in Module 5)
         try:
             from google import genai
+            from google.genai import types
             if self.api_key:
-                self._genai_client = genai.Client(api_key=self.api_key)
+                self._genai_client = genai.Client(
+                    api_key=self.api_key,
+                    http_options=types.HttpOptions(
+                        timeout=int(LLM_TIMEOUT_S * 1000),
+                        retry_options=types.HttpRetryOptions(attempts=1),
+                    ),
+                )
                 self._client_type = "genai"
                 logger.info("google.genai Client loaded successfully.")
                 return
@@ -422,11 +445,11 @@ class LLMBriefing:
         prompt = self._build_prompt(well_id, hazard, risk_data, rag_results, analog_wells)
 
         raw_llm_output = None
-        model_used = "local-evidence-engine"
+        model_used = LOCAL_ENGINE_LABEL
 
-        # Attempt 1: Modern google.genai Client (gemini-2.5-flash / 2.0-flash / 1.5-flash)
+        # Attempt 1: Modern google.genai Client (GEMINI_MODELS, in order)
         if self.api_key and self._client_type == "genai" and self._genai_client:
-            for model_cand in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+            for model_cand in GEMINI_MODELS:
                 try:
                     logger.info("Attempting Gemini call with %s ...", model_cand)
                     resp = self._genai_client.models.generate_content(
@@ -440,6 +463,9 @@ class LLMBriefing:
                         break
                 except Exception as ex:
                     logger.warning("Gemini model %s failed: %s", model_cand, ex)
+                    # Bad/revoked key: every model will fail the same way, stop trying.
+                    if re.search(r"\b(401|403)\b|PERMISSION_DENIED|leaked|API key not valid", str(ex), re.I):
+                        break
 
         # Attempt 2: Legacy google.generativeai Client
         if not raw_llm_output and self.api_key and self._client_type == "legacy" and self._legacy_client:
@@ -465,7 +491,7 @@ class LLMBriefing:
                 rag_results=rag_results,
                 analog_wells=analog_wells,
             )
-            model_used = "gemini-2.5-flash (local-synthesis fallback)"
+            model_used = LOCAL_ENGINE_LABEL
 
         # Parse into (sentence, [citations]) pairs
         parsed = _parse_citations(raw_llm_output)

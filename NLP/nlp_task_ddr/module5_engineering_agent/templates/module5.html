@@ -828,6 +828,37 @@
       padding: 8px 0;
       line-height: 1.4;
     }
+    .llm-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .llm-picker-label {
+      font-size: 9px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .llm-select {
+      height: 32px;
+      max-width: 230px;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-muted);
+      border-radius: 8px;
+      padding: 0 8px;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .llm-select:focus {
+      outline: none;
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+    }
+    .llm-select option { background: #0d1117; color: var(--text-main); }
+
     .send-btn {
       padding: 0 20px;
       height: 46px;
@@ -1287,9 +1318,9 @@
               <div class="agent-card">
                 <div class="agent-meta">
                   <div class="agent-meta-left">
-                    <span>Model: <strong>Qwen 2.5 72B (Hugging Face)</strong></span>
+                    <span>LLM chain: <strong>Qwen 2.5 72B &rarr; Gemini &rarr; local evidence engine</strong></span>
                     <span>&bull;</span>
-                    <span>Retrieval: <strong>ChromaDB Top-5 Analogs</strong></span>
+                    <span>Retrieval: <strong>ChromaDB + Top-5 AHP Analogs</strong></span>
                   </div>
                   <span class="uncertainty-pill uncertainty-low">System Ready</span>
                 </div>
@@ -1309,6 +1340,15 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
             <div class="chat-input-wrapper">
               <textarea id="questionInput" class="chat-input" rows="1" placeholder="Ask a drilling engineering question about the current well situation..."></textarea>
             </div>
+            <label class="llm-picker" title="Which model answers. Auto tries Qwen, then Gemini, then the offline engine.">
+              <span class="llm-picker-label">Answer with</span>
+              <select id="llmProvider" class="llm-select">
+                <option value="auto">Auto (Qwen &rarr; Gemini &rarr; offline)</option>
+                <option value="qwen">Qwen 2.5-72B (Hugging Face)</option>
+                <option value="gemini">Gemini</option>
+                <option value="local">Offline evidence engine</option>
+              </select>
+            </label>
             <button id="sendBtn" class="send-btn">
               <span>Consult Agent</span>
               <span>&rarr;</span>
@@ -1436,7 +1476,37 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
     const timelineInput = document.getElementById("timelineInput");
     const questionInput = document.getElementById("questionInput");
     const sendBtn = document.getElementById("sendBtn");
+    const llmProvider = document.getElementById("llmProvider");
     const chatStream = document.getElementById("chatStream");
+
+    // ── LLM provider picker: remember the choice, label options with live status ──
+    (function initProviderPicker() {
+      if (!llmProvider) return;
+      try {
+        const saved = localStorage.getItem("nwis.m5.llmProvider");
+        if (saved && llmProvider.querySelector(`option[value="${saved}"]`)) llmProvider.value = saved;
+      } catch (e) { /* storage unavailable: keep default */ }
+      llmProvider.addEventListener("change", () => {
+        try { localStorage.setItem("nwis.m5.llmProvider", llmProvider.value); } catch (e) {}
+      });
+      const base = {};
+      llmProvider.querySelectorAll("option").forEach(o => { base[o.value] = o.textContent; });
+      const refresh = () => fetch("/module5/api/health")
+        .then(r => r.json())
+        .then(h => {
+          const st = (h.llm_chain && h.llm_chain.providers) || {};
+          ["qwen", "gemini"].forEach(p => {
+            const opt = llmProvider.querySelector(`option[value="${p}"]`);
+            if (!opt || !st[p]) return;
+            const s = st[p];
+            opt.textContent = base[p] + (s === "ready" ? "" : s === "no key" ? "  [no key]" : "  [failing]");
+            opt.title = s;
+          });
+        })
+        .catch(() => {});
+      refresh();
+      llmProvider.addEventListener("focus", refresh);
+    })();
     const hazardPills = document.querySelectorAll(".hazard-pill");
     const analogsList = document.getElementById("analogsList");
     const analogsCount = document.getElementById("analogsCount");
@@ -1622,7 +1692,8 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
           formation: (formationInput && formationInput.value.trim()) || null,
           hazard: currentHazard !== "none" ? currentHazard : null
         },
-        event_sequence: currentTimeline
+        event_sequence: currentTimeline,
+        llm_provider: (llmProvider && llmProvider.value) || "auto"
       };
 
       try {
@@ -1744,9 +1815,16 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
       if (!el) return;
 
       let uncClass = "uncertainty-low";
-      const uncText = data.uncertainty || "Grounded";
-      if (uncText.toLowerCase().includes("high")) uncClass = "uncertainty-high";
-      else if (uncText.toLowerCase().includes("medium")) uncClass = "uncertainty-med";
+      const uncFull = data.uncertainty || "Grounded";
+      // Pill shows the level ("Medium", "High", ...); the full explanation is the tooltip.
+      const uncText = (uncFull.split(".")[0] || uncFull) + " uncertainty";
+      if (uncFull.toLowerCase().startsWith("high")) uncClass = "uncertainty-high";
+      else if (uncFull.toLowerCase().includes("medium") || uncFull.startsWith("N/A")) uncClass = "uncertainty-med";
+      const engineLabels = {
+        "local-evidence-engine": "Local evidence engine (offline)",
+        "scope-check": "Scope check (no retrieval)"
+      };
+      const engineText = engineLabels[data.engine] || data.engine || "Unknown";
 
       let citationsHtml = "";
       if (data.citations && data.citations.length > 0) {
@@ -1776,11 +1854,11 @@ Click **"PRESETS (5)"** in the titlebar or on the left console to switch between
         <div class="agent-card">
           <div class="agent-meta">
             <div class="agent-meta-left">
-              <span>Model: <strong>Qwen 2.5 72B (Hugging Face)</strong></span>
+              <span>Answered by: <strong>${escapeHtml(engineText)}</strong></span>
               <span>&bull;</span>
               <span>Analogs: <strong>${data.historical_wells ? data.historical_wells.length : 0} Wells</strong></span>
             </div>
-            <span class="uncertainty-pill ${uncClass}">${escapeHtml(uncText)}</span>
+            <span class="uncertainty-pill ${uncClass}" title="${escapeHtml(uncFull)}">${escapeHtml(uncText)}</span>
           </div>
           <div class="agent-body">${formatMarkdown(data.answer)}</div>
           ${citationsHtml}

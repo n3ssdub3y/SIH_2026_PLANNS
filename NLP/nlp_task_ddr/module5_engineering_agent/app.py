@@ -26,8 +26,8 @@ _THIS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_THIS_DIR))
 
 from agent.agent import EngineeringAgent
-from schemas.models import AskRequest, CurrentSituation
-from config import API_PORT, QWEN_MODEL
+from schemas.models import AskRequest, CurrentSituation, LLM_PROVIDERS
+from config import API_PORT, QWEN_MODEL, GEMINI_MODELS
 
 logging.basicConfig(
     level=logging.INFO,
@@ -138,6 +138,7 @@ def index():
 @app.route("/api/health", methods=["GET"])
 @app.route("/module5/api/health", methods=["GET"])
 def health():
+    agent.refresh_keys()
     try:
         count = agent.retriever.vector_store.collection.count()
     except Exception:
@@ -146,6 +147,12 @@ def health():
         "status": "healthy",
         "service": "module5_engineering_agent",
         "model": QWEN_MODEL,
+        "llm_chain": {
+            "providers": agent.provider_status(),   # qwen / gemini / local: ready | no key | failing: <err>
+            "qwen_model": QWEN_MODEL,
+            "gemini_models": GEMINI_MODELS,
+            "fallback": "local-evidence-engine",
+        },
         "events_in_store": count
     })
 
@@ -177,10 +184,15 @@ def ask():
     )
     timeline = body.get("event_sequence") or []
 
+    provider = str(body.get("llm_provider") or "auto").lower()
+    if provider not in LLM_PROVIDERS:
+        return jsonify({"detail": f"llm_provider must be one of {list(LLM_PROVIDERS)}"}), 400
+
     req = AskRequest(
         question=question,
         current_situation=sit,
-        event_sequence=timeline
+        event_sequence=timeline,
+        provider=provider,
     )
 
     try:
@@ -190,6 +202,7 @@ def ask():
             "historical_wells": resp.historical_wells,
             "citations": resp.citations,
             "uncertainty": resp.uncertainty,
+            "engine": resp.engine,
             "evidence": [e.model_dump() for e in resp.evidence]
         })
     except Exception as e:
