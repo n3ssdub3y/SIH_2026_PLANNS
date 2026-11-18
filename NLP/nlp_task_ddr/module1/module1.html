@@ -1412,7 +1412,7 @@ function applyLive(s) {
   ocrPageLabel.textContent = `Page ${s.pages_done} / ${total}`;
   ocrChars.textContent = (s.chars || 0).toLocaleString() + ' chars';
   if (s.stage === 'upload' || (s.stage === 'ocr' && s.pages_done === 0)) {
-    ocrPctBadge.textContent = s.status === 'queued' ? 'OCR queued…' : 'OCR 0% · warming up';
+    ocrPctBadge.textContent = s.status === 'queued' ? `Queued · ${s.queue_ahead || 0} job(s) ahead` : 'OCR 0% · warming up';
   } else if (si <= 1) {
     ocrPctBadge.textContent = `OCR ${ocrPct}% · page ${s.pages_done}/${total}`;
   } else {
@@ -1424,7 +1424,7 @@ function applyLive(s) {
   if (s.stage === 'ocr' && s.pages_done > 0 && total) {
     const perPage = s.elapsed_s / s.pages_done;
     const rem = Math.round(perPage * (total - s.pages_done));
-    timeRemaining.textContent = rem > 0 ? `~${rem}s OCR remaining` : '';
+    timeRemaining.textContent = rem > 0 ? `~${rem >= 90 ? Math.round(rem / 60) + ' min' : rem + 's'} OCR remaining` : '';
   } else if (s.stage === 'nlp' && s.units_total) {
     timeRemaining.textContent = `NLP: report ${s.units_done}/${s.units_total}`;
   } else {

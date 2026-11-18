@@ -39,6 +39,9 @@ HERE       = Path(__file__).resolve().parent
 BASE_DIR   = HERE.parent                                   # NLP/nlp_task_ddr
 UPLOAD_DIR = BASE_DIR / "data" / "runtime" / "module1" / "uploads"
 RESULT_DIR = BASE_DIR / "results" / "module1_outputs" / "uploads"
+# OCR page-text cache keyed by SHA-256 of the PDF (+dpi): re-uploading the same file skips OCR.
+OCR_CACHE_DIR = BASE_DIR / "data" / "runtime" / "module1" / "ocr_cache"
+OCR_DPI = 200
 LOGS_DIR   = BASE_DIR / "logs"
 MAX_BYTES  = 100 * 1024 * 1024
 
@@ -244,9 +247,26 @@ def run_ocr(job):
             job["error"] = m.get("error")
             finished.set()
 
+    cache = OCR_CACHE_DIR / f"{job.get('sha256', 'none')}_{OCR_DPI}.json"
+    if job.get("sha256") and cache.exists():
+        try:
+            c = json.loads(cache.read_text(encoding="utf-8"))
+            job["pages_total"] = len(c["pages"])
+            jlog(job, "ok", f"[CACHE]   Identical PDF already OCR'd ({c['engine']}); reusing {len(c['pages'])} cached pages")
+            for i, text in enumerate(c["pages"], 1):
+                job["pages"].append(text)
+                job["pages_done"] = i
+                job["chars"] += len(text)
+                job["tokens"].extend(tokenize_for_stream(text))
+                set_pct(job)
+            jlog(job, "ok", f"[OCR]     Done (cached): {job['chars']:,} chars")
+            return True
+        except Exception as e:                        # noqa: BLE001
+            jlog(job, "warn", f"[CACHE]   unreadable cache ({e}); running OCR")
+            job["pages"], job["pages_done"], job["chars"], job["tokens"] = [], 0, 0, []
     OCR.handler = on_msg
     try:
-        OCR.send({"cmd": "ocr", "job": job["job_id"], "path": job["path"], "dpi": 200})
+        OCR.send({"cmd": "ocr", "job": job["job_id"], "path": job["path"], "dpi": OCR_DPI})
         finished.wait()
     finally:
         OCR.handler = None
@@ -255,6 +275,12 @@ def run_ocr(job):
         job["error"] = None
         job["pages"], job["pages_done"], job["chars"] = [], 0, 0
         return text_layer_fallback(job, "OCR failed")
+    if job.get("sha256") and len(job["pages"]) == job["pages_total"]:
+        try:
+            OCR_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps({"engine": job["ocr_engine"], "pages": job["pages"]}), encoding="utf-8")
+        except OSError:
+            pass
     return True
 
 
@@ -385,6 +411,14 @@ def job_loop():
 
 
 # ─── HTTP API ──────────────────────────────────────────────────────────────
+def queue_ahead(jid, extra=False):
+    """Jobs that must finish before `jid` starts (running job + earlier queued ones)."""
+    running = sum(1 for j in JOBS.values() if j["status"] == "running")
+    waiting = list(JOB_Q.queue)
+    n = len(waiting) if extra else (waiting.index(jid) if jid in waiting else 0)
+    return running + n
+
+
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
     name = os.path.basename(file.filename or "upload.pdf")
@@ -407,10 +441,14 @@ async def upload(file: UploadFile = File(...)):
     job["path"] = str(path)
     jlog(job, "info", f"[INIT]    PDF received: {name} ({len(data)/1024/1024:.2f} MB, {pages} pages)")
     import hashlib
-    jlog(job, "ok", f"[HASH]    SHA-256: {hashlib.sha256(data).hexdigest()[:16]}...")
+    job["sha256"] = hashlib.sha256(data).hexdigest()
+    jlog(job, "ok", f"[HASH]    SHA-256: {job['sha256'][:16]}...")
+    ahead = queue_ahead(job["job_id"], extra=True)
+    if ahead:
+        jlog(job, "info", f"[QUEUE]   {ahead} job(s) ahead of this upload; OCR starts when they finish")
     JOB_Q.put(job["job_id"])
     return {"status": "accepted", "job_id": job["job_id"], "filename": name, "pages": pages,
-            "queue_position": JOB_Q.qsize(),
+            "queue_position": ahead,
             "ocr_engine": OCR.info.get("engine") if OCR else None,
             "ocr_device": OCR.info.get("device") if OCR else None}
 
@@ -423,6 +461,7 @@ async def job_status(job_id: str, log_since: int = 0, tok_since: int = 0, ent_si
     return JSONResponse({
         "job_id": job_id, "filename": job["filename"], "status": job["status"],
         "stage": job["stage"], "stage_index": STAGES.index(job["stage"]) if job["stage"] in STAGES else -1,
+        "queue_ahead": queue_ahead(job_id) if job["status"] == "queued" else 0,
         "pct": round(job["pct"], 1), "pages_done": job["pages_done"], "pages_total": job["pages_total"],
         "chars": job["chars"], "units_done": job["units_done"], "units_total": job["units_total"],
         "ocr_engine": job["ocr_engine"], "ocr_device": job["ocr_device"],

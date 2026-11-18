@@ -424,6 +424,7 @@ sequenceDiagram
   - Workers speak JSON lines over stdin/stdout. Their real stdout is reserved for protocol; native library output goes to `logs/module1_*_worker.log`.
   - Workers exit when the server dies, through a parent-PID watchdog plus a broken-pipe check.
   - The NLP worker uses the GPU if torch sees one, otherwise the CPU. The default install uses CPU torch, which labels a 93-page report in about 9 s (vs about 0.8 s on GPU), negligible next to OCR time, with identical output.
+- **Job queue and OCR cache** (`server.py`): jobs run strictly one at a time, so a new upload waits at about 2–3% until earlier ones finish; `/jobs/{id}` reports `queue_ahead` and the UI shows "Queued · N job(s) ahead". OCR page text is cached by PDF SHA-256 + dpi in the git-ignored `data/runtime/module1/ocr_cache/`, so re-uploading the same PDF skips OCR (`[CACHE]` log line). On CPU, PaddleOCR takes about 25–35 s/page (about 45 min for the 93-page FORGE PDF).
 - **UI** (`module1.html`):
   - The original scan animation is unchanged. In live mode it sweeps continuously until the job finishes.
   - A badge on the document shows real per-page extraction progress ("OCR 37% · page 35/93").
